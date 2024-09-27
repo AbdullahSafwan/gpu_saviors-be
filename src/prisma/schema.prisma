@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url = "mysql://root:root@localhost:3306/test?schema=public"
+  
+  // url      = env("DATABASE_URL")
+}
+
+model user {
+  id Int @unique @default(autoincrement())
+  firstName String
+  lastName String
+  phoneNumber String
+  email String?
+  status user_status @default(ENABLED)
+  createdAt DateTime @default(now())
+  // modifiedAt DateTime @default()
+}
+
+model system_configuration {
+  id Int @unique @default (autoincrement())
+  key String @unique
+  value String
+}
+
+enum user_status {
+  ENABLED
+  DISABLED
+}
