@@ -7,7 +7,7 @@ datasource db {
   url = "mysql://root:root@localhost:3306/test?schema=public"
   
   // url      = env("DATABASE_URL")
-}
+ }
 
 model user {
   id Int @unique @default(autoincrement())
@@ -27,6 +27,137 @@ model system_configuration {
 }
 
 enum user_status {
+  ENABLED
+  DISABLED
+}
+
+model booking {
+  id Int @unique @default (autoincrement())
+  status Booking_status @default(ENABLED)
+  payableAmount Int?
+  paidAmount Int?
+  userId Int 
+  
+  createdAt DateTime @default(now())
+  modifiedAt DateTime @default(now())
+
+}
+
+
+enum Booking_status {
+  ENABLED
+  DISABLED
+}
+
+model booking_item {
+  id Int @unique @default(autoincrement())
+  name String
+  type order_item_type
+  payableAmount Int
+  paidAmount Int
+  status Booking_item_status @default(ENABLED)
+  createdAt DateTime @default(now())
+  modifiedAt DateTime @default(now())
+  bookingId @relation (fields: [bookingId],references: [id])
+
+}
+
+enum Booking_item_status {
+  ENABLED
+  DISABLED
+}
+
+model delivery {
+  id Int @unique @default(autoincrement())
+  bookingId @relation // relation 
+  status delivery_status
+  address Booking_item_status
+  phoneNumber String
+  createdAt DateTime @default(now())
+  modifiedAt DateTime @default(now())
+  landmark Int?
+  secondaryPhoneNumber String?
+  deliveryDate DateTime
+
+
+}
+
+enum delivery_status {
+  ENABLED
+  DISABLED
+}
+model service {
+  id Int @unique @default(autoincrement())
+  bookingItemId @relation booking_item (fields: [bookingItemId], references: [id])
+  status service_status
+  remarks String
+  createdAt DateTime @default(now())
+  modifiedAt DateTime @default(now())
+
+
+}
+
+enum service_status {
+  ENABLED
+  DISABLED
+}
+
+model contact_log {
+  id Int @unique @default(autoincrement())
+  bookingItemId @relation bookingItem []
+  userId @relation user
+  contactedAt DateTime
+  status contact_method 
+  notes String
+  createdAt DateTime @default(now())
+  modifiedAt DateTime @default(now())
+  bookingId @relation booking []
+
+}
+
+enum contact_method {
+  ENABLED
+  DISABLED
+}
+
+
+model booking_payment {
+  id Int @unique @default(autoincrement())
+  bookingId @relation (fields: [bookingId],references: [id])
+  status payment_status
+  payableAmount Int?
+  paidAmount Int?
+  createdAt DateTime @default(now())
+  modifiedAt DateTime @default(now())
+  status payment_method 
+  recipientName String
+  transactionId String
+
+
+}
+
+enum payment_status {
+  ENABLED
+  DISABLED
+}
+
+enum payment_method {
+  ENABLED
+  DISABLED
+}
+
+model refund {
+  id Int @unique @default(autoincrement())
+  paymentId @relation booking_payment
+  status refund_status
+  refundDate DateTime
+  remarks String?
+  createdAt DateTime @default(now())
+  modifiedAt DateTime @default(now())
+  amount Int
+}
+
+enum refund_status {
   ENABLED
   DISABLED
 }
