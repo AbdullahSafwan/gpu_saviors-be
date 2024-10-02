@@ -17,6 +17,7 @@ model user {
   createdAt DateTime @default(now())
   modifiedAt DateTime @default(now())
   booking booking[]
+  contact_log contact_log[]
 }
 
 model system_configuration {
@@ -27,44 +28,44 @@ model system_configuration {
 
 model booking {
   id Int @unique @default (autoincrement())
-  status Booking_status @default(ENABLED)
+  status Booking_status 
   payableAmount Int?
   paidAmount Int?
   user user @relation(fields: [userId], references: [id])
   userId Int
-  
   createdAt DateTime @default(now())
   modifiedAt DateTime @default(now())
-
+  booking_item booking_item []
+  delivery delivery[]
+  contact_log contact_log[]
 }
 
 
-enum Booking_status {
-  ENABLED
-  DISABLED
-}
+
 
 model booking_item {
   id Int @unique @default(autoincrement())
   name String
-  type order_item_type
+  // type order_item_type
   payableAmount Int
   paidAmount Int
-  status Booking_item_status @default(ENABLED)
+  status Booking_item_status 
   createdAt DateTime @default(now())
   modifiedAt DateTime @default(now())
-  bookingId @relation (fields: [bookingId],references: [id])
+  booking booking @relation(fields: [userId],references: [id])
+  userId Int
+  service service[]
+  contact_log contact_log[]
+
 
 }
 
-enum Booking_item_status {
-  ENABLED
-  DISABLED
-}
+
 
 model delivery {
   id Int @unique @default(autoincrement())
-  bookingId @relation // relation 
+  booking booking @relation(fields: [userId],references: [id])
+  userId Int
   status delivery_status
   address Booking_item_status
   phoneNumber String
@@ -77,13 +78,12 @@ model delivery {
 
 }
 
-enum delivery_status {
-  ENABLED
-  DISABLED
-}
+
+
 model service {
   id Int @unique @default(autoincrement())
-  bookingItemId @relation booking_item (fields: [bookingItemId], references: [id])
+  booking_item booking_item @relation(fields: [userId],references: [id])
+  userId Int
   status service_status
   remarks String
   createdAt DateTime @default(now())
@@ -92,58 +92,46 @@ model service {
 
 }
 
-enum service_status {
-  ENABLED
-  DISABLED
-}
 
 model contact_log {
   id Int @unique @default(autoincrement())
-  bookingItemId @relation bookingItem []
-  userId @relation user
+  booking_item booking_item @relation(fields: [userId],references: [id])
+  userId Int
+  user user @relation(fields: [userId],references: [id])
   contactedAt DateTime
   status contact_method 
   notes String
   createdAt DateTime @default(now())
   modifiedAt DateTime @default(now())
-  bookingId @relation booking []
+  booking booking @relation(fields: [userId],references: [id])
+
 
 }
 
-enum contact_method {
-  ENABLED
-  DISABLED
-}
 
 
 model booking_payment {
   id Int @unique @default(autoincrement())
-  bookingId @relation (fields: [bookingId],references: [id])
-  status payment_status
+  booking booking @relation(fields: [userId],references: [id])
+  userId Int
+  status payment_status 
   payableAmount Int?
   paidAmount Int?
   createdAt DateTime @default(now())
   modifiedAt DateTime @default(now())
-  status payment_method 
-  recipientName String
+
   transactionId String
+  refund refund[]
 
 
 }
 
-enum payment_status {
-  ENABLED
-  DISABLED
-}
 
-enum payment_method {
-  ENABLED
-  DISABLED
-}
 
 model refund {
   id Int @unique @default(autoincrement())
-  paymentId @relation booking_payment
+  booking_payment booking_payment @relation(fields: [userId],references: [id])
+  userId Int
   status refund_status
   refundDate DateTime
   remarks String?
@@ -160,4 +148,70 @@ enum refund_status {
 enum user_status {
   ENABLED
   DISABLED
+}
+
+enum payment_method {
+  CASH
+  WALLET
+  BT
+}
+
+enum payment_status {
+  ENABLED
+  DISABLED
+}
+
+enum contact_method {
+  SMS
+  CALL
+  EMAIL 
+}
+
+
+enum service_status {
+  PENDING
+  IN_REPAIR
+  IN_QA
+  QA_PASSED
+  QA_FAILED
+
+}
+
+enum delivery_status {
+  PENDING
+  IN_TRANSIT_INBOUND
+  IN_TRANSIT_OUTBOUND
+  IN_WAREHOUSE
+  DELIVERED
+  PENDING_INBOUND
+  PENDING_OUTBOUND
+
+}
+
+enum Booking_status {
+  DRAFT
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  CONTACTED
+  
+}
+
+enum Booking_item_status {
+  DRAFT 
+  IN_REVIEW
+  IN_QUEUE
+  IN_PROGRESS
+  COMPLETED
+  IN_RESOLUTION
+}
+enum Booking_item_resolution_status {
+  RESOLVE 
+  REJECT
+}
+
+enum order_item_type {
+  GPU_REPAIR
+  GPU_SERVICE
 }
