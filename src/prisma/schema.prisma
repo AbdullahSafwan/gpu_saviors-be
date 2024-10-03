@@ -38,6 +38,7 @@ model booking {
   booking_item booking_item []
   delivery delivery[]
   contact_log contact_log[]
+  booking_payment booking_payment[]
 }
 
 
@@ -46,14 +47,14 @@ model booking {
 model booking_item {
   id Int @unique @default(autoincrement())
   name String
-  // type order_item_type
+  type order_item_type
   payableAmount Int
   paidAmount Int
   status Booking_item_status 
   createdAt DateTime @default(now())
   modifiedAt DateTime @default(now())
-  booking booking @relation(fields: [userId],references: [id])
-  userId Int
+  booking booking @relation(fields: [bookingId],references: [id])
+  bookingId Int
   service service[]
   contact_log contact_log[]
 
@@ -64,8 +65,8 @@ model booking_item {
 
 model delivery {
   id Int @unique @default(autoincrement())
-  booking booking @relation(fields: [userId],references: [id])
-  userId Int
+  booking booking @relation(fields: [bookingId],references: [id])
+  bookingId Int
   status delivery_status
   address Booking_item_status
   phoneNumber String
@@ -74,16 +75,14 @@ model delivery {
   landmark Int?
   secondaryPhoneNumber String?
   deliveryDate DateTime
-
-
 }
 
 
 
 model service {
   id Int @unique @default(autoincrement())
-  booking_item booking_item @relation(fields: [userId],references: [id])
-  userId Int
+  booking_item booking_item @relation(fields: [bookingItemId],references: [id])
+  bookingItemId Int
   status service_status
   remarks String
   createdAt DateTime @default(now())
@@ -95,16 +94,17 @@ model service {
 
 model contact_log {
   id Int @unique @default(autoincrement())
-  booking_item booking_item @relation(fields: [userId],references: [id])
-  userId Int
+  booking_item booking_item @relation(fields: [bookingItemId],references: [id])
+  bookingItemId Int
   user user @relation(fields: [userId],references: [id])
+  userId Int
+  booking booking @relation(fields: [bookingId],references: [id])
+  bookingId Int
   contactedAt DateTime
   status contact_method 
   notes String
   createdAt DateTime @default(now())
   modifiedAt DateTime @default(now())
-  booking booking @relation(fields: [userId],references: [id])
-
 
 }
 
@@ -112,14 +112,15 @@ model contact_log {
 
 model booking_payment {
   id Int @unique @default(autoincrement())
-  booking booking @relation(fields: [userId],references: [id])
-  userId Int
+  booking booking @relation(fields: [bookingId],references: [id])
+  bookingId Int
   status payment_status 
   payableAmount Int?
   paidAmount Int?
   createdAt DateTime @default(now())
   modifiedAt DateTime @default(now())
-
+  paymentMethod payment_method
+  recipientName String
   transactionId String
   refund refund[]
 
@@ -130,9 +131,8 @@ model booking_payment {
 
 model refund {
   id Int @unique @default(autoincrement())
-  booking_payment booking_payment @relation(fields: [userId],references: [id])
-  userId Int
-  status refund_status
+  booking_payment booking_payment @relation(fields: [paymentId],references: [id])
+  paymentId Int
   refundDate DateTime
   remarks String?
   createdAt DateTime @default(now())
@@ -140,10 +140,7 @@ model refund {
   amount Int
 }
 
-enum refund_status {
-  ENABLED
-  DISABLED
-}
+
 
 enum user_status {
   ENABLED
@@ -160,6 +157,7 @@ enum payment_status {
   ENABLED
   DISABLED
 }
+
 
 enum contact_method {
   SMS
