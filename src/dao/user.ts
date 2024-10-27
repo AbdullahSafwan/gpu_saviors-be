@@ -1,8 +1,10 @@
 import prisma from "../prisma";
 import { Prisma } from "@prisma/client";
+
+
 const createUser = async (data: Prisma.userCreateInput) => {
   try {
-    const result = await prisma.user.create({
+    const result = await prisma.user.create({ //orm object relation model
       data,
     });
     return result
