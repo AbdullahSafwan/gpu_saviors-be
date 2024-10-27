@@ -4,10 +4,8 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url = "mysql://root:root@localhost:3306/test?schema=public"
-  
-  // url      = env("DATABASE_URL")
-}
+  url      = env("DATABASE_URL")
+ }
 
 model user {
   id Int @unique @default(autoincrement())
@@ -17,7 +15,9 @@ model user {
   email String?
   status user_status @default(ENABLED)
   createdAt DateTime @default(now())
-  // modifiedAt DateTime @default()
+  modifiedAt DateTime @default(now())
+  booking booking[]
+  contact_log contact_log[]
 }
 
 model system_configuration {
@@ -26,7 +26,190 @@ model system_configuration {
   value String
 }
 
+model booking {
+  id Int @unique @default (autoincrement())
+  status Booking_status 
+  payableAmount Int?
+  paidAmount Int?
+  user user @relation(fields: [userId], references: [id])
+  userId Int
+  createdAt DateTime @default(now())
+  modifiedAt DateTime @default(now())
+  booking_item booking_item []
+  delivery delivery[]
+  contact_log contact_log[]
+  booking_payment booking_payment[]
+}
+
+
+
+
+model booking_item {
+  id Int @unique @default(autoincrement())
+  name String
+  type order_item_type
+  payableAmount Int
+  paidAmount Int
+  status Booking_item_status 
+  createdAt DateTime @default(now())
+  modifiedAt DateTime @default(now())
+  booking booking @relation(fields: [bookingId],references: [id])
+  bookingId Int
+  service service[]
+  contact_log contact_log[]
+
+
+}
+
+
+
+model delivery {
+  id Int @unique @default(autoincrement())
+  booking booking @relation(fields: [bookingId],references: [id])
+  bookingId Int
+  status delivery_status
+  address Booking_item_status
+  phoneNumber String
+  createdAt DateTime @default(now())
+  modifiedAt DateTime @default(now())
+  landmark Int?
+  secondaryPhoneNumber String?
+  deliveryDate DateTime
+}
+
+
+
+model service {
+  id Int @unique @default(autoincrement())
+  booking_item booking_item @relation(fields: [bookingItemId],references: [id])
+  bookingItemId Int
+  status service_status
+  remarks String
+  createdAt DateTime @default(now())
+  modifiedAt DateTime @default(now())
+
+
+}
+
+
+model contact_log {
+  id Int @unique @default(autoincrement())
+  booking_item booking_item @relation(fields: [bookingItemId],references: [id])
+  bookingItemId Int
+  user user @relation(fields: [userId],references: [id])
+  userId Int
+  booking booking @relation(fields: [bookingId],references: [id])
+  bookingId Int
+  contactedAt DateTime
+  status contact_method 
+  notes String
+  createdAt DateTime @default(now())
+  modifiedAt DateTime @default(now())
+
+}
+
+
+
+model booking_payment {
+  id Int @unique @default(autoincrement())
+  booking booking @relation(fields: [bookingId],references: [id])
+  bookingId Int
+  status payment_status 
+  payableAmount Int?
+  paidAmount Int?
+  createdAt DateTime @default(now())
+  modifiedAt DateTime @default(now())
+  paymentMethod payment_method
+  recipientName String
+  transactionId String
+  refund refund[]
+
+
+}
+
+
+
+model refund {
+  id Int @unique @default(autoincrement())
+  booking_payment booking_payment @relation(fields: [paymentId],references: [id])
+  paymentId Int
+  refundDate DateTime
+  remarks String?
+  createdAt DateTime @default(now())
+  modifiedAt DateTime @default(now())
+  amount Int
+}
+
+
+
 enum user_status {
   ENABLED
   DISABLED
+}
+
+enum payment_method {
+  CASH
+  WALLET
+  BT
+}
+
+enum payment_status {
+  ENABLED
+  DISABLED
+}
+
+
+enum contact_method {
+  SMS
+  CALL
+  EMAIL 
+}
+
+
+enum service_status {
+  PENDING
+  IN_REPAIR
+  IN_QA
+  QA_PASSED
+  QA_FAILED
+
+}
+
+enum delivery_status {
+  PENDING
+  IN_TRANSIT_INBOUND
+  IN_TRANSIT_OUTBOUND
+  IN_WAREHOUSE
+  DELIVERED
+  PENDING_INBOUND
+  PENDING_OUTBOUND
+
+}
+
+enum Booking_status {
+  DRAFT
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  CONTACTED
+  
+}
+
+enum Booking_item_status {
+  DRAFT 
+  IN_REVIEW
+  IN_QUEUE
+  IN_PROGRESS
+  COMPLETED
+  IN_RESOLUTION
+}
+enum Booking_item_resolution_status {
+  RESOLVE 
+  REJECT
+}
+
+enum order_item_type {
+  GPU_REPAIR
+  GPU_SERVICE
 }
