@@ -13,4 +13,34 @@ const createBookingpayment = async (prisma: PrismaClient, data: Prisma.booking_p
   }
 };
 
-export const booking_paymentDao = { createBookingpayment }
+const getBookingpaymet = async (prisma: PrismaClient, id: number) => {
+  try {
+    const result = await prisma.booking_payment.findUnique({
+      where: { id },
+    });
+    return result;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+const updateBookingpayment = async (
+  prisma: PrismaClient,
+  id: number,
+  data: Prisma.booking_paymentUpdateInput
+) => {
+  try {
+    const result = await prisma.booking_payment.update({
+      where: { id },
+      data,
+    });
+    return result;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const userDao = { createBookingpayment, getBookingpaymet, updateBookingpayment };
+
