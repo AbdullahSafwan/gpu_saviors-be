@@ -1,8 +1,7 @@
-import prisma from "../prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 
-const createRefund = async (data: Prisma.refundCreateInput) => {
+const createRefund = async (prisma: PrismaClient, data: Prisma.refundCreateInput) => {
   try {
     const result = await prisma.refund.create({ //orm object relation model
       data,
