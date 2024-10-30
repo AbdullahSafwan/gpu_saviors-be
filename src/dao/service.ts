@@ -1,8 +1,7 @@
-import prisma from "../prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 
-const createService = async (data: Prisma.serviceCreateInput) => {
+const createService = async (prisma: PrismaClient, data: Prisma.serviceCreateInput) => {
   try {
     const result = await prisma.service.create({ //orm object relation model
       data,
