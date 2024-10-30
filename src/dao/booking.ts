@@ -1,8 +1,7 @@
-import prisma from "../prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 
-const createBooking = async (data: Prisma.bookingCreateInput)=> {
+const createBooking = async (prisma: PrismaClient,data: Prisma.bookingCreateInput)=> {
   try{ const result = await prisma.booking.create({ //orm object relation model
     data,
     
