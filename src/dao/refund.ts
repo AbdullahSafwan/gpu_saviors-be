@@ -42,5 +42,5 @@ const updateRefund = async (
   }
 };
 
-export const userDao = { createRefund, getRefund, updateRefund };
+export const refundDao = { createRefund, getRefund, updateRefund };
 

@@ -42,5 +42,5 @@ const updateService = async (
   }
 };
 
-export const userDao = { createService, getService, updateService };
+export const serviceDao = { createService, getService, updateService };
 

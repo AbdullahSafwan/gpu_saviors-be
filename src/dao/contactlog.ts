@@ -42,5 +42,5 @@ const updateContactlog = async (
   }
 };
 
-export const userDao = { createContactlog, getContactlog, updateContactlog };
+export const contact_logDao = { createContactlog, getContactlog, updateContactlog };
 
