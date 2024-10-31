@@ -14,4 +14,34 @@ const createDelivery = async (prisma: PrismaClient, data: Prisma.deliveryCreateI
   }
 };
 
-export const deliveryDao = { createDelivery }
+const getDelivery = async (prisma: PrismaClient, id: number) => {
+  try {
+    const result = await prisma.delivery.findUnique({
+      where: { id },
+    });
+    return result;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+const updateDelivery = async (
+  prisma: PrismaClient,
+  id: number,
+  data: Prisma.deliveryUpdateInput
+) => {
+  try {
+    const result = await prisma.delivery.update({
+      where: { id },
+      data,
+    });
+    return result;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const userDao = { createDelivery, getDelivery, updateDelivery };
+
