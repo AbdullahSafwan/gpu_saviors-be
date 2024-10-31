@@ -42,5 +42,5 @@ const updateBookingpayment = async (
   }
 };
 
-export const userDao = { createBookingpayment, getBookingpaymet, updateBookingpayment };
+export const booking_paymentDao = { createBookingpayment, getBookingpaymet, updateBookingpayment };
 
