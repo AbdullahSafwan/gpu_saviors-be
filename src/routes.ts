@@ -8,6 +8,7 @@ const router = express.Router();
 
 router.get('/', getController)
 router.post('/user/',userValidator.userCreateValidator, userController.createUser)
+router.get('/user/:id', userController.getUserDetails)
 
 
 export default router;

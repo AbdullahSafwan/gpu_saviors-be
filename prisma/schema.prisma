@@ -28,7 +28,7 @@ model system_configuration {
 
 model booking {
   id              Int               @unique @default(autoincrement())
-  status          Booking_status
+  status          booking_status
   payableAmount   Int?
   paidAmount      Int?
   user            user              @relation(fields: [userId], references: [id])
@@ -47,7 +47,7 @@ model booking_item {
   type          order_item_type
   payableAmount Int
   paidAmount    Int
-  status        Booking_item_status
+  status        booking_item_status
   createdAt     DateTime            @default(now())
   modifiedAt    DateTime            @default(now())
   booking       booking             @relation(fields: [bookingId], references: [id])
@@ -61,7 +61,7 @@ model delivery {
   booking              booking             @relation(fields: [bookingId], references: [id])
   bookingId            Int
   status               delivery_status
-  address              Booking_item_status
+  address              booking_item_status
   phoneNumber          String
   createdAt            DateTime            @default(now())
   modifiedAt           DateTime            @default(now())
@@ -161,7 +161,7 @@ enum delivery_status {
   PENDING_OUTBOUND
 }
 
-enum Booking_status {
+enum booking_status {
   DRAFT
   PENDING
   CONFIRMED
@@ -170,7 +170,7 @@ enum Booking_status {
   CONTACTED
 }
 
-enum Booking_item_status {
+enum booking_item_status {
   DRAFT
   IN_REVIEW
   IN_QUEUE
@@ -179,7 +179,7 @@ enum Booking_item_status {
   IN_RESOLUTION
 }
 
-enum Booking_item_resolution_status {
+enum booking_item_resolution_status {
   RESOLVE
   REJECT
 }
