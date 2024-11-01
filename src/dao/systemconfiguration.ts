@@ -1,6 +1,6 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 
-const createSystemconfiguration = async (
+const createSystemConfiguration = async (
   prisma: PrismaClient,
   data: Prisma.system_configurationCreateInput
 ) => {
@@ -15,7 +15,7 @@ const createSystemconfiguration = async (
   }
 };
 
-const getSystemconfiguration = async (prisma: PrismaClient, id: number) => {
+const getSystemConfiguration = async (prisma: PrismaClient, id: number) => {
   try {
     const result = await prisma.system_configuration.findUnique({
       where: { id },
@@ -27,7 +27,7 @@ const getSystemconfiguration = async (prisma: PrismaClient, id: number) => {
   }
 };
 
-const updateSystemconfiguration = async (
+const updateSystemConfiguration = async (
   prisma: PrismaClient,
   id: number,
   data: Prisma.system_configurationUpdateInput
@@ -44,4 +44,4 @@ const updateSystemconfiguration = async (
   }
 };
 
-export const system_configurationDao = { createSystemconfiguration, getSystemconfiguration, updateSystemconfiguration };
+export const system_configurationDao = { createSystemConfiguration, getSystemConfiguration, updateSystemConfiguration };
