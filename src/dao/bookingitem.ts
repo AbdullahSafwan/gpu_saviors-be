@@ -1,7 +1,7 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 
 
-const createBookingitem = async (prisma: PrismaClient, data: Prisma.booking_itemCreateInput) => {
+const createBookingItem = async (prisma: PrismaClient, data: Prisma.booking_itemCreateInput) => {
   try {
     const result = await prisma.booking_item.create({ //orm object relation model
       data,
@@ -13,7 +13,7 @@ const createBookingitem = async (prisma: PrismaClient, data: Prisma.booking_item
   }
 };
 
-const getBookingitem = async (prisma: PrismaClient, id: number) => {
+const getBookingItem = async (prisma: PrismaClient, id: number) => {
   try {
     const result = await prisma.booking_item.findUnique({
       where: { id },
@@ -25,7 +25,7 @@ const getBookingitem = async (prisma: PrismaClient, id: number) => {
   }
 };
 
-const updateBookingitem = async (
+const updateBookingItem = async (
   prisma: PrismaClient,
   id: number,
   data: Prisma.booking_itemUpdateInput
@@ -42,5 +42,5 @@ const updateBookingitem = async (
   }
 };
 
-export const bookingitemDao = { createBookingitem, getBookingitem, updateBookingitem };
+export const bookingItemDao = { createBookingItem, getBookingItem, updateBookingItem };
 
