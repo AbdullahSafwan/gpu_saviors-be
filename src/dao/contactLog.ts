@@ -1,7 +1,7 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 
 
-const createContactlog = async (prisma: PrismaClient, data: Prisma.contact_logCreateInput) => {
+const createContactLog = async (prisma: PrismaClient, data: Prisma.contact_logCreateInput) => {
   try {
     const result = await prisma.contact_log.create({ //orm object relation model
       data,
@@ -13,7 +13,7 @@ const createContactlog = async (prisma: PrismaClient, data: Prisma.contact_logCr
   }
 };
 
-const getContactlog = async (prisma: PrismaClient, id: number) => {
+const getContactLog = async (prisma: PrismaClient, id: number) => {
   try {
     const result = await prisma.contact_log.findUnique({
       where: { id },
@@ -25,7 +25,7 @@ const getContactlog = async (prisma: PrismaClient, id: number) => {
   }
 };
 
-const updateContactlog = async (
+const updateContactLog = async (
   prisma: PrismaClient,
   id: number,
   data: Prisma.contact_logUpdateInput
@@ -42,5 +42,5 @@ const updateContactlog = async (
   }
 };
 
-export const contact_logDao = { createContactlog, getContactlog, updateContactlog };
+export const contact_logDao = { createContactLog, getContactLog, updateContactLog };
 
