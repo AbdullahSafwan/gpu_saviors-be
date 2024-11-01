@@ -6,10 +6,11 @@ import prisma from "../prisma";
 const createUser = async (req: Request, res: Response) => {
   try {
     const valResult = validationResult(req);
-    console.log(valResult);
+
     if (!valResult.isEmpty()) {
-      res.send({ errors: valResult.array() });
+        return res.status(400).json({ errors: valResult.array() });
     }
+
     const data = req.body;
     const result = await userDao.createUser(prisma, data);
     res.status(200).send(result);

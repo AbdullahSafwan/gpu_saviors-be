@@ -1,10 +1,14 @@
 import { body } from "express-validator";
-import { RequestHandler } from "express";
-const userCreateValidator : RequestHandler = (req, res, next) => {
-    body('firstName').isAlpha().withMessage("First Name is invalid");
-    body('lastName').isAlpha().withMessage("LastName is invalid");
-    body('phoneNumber').isMobilePhone("any").withMessage("InvalidPhone Number")
-    next();
-}
 
-export const userValidator = {userCreateValidator}
+const userCreateValidator = [
+  body("firstName").notEmpty().withMessage("First Name is required"),
+
+  body("lastName").notEmpty().withMessage("LastName is required"),
+
+  body("phoneNumber")
+    .notEmpty()
+    .isMobilePhone("any")
+    .withMessage("Invalid Phone Number"),
+];
+
+export const userValidator = { userCreateValidator };
