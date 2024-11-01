@@ -43,5 +43,5 @@ const updateDelivery = async (
   }
 };
 
-export const userDao = { createDelivery, getDelivery, updateDelivery };
+export const deliveryDao = { createDelivery, getDelivery, updateDelivery };
 
