@@ -14,6 +14,7 @@ router.get('/user/:id', userController.getUserDetails)
 
 router.post('/booking/',bookingController.createBooking)
 router.get('/booking/:id',bookingController.getBookingDetails)
+router.patch('/booking/:id',bookingController.updateBooking)
 
 
 export default router;
