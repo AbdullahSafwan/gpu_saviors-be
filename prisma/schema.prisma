@@ -15,7 +15,7 @@ model user {
   email       String?
   status      user_status   @default(ENABLED)
   createdAt   DateTime      @default(now())
-  modifiedAt  DateTime      @default(now())
+  modifiedAt  DateTime      @default(now()) @updatedAt
   booking     booking[]
   contact_log contact_log[]
 }
