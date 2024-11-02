@@ -61,7 +61,7 @@ model delivery {
   booking              booking             @relation(fields: [bookingId], references: [id])
   bookingId            Int
   status               delivery_status
-  address              booking_item_status
+  address              String
   phoneNumber          String
   createdAt            DateTime            @default(now())
   modifiedAt           DateTime            @default(now())
