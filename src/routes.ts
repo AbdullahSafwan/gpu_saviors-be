@@ -14,5 +14,6 @@ router.post(
   userController.createUser
 );
 router.get("/user/:id", userController.getUserDetails);
+router.patch("/user/:id", userController.updateUser);
 
 export default router;

@@ -26,4 +26,17 @@ const getUserDetails = async (req: Request, res: Response) => {
     res.status(400).send(error);
   }
 };
-export const userController = { createUser, getUserDetails };
+
+const updateUser = async (req: Request, res: Response) => {
+  try {
+    const data = req.body;
+    const id = +req.params.id;
+    const result = await userDao.updateUser(prisma, id, data);
+    res.status(200).send(result);
+  } catch (error) {
+    console.log(error);
+    res.status(400).send(error);
+  }
+};
+
+export const userController = { createUser, getUserDetails, updateUser };
