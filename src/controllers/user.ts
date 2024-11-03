@@ -1,16 +1,9 @@
 import { Request, Response } from "express";
 import { userDao } from "../dao/user";
-import { validationResult } from "express-validator";
 import prisma from "../prisma";
 
 const createUser = async (req: Request, res: Response) => {
   try {
-    const valResult = validationResult(req);
-
-    if (!valResult.isEmpty()) {
-      return res.status(400).json({ errors: valResult.array() });
-    }
-
     const data = req.body;
     const result = await userDao.createUser(prisma, data);
     res.status(200).send(result);
