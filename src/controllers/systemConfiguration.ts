@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import { system_configurationDao } from "../dao/systemConfiguration";
+import { systemConfigurationDao } from "../dao/systemConfiguration";
 import prisma from "../prisma";
 
 const createSystemConfiguration = async (req: Request, res: Response) => {
     try {
 
     const data = req.body;
-    const result = await system_configurationDao.createSystemConfiguration (prisma, data);
+    const result = await systemConfigurationDao.createSystemConfiguration (prisma, data);
     res.status(200).send(result);
     } catch (error) {
         console.log(error);
@@ -21,7 +21,7 @@ const getSystemConfigurationDetails = async (req: Request, res: Response) => {
       if (!id) {
         throw Error("id is required");
       }
-      const result = await system_configurationDao.getSystemConfiguration(prisma, id);
+      const result = await systemConfigurationDao.getSystemConfiguration(prisma, id);
       res.status(200).send(result);
     } catch (error) {
       console.log(error);
@@ -33,7 +33,7 @@ const getSystemConfigurationDetails = async (req: Request, res: Response) => {
     try {
         const data = req.body
         const id = +req.params.id
-        const result = await system_configurationDao.updateSystemConfiguration (prisma,id,data);
+        const result = await systemConfigurationDao.updateSystemConfiguration (prisma,id,data);
         res.status(200).send(result);
 
 
@@ -43,4 +43,4 @@ const getSystemConfigurationDetails = async (req: Request, res: Response) => {
     }
   }
 
-  export const system_configurationController = {createSystemConfiguration,getSystemConfigurationDetails ,updateSystemConfiguration }
+  export const systemConfigurationController = {createSystemConfiguration,getSystemConfigurationDetails ,updateSystemConfiguration }
