@@ -13,7 +13,7 @@ router.get('/user/:id', userController.getUserDetails)
 
 router.get('/user/',serviceController.createService)
 router.post('/service/:id', serviceController.getServiceDetails)
-router.get('/service/:id',serviceController.updateService)
+router.patch('/service/:id',serviceController.updateService)
 
 
 export default router;

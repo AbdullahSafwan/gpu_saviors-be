@@ -43,4 +43,4 @@ const getServiceDetails = async (req: Request, res: Response) => {
     }
   }
 
-  export const serviceController = {createService,getServiceDetails,updateService }
+  export const serviceController = {createService, getServiceDetails, updateService }
