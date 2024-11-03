@@ -44,4 +44,4 @@ const updateSystemConfiguration = async (
   }
 };
 
-export const system_configurationDao = { createSystemConfiguration, getSystemConfiguration, updateSystemConfiguration };
+export const systemConfigurationDao = { createSystemConfiguration, getSystemConfiguration, updateSystemConfiguration };
