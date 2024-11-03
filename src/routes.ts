@@ -3,6 +3,7 @@ import { getController } from "./controllers";
 import { userController } from "./controllers/user";
 import { userValidator } from "./middleware/validator/userValidator";
 import { throwValidationResult } from "./services/helper";
+import { systemConfigurationController } from "./controllers/systemConfiguration";
 
 const router = express.Router();
 
@@ -15,5 +16,11 @@ router.post(
 );
 router.get("/user/:id", userController.getUserDetails);
 router.patch("/user/:id", userController.updateUser);
+
+
+router.post('/systemConfiguration/',systemConfigurationController.createSystemConfiguration)
+router.get('/systemConfiguration/:key',systemConfigurationController.getSystemConfigurationDetails)
+router.patch('/systemConfiguration/:key',systemConfigurationController.updateSystemConfiguration)
+
 
 export default router;
