@@ -8,9 +8,9 @@ const deliveryCreateValidator = [
     .isMobilePhone("any")
     .withMessage("Invalid Phone Number"),
 
-    body("landmark").optional().withMessage("landmark is optional"),
+ body("landmark").optional().withMessage("landmark is optional"),
 
-    body("secondaryPhoneNumber").optional().notEmpty().withMessage("Secondary PhoneNumber is optional")
+ body("secondaryPhoneNumber").optional().notEmpty().withMessage("Secondary PhoneNumber is optional")
 
 ];
 
