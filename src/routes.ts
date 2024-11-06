@@ -6,6 +6,7 @@ import { throwValidationResult } from "./services/helper";
 import { systemConfigurationController } from "./controllers/systemConfiguration";
 import { deliveryController } from "./controllers/delivery";
 import { refundController } from "./controllers/refund";
+import { refundValidator } from "./middleware/validator/refundValidator";
 
 const router = express.Router();
 
@@ -23,7 +24,7 @@ router.post('/delivery/',deliveryController.createDelivery)
 router.get('/delivery/:id',deliveryController.getDeliveryDetails)
 router.patch('/delivery/:id',deliveryController.updateDelivery)
 
-router.post('/refund/',refundController.createRefund)
+router.post('/refund/',refundValidator.refundCreateValidator,throwValidationResult,refundController.createRefund)
 router.get('/refund/:id',refundController.getRefundDetails)
 router.patch('/refund/:id',refundController.updateRefund)
 
