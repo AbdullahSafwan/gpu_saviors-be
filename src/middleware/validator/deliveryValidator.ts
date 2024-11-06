@@ -10,7 +10,7 @@ const deliveryCreateValidator = [
 
  body("landmark").optional().withMessage("landmark is optional"),
 
- body("secondaryPhoneNumber").optional().notEmpty().withMessage("Secondary PhoneNumber is optional")
+body("secondaryPhoneNumber").optional().notEmpty().withMessage("Secondary PhoneNumber is optional")
 
 ];
 
