@@ -16,7 +16,6 @@ model user {
   status      user_status   @default(ENABLED)
   createdAt   DateTime      @default(now())
   modifiedAt  DateTime      @default(now()) @updatedAt
-  booking     booking[]
   contact_log contact_log[]
 }
 
@@ -29,10 +28,9 @@ model system_configuration {
 model booking {
   id              Int               @unique @default(autoincrement())
   status          booking_status
+  code            String?           @unique
   payableAmount   Int?
   paidAmount      Int?
-  user            user              @relation(fields: [userId], references: [id])
-  userId          Int
   createdAt       DateTime          @default(now())
   modifiedAt      DateTime          @default(now())
   booking_item    booking_item[]
@@ -43,11 +41,12 @@ model booking {
 
 model booking_item {
   id            Int                 @unique @default(autoincrement())
+  code          String?             @unique
   name          String
-  type          order_item_type
+  type          booking_item_type
   payableAmount Int
-  paidAmount    Int
-  status        booking_item_status
+  paidAmount    Int?
+  status        booking_item_status @default(DRAFT)
   createdAt     DateTime            @default(now())
   modifiedAt    DateTime            @default(now())
   booking       booking             @relation(fields: [bookingId], references: [id])
@@ -57,14 +56,14 @@ model booking_item {
 }
 
 model delivery {
-  id                   Int                 @unique @default(autoincrement())
-  booking              booking             @relation(fields: [bookingId], references: [id])
+  id                   Int             @unique @default(autoincrement())
+  booking              booking         @relation(fields: [bookingId], references: [id])
   bookingId            Int
   status               delivery_status
   address              String
   phoneNumber          String
-  createdAt            DateTime            @default(now())
-  modifiedAt           DateTime            @default(now())
+  createdAt            DateTime        @default(now())
+  modifiedAt           DateTime        @default(now())
   landmark             Int?
   secondaryPhoneNumber String?
   deliveryDate         DateTime
@@ -184,7 +183,8 @@ enum booking_item_resolution_status {
   REJECT
 }
 
-enum order_item_type {
-  GPU_REPAIR
-  GPU_SERVICE
+enum booking_item_type {
+  GPU
+  MOBO
+  LAPTOP
 }

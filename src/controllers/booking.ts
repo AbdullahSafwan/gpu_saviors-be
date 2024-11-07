@@ -1,11 +1,17 @@
 import { Request, Response } from "express";
 import { bookingDao } from "../dao/booking";
 import prisma from "../prisma";
+// import { booking_item } from "@prisma/client";
 
 const createBooking = async (req: Request, res: Response) => {
     try {
 
     const data = req.body;
+
+    // let bookingItem: booking_item[] = []
+    data.booking_item = {
+      create: data.booking_item
+    }
     const result = await bookingDao.createBooking (prisma, data);
     res.status(200).send(result);
     } catch (error) {
