@@ -16,7 +16,7 @@ model user {
   status      user_status   @default(ENABLED)
   createdAt   DateTime      @default(now())
   modifiedAt  DateTime      @default(now()) @updatedAt
-  contact_log contact_log[]
+  contact_logs contact_log[]
 }
 
 model system_configuration {
@@ -33,10 +33,10 @@ model booking {
   paidAmount      Int?
   createdAt       DateTime          @default(now())
   modifiedAt      DateTime          @default(now())
-  booking_item    booking_item[]
-  delivery        delivery[]
-  contact_log     contact_log[]
-  booking_payment booking_payment[]
+  booking_items    booking_item[]
+  deliverys        delivery[]
+  contact_logs     contact_log[]
+  booking_payments booking_payment[]
 }
 
 model booking_item {
@@ -51,7 +51,7 @@ model booking_item {
   modifiedAt    DateTime            @default(now())
   booking       booking             @relation(fields: [bookingId], references: [id])
   bookingId     Int
-  service       service[]
+  services       service[]
   contact_log   contact_log[]
 }
 
@@ -106,7 +106,7 @@ model booking_payment {
   paymentMethod payment_method
   recipientName String
   transactionId String
-  refund        refund[]
+  refunds        refund[]
 }
 
 model refund {
