@@ -17,7 +17,7 @@ router.post(
   userController.createUser
 );
 router.get("/user/:id", userController.getUserDetails);
-router.patch("/user/:id", userController.updateUser);
+router.patch("/user/:id", userValidator.userUpdateValidator,throwValidationResult,userController.updateUser);
 
 router.post('/delivery/',deliveryController.createDelivery)
 router.get('/delivery/:id',deliveryController.getDeliveryDetails)
