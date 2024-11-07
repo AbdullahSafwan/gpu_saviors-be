@@ -16,7 +16,7 @@ const createBooking = async (req: Request, res: Response) => {
     data.code = new Date().getTime().toString(36).toUpperCase();
     data.booking_items = {
       create: data.booking_items,
-    };  
+    };
 
     const result = await bookingDao.createBooking(prisma, data);
     res.status(200).send(result);
