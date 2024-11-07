@@ -5,8 +5,24 @@ const refundCreateValidator = [
 
     body ("amount").isInt().notEmpty().withMessage("Amount is required"),
 
-    body ("remarks").optional().withMessage("remarks is optional")
+    body ("remarks").optional().withMessage("remarks is optional"),
+
+    body ("refundDate").isInt().notEmpty().withMessage("RefundDate is required")
+
+
 
 ];
 
-export const refundValidator = { refundCreateValidator };
+const refundUpdateValidatior = [
+
+    body ("paymentId").optional().isInt().notEmpty().withMessage("paymentId is required"),
+
+    body ("amount").optional().isInt().notEmpty().withMessage("Amount is required"),
+
+    body ("remarks").optional().withMessage("remarks is optional"),
+
+    body ("refundDate").optional().isInt().notEmpty().withMessage("RefundDate is optional")
+
+];
+
+export const refundValidator = { refundCreateValidator , refundUpdateValidatior};

@@ -26,7 +26,7 @@ router.patch('/delivery/:id',deliveryController.updateDelivery)
 
 router.post('/refund/',refundValidator.refundCreateValidator,throwValidationResult,refundController.createRefund)
 router.get('/refund/:id',refundController.getRefundDetails)
-router.patch('/refund/:id',refundController.updateRefund)
+router.patch('/refund/:id',refundValidator.refundUpdateValidatior,throwValidationResult,refundController.updateRefund)
 
 
 router.post('/systemConfiguration/',systemConfigurationController.createSystemConfiguration)
