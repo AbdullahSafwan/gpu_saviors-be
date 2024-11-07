@@ -22,7 +22,7 @@ router.patch("/user/:id", userController.updateUser);
 
 router.post('/delivery/',deliveryValidator.deliveryCreateValidator,throwValidationResult, deliveryController.createDelivery)
 router.get('/delivery/:id',deliveryController.getDeliveryDetails)
-router.patch('/delivery/:id',deliveryController.updateDelivery)
+router.patch('/delivery/:id',deliveryValidator.deliveryUpdateValidator,throwValidationResult,deliveryController.updateDelivery)
 
 router.post('/refund/',refundController.createRefund)
 router.get('/refund/:id',refundController.getRefundDetails)
