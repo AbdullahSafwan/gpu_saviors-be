@@ -15,6 +15,8 @@ const refundCreateValidator = [
 
 const refundUpdateValidatior = [
 
+    body ("id").isInt().notEmpty().withMessage("id is required"),
+
     body ("paymentId").optional().isInt().notEmpty().withMessage("paymentId is required"),
 
     body ("amount").optional().isInt().notEmpty().withMessage("Amount is required"),
