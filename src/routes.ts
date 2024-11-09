@@ -6,6 +6,8 @@ import { throwValidationResult } from "./services/helper";
 import { systemConfigurationController } from "./controllers/systemConfiguration";
 import { deliveryController } from "./controllers/delivery";
 import { refundController } from "./controllers/refund";
+import { contact_logController } from "./controllers/contactLog"
+import { contactLogValidator } from "./middleware/validator/contactLogValidator";
 
 const router = express.Router();
 
@@ -31,6 +33,11 @@ router.patch('/refund/:id',refundController.updateRefund)
 router.post('/systemConfiguration/',systemConfigurationController.createSystemConfiguration)
 router.get('/systemConfiguration/:key',systemConfigurationController.getSystemConfigurationDetails)
 router.patch('/systemConfiguration/:key',systemConfigurationController.updateSystemConfiguration)
+
+router.post('/contactLog',contactLogValidator.contactLogCreateValidator,throwValidationResult,contact_logController.createContactLog)
+router.get('/contactLog/:id',contact_logController.getContactLogDetails)
+router.patch('/contact/:id',contact_logController.updateContactLog)
+
 
 
 export default router;
