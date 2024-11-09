@@ -7,6 +7,7 @@ import { systemConfigurationController } from "./controllers/systemConfiguration
 import { serviceController } from "./controllers/service";
 import { deliveryController } from "./controllers/delivery";
 import { refundController } from "./controllers/refund";
+import { serviceValidator } from "./middleware/validator/serviceValidator";
 
 const router = express.Router();
 
@@ -20,9 +21,9 @@ router.post(
 router.get("/user/:id", userController.getUserDetails);
 router.patch("/user/:id", userController.updateUser);
 
-router.get('/service/',serviceController.createService)
-router.post('/service/:id', serviceController.getServiceDetails)
-router.patch('/service/:id',serviceController.updateService)
+router.post('/service/',serviceValidator.serviceCreateValidator,throwValidationResult,serviceController.createService)
+router.get('/service/:id', serviceController.getServiceDetails)
+router.patch('/service/:id',serviceValidator.serviceUpdateValidator,throwValidationResult,serviceController.updateService)
 
 router.post('/delivery/',deliveryController.createDelivery)
 router.get('/delivery/:id',deliveryController.getDeliveryDetails)
