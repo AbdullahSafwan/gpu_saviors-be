@@ -11,7 +11,7 @@ const userCreateValidator = [
     .withMessage("Invalid Phone Number"),
 
 
- body ("email").optional().notEmpty().withMessage("Email is optional")
+ body ("email").isEmail().optional().notEmpty().withMessage("Email is optional")
 
  
 ];
@@ -30,7 +30,7 @@ const userUpdateValidator = [
     .isMobilePhone("any")
     .withMessage("Invalid Phone Number"),
 
- body ("email").optional().notEmpty().withMessage("Email is optional")
+ body ("email").isEmail().optional().notEmpty().withMessage("Email is optional")
 
 
 ];
