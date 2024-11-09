@@ -1,3 +1,4 @@
+import { delivery_status } from "@prisma/client";
 import { body } from "express-validator";
 
 const deliveryCreateValidator = [
@@ -8,15 +9,15 @@ const deliveryCreateValidator = [
     .isMobilePhone("any")
     .withMessage("Invalid Phone Number"),
 
- body("landmark").optional().withMessage("landmark is optional"),
+ body("landmark").optional(),
 
  body("secondaryPhoneNumber").optional().notEmpty().withMessage("Secondary PhoneNumber is optional"),
 
  body("bookingId").isInt().notEmpty().withMessage("BookingId is required"),
 
- body("status").notEmpty().withMessage("status is req"),
+ body("status").notEmpty().withMessage("status is req").bail().isIn(Object.values(delivery_status)),
 
- body ("deliveryDate").isInt().notEmpty().withMessage("DateTime is required")
+ body ("deliveryDate").notEmpty().withMessage("DateTime is required").isISO8601().toDate()
 
 ];
 
@@ -31,7 +32,7 @@ const deliveryUpdateValidator = [
     .isMobilePhone("any")
     .withMessage("Invalid Phone Number"),
 
- body("landmark").optional().withMessage("landmark is optional"),
+ body("landmark").optional(),
 
  body("secondaryPhoneNumber").optional().notEmpty().withMessage("Secondary PhoneNumber is optional"),
 
@@ -39,7 +40,7 @@ const deliveryUpdateValidator = [
 
  body("status").optional().notEmpty().withMessage("status is req"),
 
- body ("deliveryDate").optional().isInt().notEmpty().withMessage("DateTime is required")
+ body ("deliveryDate").optional().notEmpty().withMessage("DateTime is required").isISO8601().toDate()
 
 
 ];
