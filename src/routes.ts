@@ -36,7 +36,7 @@ router.patch('/systemConfiguration/:key',systemConfigurationController.updateSys
 
 router.post('/contactLog',contactLogValidator.contactLogCreateValidator,throwValidationResult,contact_logController.createContactLog)
 router.get('/contactLog/:id',contact_logController.getContactLogDetails)
-router.patch('/contact/:id',contact_logController.updateContactLog)
+router.patch('/contactLog/:id',contactLogValidator.contactLogUpdateValidator,throwValidationResult,contact_logController.updateContactLog)
 
 
 
