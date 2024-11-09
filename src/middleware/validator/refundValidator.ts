@@ -5,9 +5,9 @@ const refundCreateValidator = [
 
     body ("amount").isInt().notEmpty().withMessage("Amount is required"),
 
-    body ("remarks").optional().withMessage("remarks is optional"),
+    body ("remarks").optional(),
 
-    body ("refundDate").isInt().notEmpty().withMessage("RefundDate is required")
+    body ("refundDate").notEmpty().withMessage("RefundDate is required").bail().isISO8601().toDate()
 
 
 
@@ -15,13 +15,11 @@ const refundCreateValidator = [
 
 const refundUpdateValidatior = [
 
-    body ("id").isInt().notEmpty().withMessage("id is required"),
-
     body ("paymentId").optional().isInt().notEmpty().withMessage("paymentId is required"),
 
     body ("amount").optional().isInt().notEmpty().withMessage("Amount is required"),
 
-    body ("remarks").optional().withMessage("remarks is optional"),
+    body ("remarks").optional(),
 
     body ("refundDate").optional().isInt().notEmpty().withMessage("RefundDate is optional")
 
