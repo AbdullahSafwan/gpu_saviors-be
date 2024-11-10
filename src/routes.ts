@@ -1,5 +1,4 @@
 import express from "express";
-import { getController } from "./controllers";
 import { userController } from "./controllers/user";
 import { userValidator } from "./middleware/validator/userValidator";
 import { throwValidationResult } from "./services/helper";
@@ -18,7 +17,6 @@ import { serviceValidator } from "./middleware/validator/serviceValidator";
 
 const router = express.Router();
 
-router.get("/", getController);
 router.post("/user/", userValidator.createUserValidator, throwValidationResult, userController.createUser);
 router.get("/user/:id", userController.getUserDetails);
 router.patch("/user/:id", userValidator.updateUserValidator, throwValidationResult, userController.updateUser);
