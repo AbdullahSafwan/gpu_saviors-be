@@ -47,7 +47,7 @@ model booking_item {
   name          String
   type          booking_item_type
   payableAmount Int
-  paidAmount    Int
+  paidAmount    Int?
   comments      String?
   status        booking_item_status
   createdAt     DateTime            @default(now())
