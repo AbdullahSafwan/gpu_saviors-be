@@ -11,3 +11,4 @@ user enter form -> review form -> confirm booking by system -> confirm booking b
 npm install
 npx prisma migrate dev
 npm run dev
+npx prisma db push

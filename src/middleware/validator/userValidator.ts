@@ -1,10 +1,24 @@
 import { body } from "express-validator";
-import { RequestHandler } from "express";
-const userCreateValidator : RequestHandler = (req, res, next) => {
-    body('firstName').isAlpha().withMessage("First Name is invalid");
-    body('lastName').isAlpha().withMessage("LastName is invalid");
-    body('phoneNumber').isMobilePhone("any").withMessage("InvalidPhone Number")
-    next();
-}
 
-export const userValidator = {userCreateValidator}
+const createUserValidator = [
+  body("firstName").notEmpty().withMessage("First Name is required"),
+
+  body("lastName").notEmpty().withMessage("LastName is required"),
+
+  body("phoneNumber").notEmpty().isMobilePhone("any").withMessage("Invalid Phone Number"),
+
+  body("email").isEmail().optional().notEmpty().withMessage("Email is optional"),
+];
+
+const updateUserValidator = [
+  body("id").isInt().notEmpty().withMessage("id is required"),
+
+  body("firstName").optional().notEmpty().withMessage("First Name is required"),
+
+  body("lastName").optional().notEmpty().withMessage("LastName is required"),
+
+  body("phoneNumber").optional().notEmpty().isMobilePhone("any").withMessage("Invalid Phone Number"),
+
+  body("email").isEmail().optional().notEmpty().withMessage("Email is optional"),
+];
+export const userValidator = { createUserValidator, updateUserValidator };
