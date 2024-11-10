@@ -8,6 +8,7 @@ import { systemConfigurationValidator } from "./middleware/validator/systemConfi
 import { serviceController } from "./controllers/service";
 import { deliveryController } from "./controllers/delivery";
 import { refundController } from "./controllers/refund";
+import { refundValidator } from "./middleware/validator/refundValidator";
 import { deliveryValidator } from "./middleware/validator/deliveryValidator";
 import { serviceValidator } from "./middleware/validator/serviceValidator";
 
@@ -31,9 +32,9 @@ router.post('/delivery/',deliveryValidator.deliveryCreateValidator,throwValidati
 router.get('/delivery/:id',deliveryController.getDeliveryDetails)
 router.patch('/delivery/:id',deliveryValidator.deliveryUpdateValidator,throwValidationResult,deliveryController.updateDelivery)
 
-router.post('/refund/',refundController.createRefund)
+router.post('/refund/',refundValidator.refundCreateValidator,throwValidationResult,refundController.createRefund)
 router.get('/refund/:id',refundController.getRefundDetails)
-router.patch('/refund/:id',refundController.updateRefund)
+router.patch('/refund/:id',refundValidator.refundUpdateValidatior,throwValidationResult,refundController.updateRefund)
 
 
 router.post('/systemConfiguration/',systemConfigurationValidator.systemConfigurationCreateValidator,throwValidationResult,systemConfigurationController.createSystemConfiguration)
