@@ -1,12 +1,12 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 
-
 const createRefund = async (prisma: PrismaClient, data: Prisma.refundCreateInput) => {
   try {
-    const result = await prisma.refund.create({ //orm object relation model
+    const result = await prisma.refund.create({
+      //orm object relation model
       data,
     });
-    return result
+    return result;
   } catch (error) {
     console.log(error);
     throw error;
@@ -25,11 +25,7 @@ const getRefund = async (prisma: PrismaClient, id: number) => {
   }
 };
 
-const updateRefund = async (
-  prisma: PrismaClient,
-  id: number,
-  data: Prisma.refundUpdateInput
-) => {
+const updateRefund = async (prisma: PrismaClient, id: number, data: Prisma.refundUpdateInput) => {
   try {
     const result = await prisma.refund.update({
       where: { id },
@@ -43,4 +39,3 @@ const updateRefund = async (
 };
 
 export const refundDao = { createRefund, getRefund, updateRefund };
-

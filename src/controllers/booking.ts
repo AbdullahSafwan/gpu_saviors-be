@@ -7,10 +7,7 @@ const createBooking = async (req: Request, res: Response) => {
   try {
     const data = req.body;
     //calculating booking payableAmount using sum of all bookingItem payableAmount
-    data.payableAmount = data.booking_items.reduce(
-      (total: number, item: booking_item) => total + item.payableAmount,
-      0
-    );
+    data.payableAmount = data.booking_items.reduce((total: number, item: booking_item) => total + item.payableAmount, 0);
 
     // generate unique code using timestamp
     data.code = new Date().getTime().toString(36).toUpperCase();

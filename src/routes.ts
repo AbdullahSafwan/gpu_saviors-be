@@ -55,14 +55,14 @@ router.post(
   "/systemConfiguration/",
   systemConfigurationValidator.createSystemConfigurationValidator,
   throwValidationResult,
-  systemConfigurationController.createSystemConfiguration
+  systemConfigurationController.createSystemConfiguration,
 );
 router.get("/systemConfiguration/:id", systemConfigurationController.getSystemConfigurationDetails);
 router.patch(
   "/systemConfiguration/:id",
   systemConfigurationValidator.updateSystemConfigurationValidator,
   throwValidationResult,
-  systemConfigurationController.updateSystemConfiguration
+  systemConfigurationController.updateSystemConfiguration,
 );
 
 router.post("/contactLog", contactLogValidator.createContactLogValidator, throwValidationResult, contact_logController.createContactLog);

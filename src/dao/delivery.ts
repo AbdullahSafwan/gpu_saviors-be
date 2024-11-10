@@ -1,14 +1,13 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 
-
 const createDelivery = async (prisma: PrismaClient, data: Prisma.deliveryCreateInput) => {
   try {
-    const result = await prisma.delivery.create({ //orm object relation model
+    const result = await prisma.delivery.create({
+      //orm object relation model
       data,
     });
-    return result
-  } 
-  catch (error) {
+    return result;
+  } catch (error) {
     console.log(error);
     throw error;
   }
@@ -26,11 +25,7 @@ const getDelivery = async (prisma: PrismaClient, id: number) => {
   }
 };
 
-const updateDelivery = async (
-  prisma: PrismaClient,
-  id: number,
-  data: Prisma.deliveryUpdateInput
-) => {
+const updateDelivery = async (prisma: PrismaClient, id: number, data: Prisma.deliveryUpdateInput) => {
   try {
     const result = await prisma.delivery.update({
       where: { id },
@@ -44,4 +39,3 @@ const updateDelivery = async (
 };
 
 export const deliveryDao = { createDelivery, getDelivery, updateDelivery };
-
