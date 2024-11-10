@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 
-const systemConfigurationCreateValidator = [
+const createSystemConfigurationValidator = [
 
   body("key").notEmpty().withMessage("key is required"),
 
@@ -9,7 +9,7 @@ const systemConfigurationCreateValidator = [
 
 ];
 
-const systemConfigurationUpdateValidator = [
+const updateSystemConfigurationValidator = [
 
     body("key").notEmpty().withMessage("key is required"),
   
@@ -17,4 +17,4 @@ const systemConfigurationUpdateValidator = [
 
 ];
 
-export const systemConfigurationValidator = { systemConfigurationUpdateValidator ,systemConfigurationCreateValidator };
+export const systemConfigurationValidator = { updateSystemConfigurationValidator ,createSystemConfigurationValidator };

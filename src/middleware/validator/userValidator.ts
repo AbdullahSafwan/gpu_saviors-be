@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 
-const userCreateValidator = [
+const createUserValidator = [
   body("firstName").notEmpty().withMessage("First Name is required"),
 
   body("lastName").notEmpty().withMessage("LastName is required"),
@@ -16,7 +16,7 @@ const userCreateValidator = [
  
 ];
 
-const userUpdateValidator = [
+const updateUserValidator = [
 
   body("id").isInt().notEmpty().withMessage("id is required"),
 
@@ -34,4 +34,4 @@ const userUpdateValidator = [
 
 
 ];
-export const userValidator = { userCreateValidator,userUpdateValidator };
+export const userValidator = { createUserValidator,updateUserValidator };
