@@ -8,6 +8,8 @@ import { systemConfigurationValidator } from "./middleware/validator/systemConfi
 import { serviceController } from "./controllers/service";
 import { deliveryController } from "./controllers/delivery";
 import { refundController } from "./controllers/refund";
+import { contact_logController } from "./controllers/contactLog"
+import { contactLogValidator } from "./middleware/validator/contactLogValidator";
 import { refundValidator } from "./middleware/validator/refundValidator";
 import { deliveryValidator } from "./middleware/validator/deliveryValidator";
 import { serviceValidator } from "./middleware/validator/serviceValidator";
@@ -40,6 +42,11 @@ router.patch('/refund/:id',refundValidator.refundUpdateValidatior,throwValidatio
 router.post('/systemConfiguration/',systemConfigurationValidator.systemConfigurationCreateValidator,throwValidationResult,systemConfigurationController.createSystemConfiguration)
 router.get('/systemConfiguration/:id',systemConfigurationController.getSystemConfigurationDetails)
 router.patch('/systemConfiguration/:id',systemConfigurationValidator.systemConfigurationUpdateValidator,throwValidationResult,systemConfigurationController.updateSystemConfiguration)
+
+router.post('/contactLog',contactLogValidator.contactLogCreateValidator,throwValidationResult,contact_logController.createContactLog)
+router.get('/contactLog/:id',contact_logController.getContactLogDetails)
+router.patch('/contactLog/:id',contactLogValidator.contactLogUpdateValidator,throwValidationResult,contact_logController.updateContactLog)
+
 
 
 export default router;
