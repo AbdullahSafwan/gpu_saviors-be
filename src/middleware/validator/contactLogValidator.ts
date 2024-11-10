@@ -2,7 +2,7 @@ import { contact_method } from "@prisma/client";
 import { body } from "express-validator";
 
 
-const contactLogCreateValidator = [
+const createContactLogValidator = [
   body("bookingItemId").notEmpty().withMessage("BookingItemId is required").isInt(),
 
   body("userId").notEmpty().withMessage("userId is required").isInt(),
@@ -18,7 +18,7 @@ const contactLogCreateValidator = [
 
 ];
 
-const contactLogUpdateValidator = [
+const updateContactLogValidator = [
 
   body("id").notEmpty().withMessage("id is required").isInt(),
 
@@ -38,4 +38,4 @@ const contactLogUpdateValidator = [
 
 
 
-export const contactLogValidator = { contactLogCreateValidator, contactLogUpdateValidator };
+export const contactLogValidator = { createContactLogValidator, updateContactLogValidator };

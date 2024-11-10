@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 
-const refundCreateValidator = [
+const createRefundValidator = [
     body ("paymentId").isInt().notEmpty().withMessage("paymentId is required"),
 
     body ("amount").isInt().notEmpty().withMessage("Amount is required"),
@@ -13,7 +13,7 @@ const refundCreateValidator = [
 
 ];
 
-const refundUpdateValidatior = [
+const updateRefundValidator = [
 
     body ("paymentId").optional().isInt().notEmpty().withMessage("paymentId is required"),
 
@@ -25,4 +25,4 @@ const refundUpdateValidatior = [
 
 ];
 
-export const refundValidator = { refundCreateValidator , refundUpdateValidatior};
+export const refundValidator = { createRefundValidator , updateRefundValidator};

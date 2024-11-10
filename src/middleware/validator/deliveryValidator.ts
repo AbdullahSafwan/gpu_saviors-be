@@ -1,7 +1,7 @@
 import { delivery_status } from "@prisma/client";
 import { body } from "express-validator";
 
-const deliveryCreateValidator = [
+const createDeliveryValidator = [
   body("address").notEmpty().withMessage("address is required"),
 
   body("phoneNumber")
@@ -21,7 +21,7 @@ const deliveryCreateValidator = [
 
 ];
 
-const deliveryUpdateValidator = [
+const updateDeliveryValidator = [
 
   body("id").isInt().notEmpty().withMessage("id is required"),
 
@@ -46,4 +46,4 @@ const deliveryUpdateValidator = [
 ];
 
 
-export const deliveryValidator = { deliveryCreateValidator,deliveryUpdateValidator };
+export const deliveryValidator = { createDeliveryValidator,updateDeliveryValidator };
