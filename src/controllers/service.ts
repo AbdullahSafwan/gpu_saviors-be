@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { userDao } from "../dao/user";
+import { serviceDao } from "../dao/service";
 import prisma from "../prisma";
 
-const createUser = async (req: Request, res: Response) => {
+const createService = async (req: Request, res: Response) => {
   try {
     const data = req.body;
-    const result = await userDao.createUser(prisma, data);
+    const result = await serviceDao.createService(prisma, data);
     res.status(200).send(result);
   } catch (error) {
     console.log(error);
@@ -13,13 +13,13 @@ const createUser = async (req: Request, res: Response) => {
   }
 };
 
-const getUserDetails = async (req: Request, res: Response) => {
+const getServiceDetails = async (req: Request, res: Response) => {
   try {
     const id = req.params.id ? +req.params?.id : null;
     if (!id) {
       throw Error("id is required");
     }
-    const result = await userDao.getUser(prisma, id);
+    const result = await serviceDao.getService(prisma, id);
     res.status(200).send(result);
   } catch (error) {
     console.log(error);
@@ -27,11 +27,11 @@ const getUserDetails = async (req: Request, res: Response) => {
   }
 };
 
-const updateUser = async (req: Request, res: Response) => {
+const updateService = async (req: Request, res: Response) => {
   try {
     const data = req.body;
     const id = +req.params.id;
-    const result = await userDao.updateUser(prisma, id, data);
+    const result = await serviceDao.updateService(prisma, id, data);
     res.status(200).send(result);
   } catch (error) {
     console.log(error);
@@ -39,4 +39,4 @@ const updateUser = async (req: Request, res: Response) => {
   }
 };
 
-export const userController = { createUser, getUserDetails, updateUser };
+export const serviceController = { createService, getServiceDetails, updateService };

@@ -1,12 +1,12 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 
-
 const createBookingPayment = async (prisma: PrismaClient, data: Prisma.booking_paymentCreateInput) => {
   try {
-    const result = await prisma.booking_payment.create({ //orm object relation model
+    const result = await prisma.booking_payment.create({
+      //orm object relation model
       data,
     });
-    return result
+    return result;
   } catch (error) {
     console.log(error);
     throw error;
@@ -25,11 +25,7 @@ const getBookingPayment = async (prisma: PrismaClient, id: number) => {
   }
 };
 
-const updateBookingPayment = async (
-  prisma: PrismaClient,
-  id: number,
-  data: Prisma.booking_paymentUpdateInput
-) => {
+const updateBookingPayment = async (prisma: PrismaClient, id: number, data: Prisma.booking_paymentUpdateInput) => {
   try {
     const result = await prisma.booking_payment.update({
       where: { id },
@@ -43,4 +39,3 @@ const updateBookingPayment = async (
 };
 
 export const booking_paymentDao = { createBookingPayment, getBookingPayment, updateBookingPayment };
-

@@ -1,9 +1,6 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 
-const createUser = async (
-  prisma: PrismaClient,
-  data: Prisma.userCreateInput
-) => {
+const createUser = async (prisma: PrismaClient, data: Prisma.userCreateInput) => {
   try {
     const result = await prisma.user.create({
       data,
@@ -14,7 +11,6 @@ const createUser = async (
     throw error;
   }
 };
-
 
 const getUser = async (prisma: PrismaClient, id: number) => {
   try {
@@ -28,11 +24,7 @@ const getUser = async (prisma: PrismaClient, id: number) => {
   }
 };
 
-const updateUser = async (
-  prisma: PrismaClient,
-  id: number,
-  data: Prisma.userUpdateInput
-) => {
+const updateUser = async (prisma: PrismaClient, id: number, data: Prisma.userUpdateInput) => {
   try {
     const result = await prisma.user.update({
       where: { id },
