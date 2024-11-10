@@ -144,7 +144,7 @@ model refund {
 model system_role {
   id        Int         @unique @default(autoincrement())
   name      String
-  isActive  Boolean
+  isActive  Boolean     @default(true)
   user_role user_role[]
 }
 
@@ -154,7 +154,7 @@ model user_role {
   userId     Int
   systemRole system_role @relation(fields: [roleId], references: [id])
   roleId     Int
-  isActive   Boolean
+  isActive   Boolean     @default(true)
 }
 
 enum user_status {
