@@ -3,7 +3,6 @@ import { booking_status, booking_item_type } from "@prisma/client";
 
 const createBookingValidator = [
   // Validate booking fields
-  body("status").notEmpty().withMessage("status is required").bail().isIn(Object.values(booking_status)).withMessage("Invalid booking status"),
   body("paidAmount").optional().isInt({ min: 0 }).withMessage("Paid amount must be a positive integer"),
   body("clientName").notEmpty().withMessage("name is required").bail().isString().withMessage("name should be valid string"),
   body("phoneNumber").notEmpty().withMessage("phone Number is required").bail().isString().withMessage("phone number should be valid string"),
