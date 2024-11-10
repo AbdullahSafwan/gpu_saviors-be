@@ -1,12 +1,12 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 
-
 const createContactLog = async (prisma: PrismaClient, data: Prisma.contact_logCreateInput) => {
   try {
-    const result = await prisma.contact_log.create({ //orm object relation model
+    const result = await prisma.contact_log.create({
+      //orm object relation model
       data,
     });
-    return result
+    return result;
   } catch (error) {
     console.log(error);
     throw error;
@@ -25,11 +25,7 @@ const getContactLog = async (prisma: PrismaClient, id: number) => {
   }
 };
 
-const updateContactLog = async (
-  prisma: PrismaClient,
-  id: number,
-  data: Prisma.contact_logUpdateInput
-) => {
+const updateContactLog = async (prisma: PrismaClient, id: number, data: Prisma.contact_logUpdateInput) => {
   try {
     const result = await prisma.contact_log.update({
       where: { id },
@@ -43,4 +39,3 @@ const updateContactLog = async (
 };
 
 export const contact_logDao = { createContactLog, getContactLog, updateContactLog };
-
