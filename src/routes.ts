@@ -5,6 +5,11 @@ import { userValidator } from "./middleware/validator/userValidator";
 import { throwValidationResult } from "./services/helper";
 import { systemConfigurationController } from "./controllers/systemConfiguration";
 import { systemConfigurationValidator } from "./middleware/validator/systemConfigurationValidation";
+import { serviceController } from "./controllers/service";
+import { deliveryController } from "./controllers/delivery";
+import { refundController } from "./controllers/refund";
+import { serviceValidator } from "./middleware/validator/serviceValidator";
+
 
 const router = express.Router();
 
@@ -16,6 +21,19 @@ router.post(
   userController.createUser
 );
 router.get("/user/:id", userController.getUserDetails);
+router.patch("/user/:id", userController.updateUser);
+
+router.post('/service/',serviceValidator.serviceCreateValidator,throwValidationResult,serviceController.createService)
+router.get('/service/:id', serviceController.getServiceDetails)
+router.patch('/service/:id',serviceValidator.serviceUpdateValidator,throwValidationResult,serviceController.updateService)
+
+router.post('/delivery/',deliveryController.createDelivery)
+router.get('/delivery/:id',deliveryController.getDeliveryDetails)
+router.patch('/delivery/:id',deliveryController.updateDelivery)
+
+router.post('/refund/',refundController.createRefund)
+router.get('/refund/:id',refundController.getRefundDetails)
+router.patch('/refund/:id',refundController.updateRefund)
 
 
 router.post('/systemConfiguration/',systemConfigurationValidator.systemConfigurationCreateValidator,throwValidationResult,systemConfigurationController.createSystemConfiguration)

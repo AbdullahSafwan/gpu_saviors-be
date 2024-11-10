@@ -15,7 +15,7 @@ model user {
   email       String?
   status      user_status   @default(ENABLED)
   createdAt   DateTime      @default(now())
-  modifiedAt  DateTime      @default(now())
+  modifiedAt  DateTime      @default(now()) @updatedAt
   booking     booking[]
   contact_log contact_log[]
 }
@@ -61,7 +61,7 @@ model delivery {
   booking              booking             @relation(fields: [bookingId], references: [id])
   bookingId            Int
   status               delivery_status
-  address              booking_item_status
+  address              String
   phoneNumber          String
   createdAt            DateTime            @default(now())
   modifiedAt           DateTime            @default(now())
