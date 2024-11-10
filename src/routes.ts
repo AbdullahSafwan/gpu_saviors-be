@@ -10,7 +10,7 @@ import { deliveryController } from "./controllers/delivery";
 import { refundController } from "./controllers/refund";
 import { bookingController } from "./controllers/booking";
 import { bookingValidator } from "./middleware/validator/bookingValidator";
-import { contact_logController } from "./controllers/contactLog";
+import { contactLogController } from "./controllers/contactLog";
 import { contactLogValidator } from "./middleware/validator/contactLogValidator";
 import { refundValidator } from "./middleware/validator/refundValidator";
 import { deliveryValidator } from "./middleware/validator/deliveryValidator";
@@ -65,8 +65,8 @@ router.patch(
   systemConfigurationController.updateSystemConfiguration,
 );
 
-router.post("/contactLog", contactLogValidator.createContactLogValidator, throwValidationResult, contact_logController.createContactLog);
-router.get("/contactLog/:id", contact_logController.getContactLogDetails);
-router.patch("/contactLog/:id", contactLogValidator.updateContactLogValidator, throwValidationResult, contact_logController.updateContactLog);
+router.post("/contactLog", contactLogValidator.createContactLogValidator, throwValidationResult, contactLogController.createContactLog);
+router.get("/contactLog/:id", contactLogController.getContactLogDetails);
+router.patch("/contactLog/:id", contactLogValidator.updateContactLogValidator, throwValidationResult, contactLogController.updateContactLog);
 
 export default router;

@@ -38,4 +38,4 @@ const updateContactLog = async (prisma: PrismaClient, id: number, data: Prisma.c
   }
 };
 
-export const contact_logDao = { createContactLog, getContactLog, updateContactLog };
+export const contactLogDao = { createContactLog, getContactLog, updateContactLog };
