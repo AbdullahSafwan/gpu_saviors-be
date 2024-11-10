@@ -31,7 +31,7 @@ model booking {
   id              Int               @unique @default(autoincrement())
   clientName      String
   phoneNumber     String
-  whatsppNumber   String
+  whatsappNumber   String
   status          booking_status    @default(DRAFT)
   code            String?           @unique
   payableAmount   Int?
@@ -40,10 +40,10 @@ model booking {
   modifiedAt      DateTime          @default(now())
   isActive        Boolean           @default(true)
   appointmentDate DateTime?
-  booking_item    booking_item[]
+  booking_items    booking_item[]
   delivery        delivery[]
   contact_log     contact_log[]
-  booking_payment booking_payment[]
+  booking_payments booking_payment[]
 }
 
 model booking_item {

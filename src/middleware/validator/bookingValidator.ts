@@ -6,7 +6,7 @@ const createBookingValidator = [
   body("paidAmount").optional().isInt({ min: 0 }).withMessage("Paid amount must be a positive integer"),
   body("clientName").notEmpty().withMessage("name is required").bail().isString().withMessage("name should be valid string"),
   body("phoneNumber").notEmpty().withMessage("phone Number is required").bail().isString().withMessage("phone number should be valid string"),
-  body("whatsappNumber").notEmpty().withMessage("phone Number is required").bail().isString().withMessage("whatsapp number should be valid string"),
+  body("whatsappNumber").notEmpty().withMessage("whatsapp Number is required").bail().isString().withMessage("whatsapp number should be valid string"),
 
   // Validate each booking_item in the array
   body("booking_items").isArray({ min: 1 }).withMessage("Booking items are required"),
