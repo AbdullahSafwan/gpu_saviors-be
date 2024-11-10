@@ -32,7 +32,7 @@ model booking {
   clientName      String
   phoneNumber     String
   whatsppNumber   String
-  status          booking_status
+  status          booking_status    @default(DRAFT)
   code            String?           @unique
   payableAmount   Int?
   paidAmount      Int?
@@ -54,7 +54,7 @@ model booking_item {
   payableAmount Int
   paidAmount    Int?
   comments      String?
-  status        booking_item_status
+  status        booking_item_status @default(DRAFT)
   createdAt     DateTime            @default(now())
   modifiedAt    DateTime            @default(now())
   isActive      Boolean             @default(true)
