@@ -8,14 +8,14 @@ datasource db {
 }
 
 model user {
-  id          Int           @unique @default(autoincrement())
-  firstName   String
-  lastName    String
-  phoneNumber String
-  email       String?
-  status      user_status   @default(ENABLED)
-  createdAt   DateTime      @default(now())
-  modifiedAt  DateTime      @default(now()) @updatedAt
+  id           Int           @unique @default(autoincrement())
+  firstName    String
+  lastName     String
+  phoneNumber  String
+  email        String?
+  status       user_status   @default(ENABLED)
+  createdAt    DateTime      @default(now())
+  modifiedAt   DateTime      @default(now()) @updatedAt
   contact_logs contact_log[]
 }
 
@@ -28,6 +28,9 @@ model system_configuration {
 
 model booking {
   id              Int               @unique @default(autoincrement())
+  clientName      String
+  phoneNumber     String
+  whatsppNumber   String
   status          booking_status
   code            String?           @unique
   payableAmount   Int?
@@ -35,6 +38,7 @@ model booking {
   createdAt       DateTime          @default(now())
   modifiedAt      DateTime          @default(now())
   isActive        Boolean           @default(true)
+  appointmentDate DateTime?
   booking_item    booking_item[]
   delivery        delivery[]
   contact_log     contact_log[]
@@ -53,6 +57,7 @@ model booking_item {
   createdAt     DateTime            @default(now())
   modifiedAt    DateTime            @default(now())
   isActive      Boolean             @default(true)
+  isRepaired    Boolean             @default(false)
   booking       booking             @relation(fields: [bookingId], references: [id])
   bookingId     Int
   payment       booking_payment?    @relation(fields: [paymentId], references: [id])
