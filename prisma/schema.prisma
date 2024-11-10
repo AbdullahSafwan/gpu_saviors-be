@@ -20,9 +20,10 @@ model user {
 }
 
 model system_configuration {
-  id    Int    @unique @default(autoincrement())
-  key   String @unique
-  value String
+  id       Int     @unique @default(autoincrement())
+  key      String  @unique
+  value    String
+  isActive Boolean @default(true)
 }
 
 model booking {
@@ -33,10 +34,11 @@ model booking {
   paidAmount      Int?
   createdAt       DateTime          @default(now())
   modifiedAt      DateTime          @default(now())
-  booking_items    booking_item[]
-  deliverys        delivery[]
-  contact_logs     contact_log[]
-  booking_payments booking_payment[]
+  isActive        Boolean           @default(true)
+  booking_item    booking_item[]
+  delivery        delivery[]
+  contact_log     contact_log[]
+  booking_payment booking_payment[]
 }
 
 model booking_item {
@@ -45,13 +47,17 @@ model booking_item {
   name          String
   type          booking_item_type
   payableAmount Int
-  paidAmount    Int?
-  status        booking_item_status @default(DRAFT)
+  paidAmount    Int
+  comments      String?
+  status        booking_item_status
   createdAt     DateTime            @default(now())
   modifiedAt    DateTime            @default(now())
+  isActive      Boolean             @default(true)
   booking       booking             @relation(fields: [bookingId], references: [id])
   bookingId     Int
-  services       service[]
+  payment       booking_payment?    @relation(fields: [paymentId], references: [id])
+  paymentId     Int?
+  service       service[]
   contact_log   contact_log[]
 }
 
@@ -61,12 +67,16 @@ model delivery {
   bookingId            Int
   status               delivery_status
   address              String
+  postalCode           Int
+  courier              String
+  type                 courier_type
   phoneNumber          String
   createdAt            DateTime        @default(now())
   modifiedAt           DateTime        @default(now())
   landmark             Int?
   secondaryPhoneNumber String?
   deliveryDate         DateTime
+  isActive             Boolean         @default(true)
 }
 
 model service {
@@ -77,6 +87,7 @@ model service {
   remarks       String
   createdAt     DateTime       @default(now())
   modifiedAt    DateTime       @default(now())
+  isActive      Boolean        @default(true)
 }
 
 model contact_log {
@@ -92,6 +103,7 @@ model contact_log {
   notes         String
   createdAt     DateTime       @default(now())
   modifiedAt    DateTime       @default(now())
+  isActive      Boolean        @default(true)
 }
 
 model booking_payment {
@@ -103,10 +115,12 @@ model booking_payment {
   paidAmount    Int?
   createdAt     DateTime       @default(now())
   modifiedAt    DateTime       @default(now())
+  isActive      Boolean        @default(true)
   paymentMethod payment_method
   recipientName String
   transactionId String
-  refunds        refund[]
+  refund        refund[]
+  bookingItem   booking_item[]
 }
 
 model refund {
@@ -118,6 +132,7 @@ model refund {
   createdAt       DateTime        @default(now())
   modifiedAt      DateTime        @default(now())
   amount          Int
+  isActive        Boolean         @default(true)
 }
 
 enum user_status {
@@ -187,4 +202,9 @@ enum booking_item_type {
   GPU
   MOBO
   LAPTOP
+}
+
+enum courier_type {
+  INBOUND
+  OUTBOUND
 }
