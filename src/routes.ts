@@ -21,7 +21,7 @@ router.post(
   userController.createUser
 );
 router.get("/user/:id", userController.getUserDetails);
-router.patch("/user/:id", userController.updateUser);
+router.patch("/user/:id", userValidator.userUpdateValidator,throwValidationResult,userController.updateUser);
 
 router.post('/service/',serviceValidator.serviceCreateValidator,throwValidationResult,serviceController.createService)
 router.get('/service/:id', serviceController.getServiceDetails)
