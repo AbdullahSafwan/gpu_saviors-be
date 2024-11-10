@@ -8,8 +8,8 @@ import { systemConfigurationValidator } from "./middleware/validator/systemConfi
 import { serviceController } from "./controllers/service";
 import { deliveryController } from "./controllers/delivery";
 import { refundController } from "./controllers/refund";
+import { deliveryValidator } from "./middleware/validator/deliveryValidator";
 import { serviceValidator } from "./middleware/validator/serviceValidator";
-
 
 const router = express.Router();
 
@@ -27,9 +27,9 @@ router.post('/service/',serviceValidator.serviceCreateValidator,throwValidationR
 router.get('/service/:id', serviceController.getServiceDetails)
 router.patch('/service/:id',serviceValidator.serviceUpdateValidator,throwValidationResult,serviceController.updateService)
 
-router.post('/delivery/',deliveryController.createDelivery)
+router.post('/delivery/',deliveryValidator.deliveryCreateValidator,throwValidationResult, deliveryController.createDelivery)
 router.get('/delivery/:id',deliveryController.getDeliveryDetails)
-router.patch('/delivery/:id',deliveryController.updateDelivery)
+router.patch('/delivery/:id',deliveryValidator.deliveryUpdateValidator,throwValidationResult,deliveryController.updateDelivery)
 
 router.post('/refund/',refundController.createRefund)
 router.get('/refund/:id',refundController.getRefundDetails)
