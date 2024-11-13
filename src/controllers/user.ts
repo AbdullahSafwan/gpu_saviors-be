@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { userDao } from "../dao/user";
 import prisma from "../prisma";
+import { CreateUserRequest, UpdateUserRequest } from "../types/userTypes";
 
-const createUser = async (req: Request, res: Response) => {
+const createUser = async (req: Request<{}, {}, CreateUserRequest>, res: Response) => {
   try {
     const data = req.body;
     const result = await userDao.createUser(prisma, data);
@@ -13,7 +14,7 @@ const createUser = async (req: Request, res: Response) => {
   }
 };
 
-const getUserDetails = async (req: Request, res: Response) => {
+const getUserDetails = async (req: Request<{ id: string }>, res: Response) => {
   try {
     const id = req.params.id ? +req.params?.id : null;
     if (!id) {
@@ -27,7 +28,7 @@ const getUserDetails = async (req: Request, res: Response) => {
   }
 };
 
-const updateUser = async (req: Request, res: Response) => {
+const updateUser = async (req: Request<{ id: string }, {}, UpdateUserRequest>, res: Response) => {
   try {
     const data = req.body;
     const id = +req.params.id;
