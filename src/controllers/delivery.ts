@@ -20,11 +20,17 @@ const getDeliveryDetails = async (req: Request, res: Response) => {
       throw Error("id is required");
     }
     const result = await deliveryDao.getDelivery(prisma, id);
+
+// If no delivery is found, return 400 with an appropriate error message
+    if (!result) {
+      throw new Error("Delivery not found");
+    }
     res.status(200).send(result);
   } catch (error) {
     console.log(error);
     res.status(400).send(error);
   }
+  
 };
 
 const updateDelivery = async (req: Request, res: Response) => {

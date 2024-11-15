@@ -21,6 +21,13 @@ const getContactLogDetails = async (req: Request, res: Response) => {
     }
     const result = await contactLogDao.getContactLog(prisma, id);
     res.status(200).send(result);
+
+    // If no contact log is found, return a 400 error and exit early
+    if (!result) {
+      res.status(400).send(new Error('Contact log not found'));
+      return;
+    }
+    
   } catch (error) {
     console.log(error);
     res.status(400).send(error);
