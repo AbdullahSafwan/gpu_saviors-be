@@ -6,7 +6,7 @@ const createServiceValidator = [
 
   body("status").notEmpty().withMessage("status is required").bail().isIn(Object.values(service_status)),
 
-  body("remarks").notEmpty().withMessage("Remarks required"),
+  body("remarks").notEmpty().withMessage("Remarks required").isString(),
 ];
 
 const updateServiceValidator = [
@@ -14,6 +14,6 @@ const updateServiceValidator = [
 
   body("status").optional().notEmpty().withMessage("status is required").bail().isIn(Object.values(service_status)),
 
-  body("remarks").optional().notEmpty().withMessage("Remarks required"),
+  body("remarks").optional().notEmpty().withMessage("Remarks required").isString(),
 ];
 export const serviceValidator = { createServiceValidator, updateServiceValidator };
