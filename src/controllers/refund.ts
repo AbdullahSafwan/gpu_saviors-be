@@ -11,7 +11,7 @@ const createRefund = async (req: Request, res: Response) => {
     sendSuccessResponse(res, 200, "Successfully created refund", result);
   } catch (error) {
     debugLog(error);
-    sendErrorResponse(res, 400, "Error created refund", error);
+    sendErrorResponse(res, 400, "Error creating refund", error);
   }
 };
 
