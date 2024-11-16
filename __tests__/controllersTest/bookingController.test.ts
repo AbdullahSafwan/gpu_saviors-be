@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { bookingDao } from "../../src/dao/booking";
 import prisma from "../../src/prisma";
 import { booking_item } from "@prisma/client";
+import * as responseHelper from "./../../src/services/responseHelper"; // Adjust the import path as needed
 
 // Mock the dependencies
 jest.mock("../../src/dao/booking", () => ({
@@ -45,18 +46,25 @@ describe("bookingController", () => {
         payableAmount: 300,
       };
 
-      req = {
+      const mockRequest = {
         body: mockBookingData,
-      };
+      } as Request;
+
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
 
       // Mock the behavior of the `createBooking` method in bookingDao
-      (bookingDao.createBooking as jest.Mock).mockResolvedValue({ success: true });
+      bookingDao.createBooking = jest.fn().mockResolvedValue(mockBookingData);
 
-      await bookingController.createBooking(req as Request, res as Response);
+      // Spy on sendSuccessResponse
+      const sendSuccessSpy = jest.spyOn(responseHelper, "sendSuccessResponse").mockImplementation();
+
+      await bookingController.createBooking(mockRequest, mockResponse);
 
       expect(bookingDao.createBooking).toHaveBeenCalledWith(prisma, mockBookingData);
-      expect(statusMock).toHaveBeenCalledWith(200);
-      expect(sendMock).toHaveBeenCalledWith({ success: true });
+      expect(sendSuccessSpy).toHaveBeenCalledWith(mockResponse, 200, expect.any(String), mockBookingData);
     });
 
     it("should return an error if the data is invalid", async () => {
@@ -66,17 +74,28 @@ describe("bookingController", () => {
         payableAmount: 0,
       };
 
-      req = {
+      const mockRequest = {
         body: invalidBookingData,
-      };
+      } as Request;
+
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+
+      const mockError = new Error("Refund creation failed");
 
       // Mock the `createBooking` to throw an error
-      (bookingDao.createBooking as jest.Mock).mockRejectedValue(new Error("Invalid data"));
+      (bookingDao.createBooking as jest.Mock).mockRejectedValue(mockError);
 
-      await bookingController.createBooking(req as Request, res as Response);
+      // Spy on sendErrorResponse
+      const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse").mockImplementation();
 
-      expect(statusMock).toHaveBeenCalledWith(400);
-      expect(sendMock).toHaveBeenCalledWith(new Error("Invalid data"));
+      await bookingController.createBooking(mockRequest, mockResponse);
+
+      expect(bookingDao.createBooking).toHaveBeenCalledWith(prisma, mockRequest.body);
+      expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, expect.any(String), mockError);
+      sendErrorSpy.mockRestore();
     });
   });
 
@@ -89,28 +108,40 @@ describe("bookingController", () => {
         booking_items: [],
       };
 
-      req = {
+      const mockRequest = {
         params: { id: "1" },
-      };
+      } as unknown as Request;
 
-      (bookingDao.getBooking as jest.Mock).mockResolvedValue(mockBooking);
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
 
-      await bookingController.getBookingDetails(req as Request, res as Response);
+      bookingDao.getBooking = jest.fn().mockResolvedValue(mockBooking);
+      // Spy on sendSuccessResponse
+      const sendSuccessSpy = jest.spyOn(responseHelper, "sendSuccessResponse").mockImplementation();
+
+      await bookingController.getBookingDetails(mockRequest, mockResponse);
 
       expect(bookingDao.getBooking).toHaveBeenCalledWith(prisma, 1);
-      expect(statusMock).toHaveBeenCalledWith(200);
-      expect(sendMock).toHaveBeenCalledWith(mockBooking);
+      expect(sendSuccessSpy).toHaveBeenCalledWith(mockResponse, 200, expect.any(String), mockBooking);
+      sendSuccessSpy.mockRestore();
     });
 
     it("should return an error if the ID is missing", async () => {
-      req = {
+      const mockRequest = {
         params: {},
-      };
+      } as Request;
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+        send: jest.fn(),
+      } as unknown as Response;
 
-      await bookingController.getBookingDetails(req as Request, res as Response);
+      await bookingController.getBookingDetails(mockRequest, mockResponse);
 
-      expect(statusMock).toHaveBeenCalledWith(400);
-      expect(sendMock).toHaveBeenCalledWith(new Error("id is required"));
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.send).toHaveBeenCalledWith(expect.any(String));
     });
   });
 

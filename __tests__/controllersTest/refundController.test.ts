@@ -17,16 +17,16 @@ describe("refundController", () => {
       jest.clearAllMocks();
     });
     it("should successfully create a refund and return a 200 status", async () => {
+      const mockRefundData = { id: 1, amount: 100, orderId: 1 };
+
       const mockRequest = {
-        body: { amount: 100, orderId: 1 },
+        body: mockRefundData,
       } as Request;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
       } as unknown as Response;
-
-      const mockRefundData = { id: 1, amount: 100, orderId: 1 };
 
       // Mock the refundDao.createRefund function
       refundDao.createRefund = jest.fn().mockResolvedValue(mockRefundData);
