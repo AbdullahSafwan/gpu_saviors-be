@@ -1,4 +1,5 @@
 import { Prisma, PrismaClient } from "@prisma/client";
+import { debugLog } from "../services/helper";
 
 const createSystemConfiguration = async (prisma: PrismaClient, data: Prisma.system_configurationCreateInput) => {
   try {
@@ -7,7 +8,7 @@ const createSystemConfiguration = async (prisma: PrismaClient, data: Prisma.syst
     });
     return result;
   } catch (error) {
-    console.log(error);
+    debugLog(error);
     throw error;
   }
 };
@@ -19,7 +20,7 @@ const getSystemConfiguration = async (prisma: PrismaClient, id: number) => {
     });
     return result;
   } catch (error) {
-    console.log(error);
+    debugLog(error);
     throw error;
   }
 };
@@ -32,7 +33,7 @@ const updateSystemConfiguration = async (prisma: PrismaClient, id: number, data:
     });
     return result;
   } catch (error) {
-    console.log(error);
+    debugLog(error);
     throw error;
   }
 };

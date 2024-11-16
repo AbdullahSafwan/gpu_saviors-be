@@ -1,4 +1,5 @@
 import { Prisma, PrismaClient } from "@prisma/client";
+import { debugLog } from "../services/helper";
 
 const createContactLog = async (prisma: PrismaClient, data: Prisma.contact_logCreateInput) => {
   try {
@@ -8,7 +9,7 @@ const createContactLog = async (prisma: PrismaClient, data: Prisma.contact_logCr
     });
     return result;
   } catch (error) {
-    console.log(error);
+    debugLog(error);
     throw error;
   }
 };
@@ -20,7 +21,7 @@ const getContactLog = async (prisma: PrismaClient, id: number) => {
     });
     return result;
   } catch (error) {
-    console.log(error);
+    debugLog(error);
     throw error;
   }
 };
@@ -33,7 +34,7 @@ const updateContactLog = async (prisma: PrismaClient, id: number, data: Prisma.c
     });
     return result;
   } catch (error) {
-    console.log(error);
+    debugLog(error);
     throw error;
   }
 };
