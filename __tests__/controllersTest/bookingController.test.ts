@@ -1,11 +1,11 @@
-import { bookingController } from '../../src/controllers/booking';
-import { Request, Response } from 'express';
-import { bookingDao } from '../../src/dao/booking';
-import prisma from '../../src/prisma';
-import { booking_item } from '@prisma/client';
+import { bookingController } from "../../src/controllers/booking";
+import { Request, Response } from "express";
+import { bookingDao } from "../../src/dao/booking";
+import prisma from "../../src/prisma";
+import { booking_item } from "@prisma/client";
 
 // Mock the dependencies
-jest.mock('../../src/dao/booking', () => ({
+jest.mock("../../src/dao/booking", () => ({
   bookingDao: {
     createBooking: jest.fn(),
     getBooking: jest.fn(),
@@ -13,11 +13,11 @@ jest.mock('../../src/dao/booking', () => ({
   },
 }));
 
-jest.mock('../../src/prisma', () => ({
+jest.mock("../../src/prisma", () => ({
   // Add any mock prisma methods that may be used
 }));
 
-describe('bookingController', () => {
+describe("bookingController", () => {
   let req: Partial<Request>;
   let res: Partial<Response>;
   let sendMock: jest.Mock;
@@ -37,14 +37,11 @@ describe('bookingController', () => {
     jest.clearAllMocks();
   });
 
-  describe('createBooking', () => {
-    it('should create a new booking and return a result', async () => {
+  describe("createBooking", () => {
+    it("should create a new booking and return a result", async () => {
       const mockBookingData = {
-        booking_items: [
-          { payableAmount: 100 },
-          { payableAmount: 200 },
-        ],
-        code: 'ABC123',
+        booking_items: [{ payableAmount: 100 }, { payableAmount: 200 }],
+        code: "ABC123",
         payableAmount: 300,
       };
 
@@ -62,10 +59,10 @@ describe('bookingController', () => {
       expect(sendMock).toHaveBeenCalledWith({ success: true });
     });
 
-    it('should return an error if the data is invalid', async () => {
+    it("should return an error if the data is invalid", async () => {
       const invalidBookingData = {
         booking_items: [],
-        code: '',
+        code: "",
         payableAmount: 0,
       };
 
@@ -74,26 +71,26 @@ describe('bookingController', () => {
       };
 
       // Mock the `createBooking` to throw an error
-      (bookingDao.createBooking as jest.Mock).mockRejectedValue(new Error('Invalid data'));
+      (bookingDao.createBooking as jest.Mock).mockRejectedValue(new Error("Invalid data"));
 
       await bookingController.createBooking(req as Request, res as Response);
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(sendMock).toHaveBeenCalledWith(new Error('Invalid data'));
+      expect(sendMock).toHaveBeenCalledWith(new Error("Invalid data"));
     });
   });
 
-  describe('getBookingDetails', () => {
-    it('should get booking details for a valid ID', async () => {
+  describe("getBookingDetails", () => {
+    it("should get booking details for a valid ID", async () => {
       const mockBooking = {
         id: 1,
-        code: 'ABC123',
+        code: "ABC123",
         payableAmount: 300,
         booking_items: [],
       };
 
       req = {
-        params: { id: '1' },
+        params: { id: "1" },
       };
 
       (bookingDao.getBooking as jest.Mock).mockResolvedValue(mockBooking);
@@ -105,7 +102,7 @@ describe('bookingController', () => {
       expect(sendMock).toHaveBeenCalledWith(mockBooking);
     });
 
-    it('should return an error if the ID is missing', async () => {
+    it("should return an error if the ID is missing", async () => {
       req = {
         params: {},
       };
@@ -113,20 +110,20 @@ describe('bookingController', () => {
       await bookingController.getBookingDetails(req as Request, res as Response);
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(sendMock).toHaveBeenCalledWith(new Error('id is required'));
+      expect(sendMock).toHaveBeenCalledWith(new Error("id is required"));
     });
   });
 
-  describe('updateBooking', () => {
-    it('should update the booking and return the updated result', async () => {
+  describe("updateBooking", () => {
+    it("should update the booking and return the updated result", async () => {
       const mockBookingUpdate = {
-        code: 'ABC123',
+        code: "ABC123",
         payableAmount: 350,
       };
 
       req = {
         body: mockBookingUpdate,
-        params: { id: '1' },
+        params: { id: "1" },
       };
 
       (bookingDao.updateBooking as jest.Mock).mockResolvedValue({ success: true });
@@ -138,23 +135,23 @@ describe('bookingController', () => {
       expect(sendMock).toHaveBeenCalledWith({ success: true });
     });
 
-    it('should return an error if the update fails', async () => {
+    it("should return an error if the update fails", async () => {
       const mockBookingUpdate = {
-        code: 'ABC123',
+        code: "ABC123",
         payableAmount: 350,
       };
 
       req = {
         body: mockBookingUpdate,
-        params: { id: '1' },
+        params: { id: "1" },
       };
 
-      (bookingDao.updateBooking as jest.Mock).mockRejectedValue(new Error('Update failed'));
+      (bookingDao.updateBooking as jest.Mock).mockRejectedValue(new Error("Update failed"));
 
       await bookingController.updateBooking(req as Request, res as Response);
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(sendMock).toHaveBeenCalledWith(new Error('Update failed'));
+      expect(sendMock).toHaveBeenCalledWith(new Error("Update failed"));
     });
   });
 });

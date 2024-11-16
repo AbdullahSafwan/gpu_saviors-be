@@ -1,10 +1,10 @@
-import { contactLogController } from '../../src/controllers/contactLog';
-import { Request, Response } from 'express';
-import { contactLogDao } from '../../src/dao/contactLog';
-import prisma from '../../src/prisma';
+import { contactLogController } from "../../src/controllers/contactLog";
+import { Request, Response } from "express";
+import { contactLogDao } from "../../src/dao/contactLog";
+import prisma from "../../src/prisma";
 
 // Mock the dependencies
-jest.mock('../../src/dao/contactLog', () => ({
+jest.mock("../../src/dao/contactLog", () => ({
   contactLogDao: {
     createContactLog: jest.fn(),
     getContactLog: jest.fn(),
@@ -12,12 +12,12 @@ jest.mock('../../src/dao/contactLog', () => ({
   },
 }));
 
-jest.mock('../../src/prisma', () => ({
+jest.mock("../../src/prisma", () => ({
   // You can mock prisma methods if necessary, for example:
   // user: { findMany: jest.fn() },
 }));
 
-describe('contactLogController', () => {
+describe("contactLogController", () => {
   let req: Partial<Request>;
   let res: Partial<Response>;
   let sendMock: jest.Mock;
@@ -37,10 +37,10 @@ describe('contactLogController', () => {
     jest.clearAllMocks();
   });
 
-  describe('createContactLog', () => {
-    it('should create a new contact log and return the result', async () => {
+  describe("createContactLog", () => {
+    it("should create a new contact log and return the result", async () => {
       const mockContactLogData = {
-        message: 'Test message',
+        message: "Test message",
         userId: 1,
         contactDate: new Date(),
       };
@@ -62,9 +62,9 @@ describe('contactLogController', () => {
       expect(sendMock).toHaveBeenCalledWith({ id: 1, ...mockContactLogData });
     });
 
-    it('should return an error if creating contact log fails', async () => {
+    it("should return an error if creating contact log fails", async () => {
       const invalidContactLogData = {
-        message: 'Test message',
+        message: "Test message",
         userId: null, // Invalid data
         contactDate: new Date(),
       };
@@ -74,26 +74,26 @@ describe('contactLogController', () => {
       };
 
       // Mock the `createContactLog` to throw an error
-      (contactLogDao.createContactLog as jest.Mock).mockRejectedValue(new Error('Invalid data'));
+      (contactLogDao.createContactLog as jest.Mock).mockRejectedValue(new Error("Invalid data"));
 
       await contactLogController.createContactLog(req as Request, res as Response);
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(sendMock).toHaveBeenCalledWith(new Error('Invalid data'));
+      expect(sendMock).toHaveBeenCalledWith(new Error("Invalid data"));
     });
   });
 
-  describe('getContactLogDetails', () => {
-    it('should get contact log details for a valid ID', async () => {
+  describe("getContactLogDetails", () => {
+    it("should get contact log details for a valid ID", async () => {
       const mockContactLog = {
         id: 1,
-        message: 'Test message',
+        message: "Test message",
         userId: 1,
         contactDate: new Date(),
       };
 
       req = {
-        params: { id: '1' },
+        params: { id: "1" },
       };
 
       // Mock the `getContactLog` method in contactLogDao
@@ -106,7 +106,7 @@ describe('contactLogController', () => {
       expect(sendMock).toHaveBeenCalledWith(mockContactLog);
     });
 
-    it('should return an error if the ID is missing', async () => {
+    it("should return an error if the ID is missing", async () => {
       req = {
         params: {},
       };
@@ -114,12 +114,12 @@ describe('contactLogController', () => {
       await contactLogController.getContactLogDetails(req as Request, res as Response);
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(sendMock).toHaveBeenCalledWith(new Error('id is required'));
+      expect(sendMock).toHaveBeenCalledWith(new Error("id is required"));
     });
 
-    it('should return an error if the contact log does not exist', async () => {
+    it("should return an error if the contact log does not exist", async () => {
       req = {
-        params: { id: '999' },
+        params: { id: "999" },
       };
 
       (contactLogDao.getContactLog as jest.Mock).mockResolvedValue(null);
@@ -127,19 +127,19 @@ describe('contactLogController', () => {
       await contactLogController.getContactLogDetails(req as Request, res as Response);
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(sendMock).toHaveBeenCalledWith(new Error('Contact log not found'));
+      expect(sendMock).toHaveBeenCalledWith(new Error("Contact log not found"));
     });
   });
 
-  describe('updateContactLog', () => {
-    it('should update the contact log and return the updated result', async () => {
+  describe("updateContactLog", () => {
+    it("should update the contact log and return the updated result", async () => {
       const mockUpdatedData = {
-        message: 'Updated message',
+        message: "Updated message",
       };
 
       req = {
         body: mockUpdatedData,
-        params: { id: '1' },
+        params: { id: "1" },
       };
 
       // Mock the `updateContactLog` method in contactLogDao
@@ -155,23 +155,23 @@ describe('contactLogController', () => {
       expect(sendMock).toHaveBeenCalledWith({ id: 1, ...mockUpdatedData });
     });
 
-    it('should return an error if the update fails', async () => {
+    it("should return an error if the update fails", async () => {
       const mockUpdatedData = {
-        message: 'Updated message',
+        message: "Updated message",
       };
 
       req = {
         body: mockUpdatedData,
-        params: { id: '1' },
+        params: { id: "1" },
       };
 
       // Mock the `updateContactLog` to throw an error
-      (contactLogDao.updateContactLog as jest.Mock).mockRejectedValue(new Error('Update failed'));
+      (contactLogDao.updateContactLog as jest.Mock).mockRejectedValue(new Error("Update failed"));
 
       await contactLogController.updateContactLog(req as Request, res as Response);
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(sendMock).toHaveBeenCalledWith(new Error('Update failed'));
+      expect(sendMock).toHaveBeenCalledWith(new Error("Update failed"));
     });
   });
 });
