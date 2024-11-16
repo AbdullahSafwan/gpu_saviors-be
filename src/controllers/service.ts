@@ -1,15 +1,17 @@
 import { Request, Response } from "express";
 import { serviceDao } from "../dao/service";
 import prisma from "../prisma";
+import { debugLog } from "../services/helper";
+import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
 
 const createService = async (req: Request, res: Response) => {
   try {
     const data = req.body;
     const result = await serviceDao.createService(prisma, data);
-    res.status(200).send(result);
+    sendSuccessResponse(res, 200, "Successfully created service", result);
   } catch (error) {
-    console.log(error);
-    res.status(400).send(error);
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error created service", error);
   }
 };
 
@@ -21,12 +23,12 @@ const getServiceDetails = async (req: Request, res: Response) => {
     }
     const result = await serviceDao.getService(prisma, id);
     if (!result) {
-      return res.status(400).send("Service not found");
+      throw new Error(`service not found against id: ${id}`);
     }
-    res.status(200).send(result);
+    sendSuccessResponse(res, 200, "Successfully fetched service", result);
   } catch (error) {
-    console.log(error);
-    res.status(400).send(error);
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error fetching service", error);
   }
 };
 
@@ -35,10 +37,10 @@ const updateService = async (req: Request, res: Response) => {
     const data = req.body;
     const id = +req.params.id;
     const result = await serviceDao.updateService(prisma, id, data);
-    res.status(200).send(result);
+    sendSuccessResponse(res, 200, "Successfully updating service", result);
   } catch (error) {
-    console.log(error);
-    res.status(400).send(error);
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error updated service", error);
   }
 };
 
