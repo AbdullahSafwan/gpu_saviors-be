@@ -4,9 +4,9 @@ import { body } from "express-validator";
 const createDeliveryValidator = [
   body("address").notEmpty().withMessage("address is required"),
 
-  body("phoneNumber").notEmpty().isMobilePhone("any").withMessage("Invalid Phone Number"),
+  body("phoneNumber").notEmpty().withMessage("phoneNumber is required").bail().isMobilePhone("any").withMessage("Invalid Phone Number"),
 
-  body("landmark").optional(),
+  body("landmark").optional().isInt(),
 
   body("secondaryPhoneNumber").optional().notEmpty().withMessage("Secondary PhoneNumber is optional"),
 
@@ -30,7 +30,7 @@ const updateDeliveryValidator = [
 
   body("phoneNumber").optional().notEmpty().isMobilePhone("any").withMessage("Invalid Phone Number"),
 
-  body("landmark").optional(),
+  body("landmark").optional().isInt(),
 
   body("secondaryPhoneNumber").optional().notEmpty().withMessage("Secondary PhoneNumber is optional"),
 
