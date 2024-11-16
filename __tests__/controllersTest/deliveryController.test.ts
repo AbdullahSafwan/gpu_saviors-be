@@ -2,27 +2,13 @@ import { Request, Response } from "express";
 import { deliveryController } from "../../src/controllers/delivery"; // adjust the path
 import { deliveryDao } from "../../src/dao/delivery"; // adjust the path
 import prisma from "../../src/prisma"; // adjust the path to your Prisma instance
+import * as responseHelper from "./../../src/services/responseHelper"; // Adjust the import path as needed
 
 // Type the methods of deliveryDao as Jest mocks
 jest.mock("../../src/dao/delivery");
 
 describe("Delivery Controller", () => {
-  let req: Partial<Request>;
-  let res: Partial<Response>;
-
-  // Type the deliveryDao mock methods
-  const mockCreateDelivery = deliveryDao.createDelivery as jest.Mock;
-  const mockGetDelivery = deliveryDao.getDelivery as jest.Mock;
-  const mockUpdateDelivery = deliveryDao.updateDelivery as jest.Mock;
-
-  beforeEach(() => {
-    // Mocking express Request and Response objects
-    req = {} as Request;
-    res = {
-      status: jest.fn().mockReturnThis(),
-      send: jest.fn().mockReturnThis(),
-    } as unknown as Response;
-  });
+  beforeEach(() => {});
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -34,29 +20,48 @@ describe("Delivery Controller", () => {
       const mockData = { status: "Pending", bookingId: 123 };
       const mockResult = { id: 1, ...mockData };
 
-      mockCreateDelivery.mockResolvedValue(mockResult);
+      const mockRequest = {
+        body: mockData,
+      } as Request;
 
-      req.body = mockData;
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
 
-      await deliveryController.createDelivery(req as Request, res as Response);
+      deliveryDao.createDelivery = jest.fn().mockResolvedValue(mockData);
 
-      expect(mockCreateDelivery).toHaveBeenCalledWith(prisma, mockData);
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.send).toHaveBeenCalledWith(mockResult);
+      // Spy on sendSuccessResponse
+      const sendSuccessSpy = jest.spyOn(responseHelper, "sendSuccessResponse").mockImplementation();
+
+      await deliveryController.createDelivery(mockRequest, mockResponse);
+
+      expect(deliveryDao.createDelivery).toHaveBeenCalledWith(prisma, mockData);
+      expect(sendSuccessSpy).toHaveBeenCalledWith(mockResponse, 200, expect.any(String), mockData);
     });
 
     it("should return error when createDelivery fails", async () => {
+      const mockData = { status: "Pending", bookingId: 123 };
+      const mockRequest = {
+        body: mockData,
+      } as Request;
+
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+
       const mockError = new Error("Failed to create delivery");
 
-      mockCreateDelivery.mockRejectedValue(mockError);
+      deliveryDao.createDelivery = jest.fn().mockRejectedValue(mockError);
 
-      req.body = { status: "Pending", bookingId: 123 };
+      // Spy on sendErrorResponse
+      const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse").mockImplementation();
 
-      await deliveryController.createDelivery(req as Request, res as Response);
+      await deliveryController.createDelivery(mockRequest, mockResponse);
 
-      expect(mockCreateDelivery).toHaveBeenCalled();
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.send).toHaveBeenCalledWith(mockError);
+      expect(deliveryDao.createDelivery).toHaveBeenCalledWith(prisma, mockRequest.body);
+      expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, expect.any(String), mockError);
     });
   });
 
@@ -65,38 +70,68 @@ describe("Delivery Controller", () => {
     it("should return delivery details successfully", async () => {
       const mockId = 1;
       const mockDelivery = { id: mockId, status: "Delivered" };
-      req.params = { id: mockId.toString() };
+      const mockRequest = {
+        params: { id: "1" },
+      } as unknown as Request;
 
-      mockGetDelivery.mockResolvedValue(mockDelivery);
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
 
-      await deliveryController.getDeliveryDetails(req as Request, res as Response);
+      deliveryDao.getDelivery = jest.fn().mockResolvedValue(mockDelivery);
+      // Spy on sendSuccessResponse
+      const sendSuccessSpy = jest.spyOn(responseHelper, "sendSuccessResponse").mockImplementation();
 
-      expect(mockGetDelivery).toHaveBeenCalledWith(prisma, mockId);
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.send).toHaveBeenCalledWith(mockDelivery);
+      await deliveryController.getDeliveryDetails(mockRequest, mockResponse);
+
+      expect(deliveryDao.getDelivery).toHaveBeenCalledWith(prisma, mockId);
+      expect(sendSuccessSpy).toHaveBeenCalledWith(mockResponse, 200, expect.any(String), mockDelivery);
+      // Restore the original implementation
+      sendSuccessSpy.mockRestore();
     });
 
     it("should return error when id is not provided", async () => {
-      req.params = { id: "" };
+      const mockRequest = {
+        params: {},
+      } as Request;
 
-      await deliveryController.getDeliveryDetails(req as Request, res as Response);
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+        send: jest.fn(),
+      } as unknown as Response;
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.send).toHaveBeenCalledWith(new Error("id is required"));
+      const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse").mockImplementation();
+
+      await deliveryController.getDeliveryDetails(mockRequest, mockResponse);
+
+      expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, "Error fetching delivery", expect.any(Error));
+
+      sendErrorSpy.mockRestore();
     });
 
     it("should return error when delivery is not found", async () => {
       const mockId = 1;
+      const mockRequest = {
+        params: { id: mockId.toString() },
+      } as unknown as Request;
+
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+
       const mockError = new Error("Delivery not found");
-      req.params = { id: mockId.toString() };
+      deliveryDao.getDelivery = jest.fn().mockRejectedValue(mockError);
+      // mockGetDelivery.mockResolvedValue(null); // Simulate no data found
+      // Spy on sendErrorResponse
+      const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse");
 
-      mockGetDelivery.mockResolvedValue(null); // Simulate no data found
+      await deliveryController.getDeliveryDetails(mockRequest, mockResponse);
 
-      await deliveryController.getDeliveryDetails(req as Request, res as Response);
-
-      expect(mockGetDelivery).toHaveBeenCalledWith(prisma, mockId);
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.send).toHaveBeenCalledWith(mockError);
+      expect(deliveryDao.getDelivery).toHaveBeenCalledWith(prisma, mockId);
+      expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, expect.any(String), mockError);
     });
   });
 
@@ -106,33 +141,56 @@ describe("Delivery Controller", () => {
       const mockId = 1;
       const mockData = { status: "Shipped" };
       const mockResult = { id: mockId, ...mockData };
-      req.params = { id: mockId.toString() };
-      req.body = mockData;
 
-      mockUpdateDelivery.mockResolvedValue(mockResult);
+      const mockRequest = {
+        body: mockData,
+        params: { id: mockId.toString() },
+      } as unknown as Request;
 
-      await deliveryController.updateDelivery(req as Request, res as Response);
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
 
-      expect(mockUpdateDelivery).toHaveBeenCalledWith(prisma, mockId, mockData);
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.send).toHaveBeenCalledWith(mockResult);
+      deliveryDao.updateDelivery = jest.fn().mockResolvedValue(mockResult);
+       // Spy on sendSuccessResponse
+       const sendSuccessSpy = jest.spyOn(responseHelper, "sendSuccessResponse").mockImplementation();
+
+
+      await deliveryController.updateDelivery(mockRequest, mockResponse);
+
+      expect(deliveryDao.updateDelivery).toHaveBeenCalledWith(prisma, mockId, mockData);
+      expect(sendSuccessSpy).toHaveBeenCalledWith(mockResponse, 200, expect.any(String), mockResult);
+      // Restore spy (optional for consistency across tests)
+      sendSuccessSpy.mockRestore();
     });
 
     it("should return error when updateDelivery fails", async () => {
       const mockId = 1;
       const mockData = { status: "Failed" };
-      const mockError = new Error("Failed to update delivery");
 
-      req.params = { id: mockId.toString() };
-      req.body = mockData;
+      const mockRequest = {
+        body: mockData,
+        params: { id: mockId.toString() },
+      } as unknown as Request;
 
-      mockUpdateDelivery.mockRejectedValue(mockError);
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
 
-      await deliveryController.updateDelivery(req as Request, res as Response);
+      const mockError = new Error("Refund update failed");
 
-      expect(mockUpdateDelivery).toHaveBeenCalledWith(prisma, mockId, mockData);
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.send).toHaveBeenCalledWith(mockError);
+      deliveryDao.updateDelivery = jest.fn().mockRejectedValue(mockError);
+// Spy on sendErrorResponse
+const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse").mockImplementation();
+
+      await deliveryController.updateDelivery(mockRequest, mockResponse);
+
+      expect(deliveryDao.updateDelivery).toHaveBeenCalledWith(prisma, mockId, mockData);
+      expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, expect.any(String), mockError);
+      // Restore spy (optional for consistency across tests)
+      sendErrorSpy.mockRestore();
     });
   });
 });

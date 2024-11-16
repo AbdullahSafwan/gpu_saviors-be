@@ -28,7 +28,7 @@ const getDeliveryDetails = async (req: Request, res: Response) => {
     sendSuccessResponse(res, 200, "Successfully fetched delivery", result);
   } catch (error) {
     debugLog(error);
-    sendErrorResponse(res, 400, "Error creating delivery", error);
+    sendErrorResponse(res, 400, "Error fetching delivery", error);
   }
   
 };
