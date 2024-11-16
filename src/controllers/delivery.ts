@@ -1,15 +1,17 @@
 import { Request, Response } from "express";
 import { deliveryDao } from "../dao/delivery";
 import prisma from "../prisma";
+import { debugLog } from "../services/helper";
+import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
 
 const createDelivery = async (req: Request, res: Response) => {
   try {
     const data = req.body;
     const result = await deliveryDao.createDelivery(prisma, data);
-    res.status(200).send(result);
+    sendSuccessResponse(res, 200, "Successfully created delivery", result);
   } catch (error) {
-    console.log(error);
-    res.status(400).send(error);
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error creating delivery", error);
   }
 };
 
@@ -20,10 +22,13 @@ const getDeliveryDetails = async (req: Request, res: Response) => {
       throw Error("id is required");
     }
     const result = await deliveryDao.getDelivery(prisma, id);
-    res.status(200).send(result);
+    if (!result) {
+      throw new Error(`delivery not found against id: ${id}`);
+    }
+    sendSuccessResponse(res, 200, "Successfully fetched delivery", result);
   } catch (error) {
-    console.log(error);
-    res.status(400).send(error);
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error creating delivery", error);
   }
 };
 
@@ -32,10 +37,10 @@ const updateDelivery = async (req: Request, res: Response) => {
     const data = req.body;
     const id = +req.params.id;
     const result = await deliveryDao.updateDelivery(prisma, id, data);
-    res.status(200).send(result);
+    sendSuccessResponse(res, 200, "Successfully updated delivery", result);
   } catch (error) {
-    console.log(error);
-    res.status(400).send(error);
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error updating delivery", error);
   }
 };
 
