@@ -1,15 +1,17 @@
 import { Request, Response } from "express";
 import { contactLogDao } from "../dao/contactLog";
 import prisma from "../prisma";
+import { debugLog } from "../services/helper";
+import { sendErrorResponse, sendSuccessResponse } from "../services/responseHelper";
 
 const createContactLog = async (req: Request, res: Response) => {
   try {
     const data = req.body;
     const result = await contactLogDao.createContactLog(prisma, data);
-    res.status(200).send(result);
+    sendSuccessResponse(res, 200, "Successfully created contactLog", result);
   } catch (error) {
-    console.log(error);
-    res.status(400).send(error);
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error creating contact log", error);
   }
 };
 
@@ -20,10 +22,13 @@ const getContactLogDetails = async (req: Request, res: Response) => {
       throw Error("id is required");
     }
     const result = await contactLogDao.getContactLog(prisma, id);
-    res.status(200).send(result);
+    if (!result) {
+      throw new Error(`contact log not found against id: ${id}`);
+    }
+    sendSuccessResponse(res, 200, "Successfully created contactLog", result);
   } catch (error) {
-    console.log(error);
-    res.status(400).send(error);
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error fetching contact log", error);
   }
 };
 
@@ -32,10 +37,10 @@ const updateContactLog = async (req: Request, res: Response) => {
     const data = req.body;
     const id = +req.params.id;
     const result = await contactLogDao.updateContactLog(prisma, id, data);
-    res.status(200).send(result);
+    sendSuccessResponse(res, 200, "Successfully updated contactLog", result);
   } catch (error) {
-    console.log(error);
-    res.status(400).send(error);
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error updating contact log", error);
   }
 };
 

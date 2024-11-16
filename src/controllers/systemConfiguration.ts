@@ -1,15 +1,17 @@
 import { Request, Response } from "express";
 import { systemConfigurationDao } from "../dao/systemConfiguration";
 import prisma from "../prisma";
+import { debugLog } from "../services/helper";
+import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
 
 const createSystemConfiguration = async (req: Request, res: Response) => {
   try {
     const data = req.body;
     const result = await systemConfigurationDao.createSystemConfiguration(prisma, data);
-    res.status(200).send(result);
+    sendSuccessResponse(res, 200, "Successfully created system configuration", result);
   } catch (error) {
-    console.log(error);
-    res.status(400).send(error);
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error creating system configuration", error);
   }
 };
 
@@ -20,10 +22,13 @@ const getSystemConfigurationDetails = async (req: Request, res: Response) => {
       throw Error("id is required");
     }
     const result = await systemConfigurationDao.getSystemConfiguration(prisma, id);
-    res.status(200).send(result);
+    if (!result) {
+      throw new Error(`system configuration not found against id: ${id}`);
+    }
+    sendSuccessResponse(res, 200, "Successfully fetched system configuration", result);
   } catch (error) {
-    console.log(error);
-    res.status(400).send(error);
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error fetching system configuration", error);
   }
 };
 
@@ -32,10 +37,10 @@ const updateSystemConfiguration = async (req: Request, res: Response) => {
     const data = req.body;
     const id = +req.params.id;
     const result = await systemConfigurationDao.updateSystemConfiguration(prisma, id, data);
-    res.status(200).send(result);
+    sendSuccessResponse(res, 200, "Successfully updated system configuration", result);
   } catch (error) {
-    console.log(error);
-    res.status(400).send(error);
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error updating system configuration", error);
   }
 };
 

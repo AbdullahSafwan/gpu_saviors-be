@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { bookingDao } from "../dao/booking";
 import prisma from "../prisma";
 import { booking_item } from "@prisma/client";
+import { debugLog } from "../services/helper";
+import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
 
 const createBooking = async (req: Request, res: Response) => {
   try {
@@ -16,10 +18,10 @@ const createBooking = async (req: Request, res: Response) => {
     };
 
     const result = await bookingDao.createBooking(prisma, data);
-    res.status(200).send(result);
+    sendSuccessResponse(res, 200, "Successfully created booking", result);
   } catch (error) {
-    console.log(error);
-    res.status(400).send(error);
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error creating booking", error);
   }
 };
 
@@ -30,10 +32,13 @@ const getBookingDetails = async (req: Request, res: Response) => {
       throw Error("id is required");
     }
     const result = await bookingDao.getBooking(prisma, id);
-    res.status(200).send(result);
+    if (!result) {
+      throw new Error(`delivery not found against id: ${id}`);
+    }
+    sendSuccessResponse(res, 200, "Successfully fetched booking", result);
   } catch (error) {
-    console.log(error);
-    res.status(400).send(error);
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error fetching booking", error);
   }
 };
 
@@ -42,10 +47,10 @@ const updateBooking = async (req: Request, res: Response) => {
     const data = req.body;
     const id = +req.params.id;
     const result = await bookingDao.updateBooking(prisma, id, data);
-    res.status(200).send(result);
+    sendSuccessResponse(res, 200, "Successfully updated booking", result);
   } catch (error) {
-    console.log(error);
-    res.status(400).send(error);
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error updating booking", error);
   }
 };
 
