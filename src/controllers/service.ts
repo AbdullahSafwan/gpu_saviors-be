@@ -11,7 +11,7 @@ const createService = async (req: Request, res: Response) => {
     sendSuccessResponse(res, 200, "Successfully created service", result);
   } catch (error) {
     debugLog(error);
-    sendErrorResponse(res, 400, "Error created service", error);
+    sendErrorResponse(res, 400, "Error creating service", error);
   }
 };
 

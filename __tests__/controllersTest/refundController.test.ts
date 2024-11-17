@@ -38,6 +38,8 @@ describe("refundController", () => {
 
       expect(refundDao.createRefund).toHaveBeenCalledWith(prisma, mockRequest.body);
       expect(sendSuccessSpy).toHaveBeenCalledWith(mockResponse, 200, expect.any(String), mockRefundData);
+      // Restore the original implementation
+      sendSuccessSpy.mockRestore();
     });
 
     it("should return a 400 status on error", async () => {
@@ -60,6 +62,8 @@ describe("refundController", () => {
 
       expect(refundDao.createRefund).toHaveBeenCalledWith(prisma, mockRequest.body);
       expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, expect.any(String), mockError);
+      // Restore the original implementation
+      sendErrorSpy.mockRestore();
     });
   });
 
@@ -128,6 +132,7 @@ describe("refundController", () => {
 
       expect(refundDao.getRefund).toHaveBeenCalledWith(prisma, 1);
       expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, expect.any(String), mockError);
+      sendErrorSpy.mockRestore();
     });
   });
 
