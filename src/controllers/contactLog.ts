@@ -25,7 +25,7 @@ const getContactLogDetails = async (req: Request, res: Response) => {
     if (!result) {
       throw new Error(`contact log not found against id: ${id}`);
     }
-    sendSuccessResponse(res, 200, "Successfully created contactLog", result);
+    sendSuccessResponse(res, 200, "Successfully fetched contactLog", result);
   } catch (error) {
     debugLog(error);
     sendErrorResponse(res, 400, "Error fetching contact log", error);
