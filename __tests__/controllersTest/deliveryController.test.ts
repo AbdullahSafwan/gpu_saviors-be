@@ -153,9 +153,8 @@ describe("Delivery Controller", () => {
       } as unknown as Response;
 
       deliveryDao.updateDelivery = jest.fn().mockResolvedValue(mockResult);
-       // Spy on sendSuccessResponse
-       const sendSuccessSpy = jest.spyOn(responseHelper, "sendSuccessResponse").mockImplementation();
-
+      // Spy on sendSuccessResponse
+      const sendSuccessSpy = jest.spyOn(responseHelper, "sendSuccessResponse").mockImplementation();
 
       await deliveryController.updateDelivery(mockRequest, mockResponse);
 
@@ -182,8 +181,8 @@ describe("Delivery Controller", () => {
       const mockError = new Error("Refund update failed");
 
       deliveryDao.updateDelivery = jest.fn().mockRejectedValue(mockError);
-// Spy on sendErrorResponse
-const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse").mockImplementation();
+      // Spy on sendErrorResponse
+      const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse").mockImplementation();
 
       await deliveryController.updateDelivery(mockRequest, mockResponse);
 

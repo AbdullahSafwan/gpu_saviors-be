@@ -122,7 +122,7 @@ describe("contactLogController", () => {
 
       await contactLogController.getContactLogDetails(mockRequest, mockResponse);
 
-      expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, expect.any(String), expect.any(Error));
+      expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, "Error fetching contact log", new Error("id is required"));
 
       sendErrorSpy.mockRestore();
     });

@@ -2,7 +2,6 @@ import { bookingController } from "../../src/controllers/booking";
 import { Request, Response } from "express";
 import { bookingDao } from "../../src/dao/booking";
 import prisma from "../../src/prisma";
-import { booking_item } from "@prisma/client";
 import * as responseHelper from "./../../src/services/responseHelper"; // Adjust the import path as needed
 
 // Mock the dependencies
@@ -130,18 +129,23 @@ describe("bookingController", () => {
 
     it("should return an error if the ID is missing", async () => {
       const mockRequest = {
-        params: {},
+        params: {}, // No 'id' provided
       } as Request;
+
       const mockResponse = {
-        status: jest.fn().mockReturnThis(),
+        status: jest.fn().mockReturnThis(), // Allow chaining
         json: jest.fn(),
         send: jest.fn(),
       } as unknown as Response;
 
+      const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse").mockImplementation();
+
       await bookingController.getBookingDetails(mockRequest, mockResponse);
 
-      expect(mockResponse.status).toHaveBeenCalledWith(400);
-      expect(mockResponse.send).toHaveBeenCalledWith(expect.any(String));
+      // Verify sendErrorResponse was invoked with the correct arguments
+      expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, expect.any(String), new Error("id is required"));
+
+      sendErrorSpy.mockRestore(); // Restore the original function
     });
   });
 
@@ -152,18 +156,29 @@ describe("bookingController", () => {
         payableAmount: 350,
       };
 
-      req = {
-        body: mockBookingUpdate,
+      const mockRequest = {
         params: { id: "1" },
-      };
+        body: mockBookingUpdate,
+      } as unknown as Request;
 
-      (bookingDao.updateBooking as jest.Mock).mockResolvedValue({ success: true });
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
 
-      await bookingController.updateBooking(req as Request, res as Response);
+      const updateBooking = { id: 1, ...mockBookingUpdate };
+
+      bookingDao.updateBooking = jest.fn().mockResolvedValue(updateBooking);
+
+      // Spy on sendSuccessResponse
+      const sendSuccessSpy = jest.spyOn(responseHelper, "sendSuccessResponse").mockImplementation();
+
+      await bookingController.updateBooking(mockRequest, mockResponse);
 
       expect(bookingDao.updateBooking).toHaveBeenCalledWith(prisma, 1, mockBookingUpdate);
-      expect(statusMock).toHaveBeenCalledWith(200);
-      expect(sendMock).toHaveBeenCalledWith({ success: true });
+      expect(sendSuccessSpy).toHaveBeenCalledWith(mockResponse, 200, expect.any(String), updateBooking);
+      // Restore spy (optional for consistency across tests)
+      sendSuccessSpy.mockRestore();
     });
 
     it("should return an error if the update fails", async () => {
@@ -172,17 +187,29 @@ describe("bookingController", () => {
         payableAmount: 350,
       };
 
-      req = {
+      const mockRequest = {
         body: mockBookingUpdate,
         params: { id: "1" },
-      };
+      } as unknown as Request;
 
-      (bookingDao.updateBooking as jest.Mock).mockRejectedValue(new Error("Update failed"));
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
 
-      await bookingController.updateBooking(req as Request, res as Response);
+      const mockError = new Error("Error updating booking");
 
-      expect(statusMock).toHaveBeenCalledWith(400);
-      expect(sendMock).toHaveBeenCalledWith(new Error("Update failed"));
+      bookingDao.updateBooking = jest.fn().mockRejectedValue(mockError);
+      // Spy on sendErrorResponse
+      const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse").mockImplementation();
+
+      await bookingController.updateBooking(mockRequest, mockResponse);
+
+      expect(bookingDao.updateBooking).toHaveBeenCalledWith(prisma, 1, mockRequest.body);
+
+      expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, expect.any(String), mockError);
+      // Restore spy (optional for consistency across tests)
+      sendErrorSpy.mockRestore();
     });
   });
 });

@@ -111,10 +111,11 @@ describe("systemConfigurationController", () => {
         send: jest.fn(),
       } as unknown as Response;
 
+      const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse").mockImplementation();
+
       await systemConfigurationController.getSystemConfigurationDetails(mockRequest, mockResponse);
 
-      expect(mockResponse.status).toHaveBeenCalledWith(400);
-      expect(mockResponse.send).toHaveBeenCalledWith("id is required");
+      expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, "Error fetching system configuration", new Error("id is required"));
     });
 
     it("should return a 400 status if system configuration is not found", async () => {

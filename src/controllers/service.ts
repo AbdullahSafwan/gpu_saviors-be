@@ -19,7 +19,7 @@ const getServiceDetails = async (req: Request, res: Response) => {
   try {
     const id = req.params.id ? +req.params?.id : null;
     if (!id) {
-      return res.status(400).send("id is required");
+      throw new Error("id is required");
     }
     const result = await serviceDao.getService(prisma, id);
     if (!result) {
