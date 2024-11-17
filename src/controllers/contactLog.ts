@@ -19,7 +19,7 @@ const getContactLogDetails = async (req: Request, res: Response) => {
   try {
     const id = req.params.id ? +req.params?.id : null;
     if (!id) {
-      throw Error("id is required");
+      throw new Error("id is required");
     }
     const result = await contactLogDao.getContactLog(prisma, id);
     if (!result) {

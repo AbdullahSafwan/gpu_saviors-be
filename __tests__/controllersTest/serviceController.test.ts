@@ -102,10 +102,14 @@ describe("serviceController", () => {
         send: jest.fn(),
       } as unknown as Response;
 
+      const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse").mockImplementation();
+
       await serviceController.getServiceDetails(mockRequest, mockResponse);
 
-      expect(mockResponse.status).toHaveBeenCalledWith(400);
-      expect(mockResponse.send).toHaveBeenCalledWith("id is required");
+      // Verify sendErrorResponse was invoked with the correct arguments
+      expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, "Error fetching service", new Error("id is required"));
+
+      sendErrorSpy.mockRestore(); // Restore the original function
     });
 
     it("should return a 400 status if service is not found", async () => {

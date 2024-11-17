@@ -2,114 +2,158 @@ import { Request, Response } from "express";
 import { userController } from "../../src/controllers/user"; // Adjust the path based on your project
 import { userDao } from "../../src/dao/user"; // Adjust path
 import prisma from "../../src/prisma"; // Adjust path
+import * as responseHelper from "./../../src/services/responseHelper"; // Adjust the import path as needed
 
 // Mocking userDao and prisma
-jest.mock("../../src/dao/user", () => ({
-  userDao: {
-    createUser: jest.fn(),
-    getUser: jest.fn(),
-    updateUser: jest.fn(),
-  },
-}));
+jest.mock("../../src/dao/user");
 
 jest.mock("../../src/prisma", () => ({
   prisma: jest.fn(),
 }));
 
 describe("userController", () => {
-  let mockRequest: Partial<Request>;
-  let mockResponse: Partial<Response>;
-  let statusMock: jest.Mock;
-  let sendMock: jest.Mock;
-
   beforeEach(() => {
-    // Set up mocks for Request and Response objects
-    statusMock = jest.fn().mockReturnThis(); // Allows chaining of `.status().send()`
-    sendMock = jest.fn();
-
-    mockRequest = {
-      body: { name: "John", email: "john@example.com" }, // Example request body
-      params: { id: "1" }, // Example params for getUser and updateUser
-    };
-
-    mockResponse = {
-      status: statusMock,
-      send: sendMock,
-    };
+    jest.clearAllMocks();
   });
 
   describe("createUser", () => {
     it("should create a new user and send a success response", async () => {
       const mockUserData = { id: 1, name: "John", email: "john@example.com" };
+      const mockRequest = {
+        body: mockUserData,
+      } as Request;
 
-      (userDao.createUser as jest.Mock).mockResolvedValue(mockUserData); // Mock successful response
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
 
-      await userController.createUser(mockRequest as Request, mockResponse as Response);
+      userDao.createUser = jest.fn().mockResolvedValue(mockUserData); // Mock successful response
+
+      // Spy on sendSuccessResponse
+      const sendSuccessSpy = jest.spyOn(responseHelper, "sendSuccessResponse").mockImplementation();
+      await userController.createUser(mockRequest, mockResponse);
 
       expect(userDao.createUser).toHaveBeenCalledWith(prisma, mockRequest.body);
-      expect(statusMock).toHaveBeenCalledWith(200);
-      expect(sendMock).toHaveBeenCalledWith(mockUserData);
+      expect(sendSuccessSpy).toHaveBeenCalledWith(mockResponse, 200, expect.any(String), mockUserData);
+      // Restore the original implementation
+      sendSuccessSpy.mockRestore();
     });
 
     it("should handle errors and send a failure response", async () => {
-      const mockError = new Error("Database error");
+      const mockRequest = {
+        body: { amount: 100, orderId: 1 },
+      } as Request;
 
-      (userDao.createUser as jest.Mock).mockRejectedValue(mockError); // Mock error response
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
 
-      await userController.createUser(mockRequest as Request, mockResponse as Response);
+      const mockError = new Error("Error creating user");
 
-      expect(statusMock).toHaveBeenCalledWith(400);
-      expect(sendMock).toHaveBeenCalledWith(mockError);
+      userDao.createUser = jest.fn().mockRejectedValue(mockError); // Mock error response
+
+      // Spy on sendErrorResponse
+      const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse").mockImplementation();
+
+      await userController.createUser(mockRequest, mockResponse);
+      expect(userDao.createUser).toHaveBeenCalledWith(prisma, mockRequest.body);
+      expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, expect.any(String), mockError);
+      // Restore the original implementation
+      sendErrorSpy.mockRestore();
     });
   });
 
   describe("getUserDetails", () => {
     it("should retrieve user details and send a success response", async () => {
+      const mockRequest = {
+        params: { id: "1" },
+      } as unknown as Request;
+
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+
       const mockUserData = { id: 1, name: "John", email: "john@example.com" };
 
-      (userDao.getUser as jest.Mock).mockResolvedValue(mockUserData); // Mock successful response
+      userDao.getUser = jest.fn().mockResolvedValue(mockUserData); // Mock successful response
+      // Spy on sendSuccessResponse
+      const sendSuccessSpy = jest.spyOn(responseHelper, "sendSuccessResponse").mockImplementation();
 
-      await userController.getUserDetails(mockRequest as Request, mockResponse as Response);
+      await userController.getUserDetails(mockRequest, mockResponse);
 
       expect(userDao.getUser).toHaveBeenCalledWith(prisma, 1); // Testing the id parsing
-      expect(statusMock).toHaveBeenCalledWith(200);
-      expect(sendMock).toHaveBeenCalledWith(mockUserData);
+      expect(sendSuccessSpy).toHaveBeenCalledWith(mockResponse, 200, expect.any(String), mockUserData);
+      // Restore the original implementation
+      sendSuccessSpy.mockRestore();
     });
 
     it("should handle errors and send a failure response if id is missing", async () => {
-      mockRequest.params = {}; // Simulate missing id
+      const mockRequest = {
+        params: {},
+      } as Request;
 
-      const mockError = new Error("id is required");
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+        send: jest.fn(),
+      } as unknown as Response;
 
-      await userController.getUserDetails(mockRequest as Request, mockResponse as Response);
+      const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse").mockImplementation();
+      await userController.getUserDetails(mockRequest, mockResponse);
 
-      expect(statusMock).toHaveBeenCalledWith(400);
-      expect(sendMock).toHaveBeenCalledWith(mockError);
+      expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, "Error fetching user", new Error("id is required"));
     });
   });
 
   describe("updateUser", () => {
     it("should update a user and send a success response", async () => {
+      const mockRequest = {
+        body: { name: "John Updated" },
+        params: { id: "1" },
+      } as unknown as Request;
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+
       const mockUpdatedUser = { id: 1, name: "John Updated", email: "johnupdated@example.com" };
+      userDao.updateUser = jest.fn().mockResolvedValue(mockUpdatedUser); // Mock successful response
+      // Spy on sendSuccessResponse
+      const sendSuccessSpy = jest.spyOn(responseHelper, "sendSuccessResponse").mockImplementation();
 
-      (userDao.updateUser as jest.Mock).mockResolvedValue(mockUpdatedUser); // Mock successful response
-
-      await userController.updateUser(mockRequest as Request, mockResponse as Response);
+      await userController.updateUser(mockRequest, mockResponse);
 
       expect(userDao.updateUser).toHaveBeenCalledWith(prisma, 1, mockRequest.body); // Testing the id parsing
-      expect(statusMock).toHaveBeenCalledWith(200);
-      expect(sendMock).toHaveBeenCalledWith(mockUpdatedUser);
+      expect(sendSuccessSpy).toHaveBeenCalledWith(mockResponse, 200, expect.any(String), mockUpdatedUser);
+      // Restore spy (optional for consistency across tests)
+      sendSuccessSpy.mockRestore();
     });
 
     it("should handle errors and send a failure response", async () => {
-      const mockError = new Error("Update failed");
+      const mockRequest = {
+        body: { name: "xyz" },
+        params: { id: "1" },
+      } as unknown as Request;
 
-      (userDao.updateUser as jest.Mock).mockRejectedValue(mockError); // Mock error response
+      const mockResponse = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
 
-      await userController.updateUser(mockRequest as Request, mockResponse as Response);
+      const mockError = new Error("Error updating user");
 
-      expect(statusMock).toHaveBeenCalledWith(400);
-      expect(sendMock).toHaveBeenCalledWith(mockError);
+      userDao.updateUser = jest.fn().mockRejectedValue(mockError); // Mock error response
+      // Spy on sendErrorResponse
+      const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse").mockImplementation();
+
+      await userController.updateUser(mockRequest, mockResponse);
+
+      expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, expect.any(String), mockError);
+      // Restore spy (optional for consistency across tests)
+      sendErrorSpy.mockRestore();
     });
   });
 });

@@ -53,7 +53,7 @@ describe("refundController", () => {
       } as unknown as Response;
 
       const mockError = new Error("Refund creation failed");
-      (refundDao.createRefund as jest.Mock).mockRejectedValue(mockError);
+      refundDao.createRefund = jest.fn().mockRejectedValue(mockError);
 
       // Spy on sendErrorResponse
       const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse").mockImplementation();
@@ -106,10 +106,11 @@ describe("refundController", () => {
         send: jest.fn(),
       } as unknown as Response;
 
+      const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse").mockImplementation();
+
       await refundController.getRefundDetails(mockRequest, mockResponse);
 
-      expect(mockResponse.status).toHaveBeenCalledWith(400);
-      expect(mockResponse.send).toHaveBeenCalledWith("id is required");
+      expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, "Error fetching refund", new Error("id is required"));
     });
 
     it("should return a 400 status if refund is not found", async () => {
@@ -181,7 +182,7 @@ describe("refundController", () => {
       const mockError = new Error("Refund update failed");
 
       // Mock the DAO function to reject
-      (refundDao.updateRefund as jest.Mock).mockRejectedValue(mockError);
+      refundDao.updateRefund = jest.fn().mockRejectedValue(mockError);
 
       // Spy on sendErrorResponse
       const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse").mockImplementation();
