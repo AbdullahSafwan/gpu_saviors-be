@@ -1,4 +1,5 @@
 import { Prisma, PrismaClient } from "@prisma/client";
+import { debugLog } from "../services/helper";
 
 const createUser = async (prisma: PrismaClient, data: Prisma.userCreateInput) => {
   try {
@@ -7,7 +8,7 @@ const createUser = async (prisma: PrismaClient, data: Prisma.userCreateInput) =>
     });
     return result;
   } catch (error) {
-    console.log(error);
+    debugLog(error);
     throw error;
   }
 };
@@ -19,7 +20,7 @@ const getUser = async (prisma: PrismaClient, id: number) => {
     });
     return result;
   } catch (error) {
-    console.log(error);
+    debugLog(error);
     throw error;
   }
 };
@@ -32,7 +33,7 @@ const updateUser = async (prisma: PrismaClient, id: number, data: Prisma.userUpd
     });
     return result;
   } catch (error) {
-    console.log(error);
+    debugLog(error);
     throw error;
   }
 };

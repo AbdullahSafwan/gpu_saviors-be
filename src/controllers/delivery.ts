@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { deliveryDao } from "../dao/delivery";
 import prisma from "../prisma";
 import { CreateDeliveryRequest, UpdateDeliveryRequest } from "../types/deliveryTypes";
+import { debugLog } from "../services/helper";
+import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
 
 const createDelivery = async (req: Request<{}, {}, CreateDeliveryRequest>, res: Response) => {
   try {
@@ -14,10 +16,10 @@ const createDelivery = async (req: Request<{}, {}, CreateDeliveryRequest>, res: 
     };
 
     const result = await deliveryDao.createDelivery(prisma, deliveryData);
-    res.status(200).send(result);
+    sendSuccessResponse(res, 200, "Successfully created delivery", result);
   } catch (error) {
-    console.log(error);
-    res.status(400).send(error);
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error creating delivery", error);
   }
 }; 
 
@@ -25,14 +27,18 @@ const getDeliveryDetails = async (req: Request<{ id: string }>, res: Response) =
   try {
     const id = req.params.id ? +req.params?.id : null;
     if (!id) {
-      throw Error("id is required");
+      throw new Error("id is required");
     }
     const result = await deliveryDao.getDelivery(prisma, id);
-    res.status(200).send(result);
+    if (!result) {
+      throw new Error(`delivery not found against id: ${id}`);
+    }
+    sendSuccessResponse(res, 200, "Successfully fetched delivery", result);
   } catch (error) {
-    console.log(error);
-    res.status(400).send(error);
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error fetching delivery", error);
   }
+  
 };
 
 const updateDelivery = async (req: Request<{ id: string }, {}, UpdateDeliveryRequest>, res: Response) => {
@@ -40,10 +46,10 @@ const updateDelivery = async (req: Request<{ id: string }, {}, UpdateDeliveryReq
     const data = req.body;
     const id = +req.params.id;
     const result = await deliveryDao.updateDelivery(prisma, id, data);
-    res.status(200).send(result);
+    sendSuccessResponse(res, 200, "Successfully updated delivery", result);
   } catch (error) {
-    console.log(error);
-    res.status(400).send(error);
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error updating delivery", error);
   }
 };
 

@@ -21,21 +21,15 @@ router.post("/user/", userValidator.createUserValidator, throwValidationResult, 
 router.get("/user/:id", userController.getUserDetails);
 router.patch("/user/:id", userValidator.updateUserValidator, throwValidationResult, userController.updateUser);
 
-router.post("/delivery/", deliveryController.createDelivery);
-router.get("/delivery/:id", deliveryController.getDeliveryDetails);
-router.patch("/delivery/:id", deliveryController.updateDelivery);
 
-router.post("/refund/", refundController.createRefund);
-router.get("/refund/:id", refundController.getRefundDetails);
-router.patch("/refund/:id", refundController.updateRefund);
 
 router.post("/booking/", bookingValidator.createBookingValidator, throwValidationResult, bookingController.createBooking);
 router.get("/booking/:id", bookingController.getBookingDetails);
-router.patch("/booking/:id", bookingController.updateBooking);
+router.patch("/booking/:id",bookingValidator.updateBookingValidator,throwValidationResult, bookingController.updateBooking);
 
-router.post("/systemConfiguration/", systemConfigurationController.createSystemConfiguration);
-router.get("/systemConfiguration/:key", systemConfigurationController.getSystemConfigurationDetails);
-router.patch("/systemConfiguration/:key", systemConfigurationController.updateSystemConfiguration);
+// router.post("/systemConfiguration/", systemConfigurationController.createSystemConfiguration);
+// router.get("/systemConfiguration/:key", systemConfigurationController.getSystemConfigurationDetails);
+// router.patch("/systemConfiguration/:key", systemConfigurationController.updateSystemConfiguration);
 
 router.post("/service/", serviceValidator.createServiceValidator, throwValidationResult, serviceController.createService);
 router.get("/service/:id", serviceController.getServiceDetails);
