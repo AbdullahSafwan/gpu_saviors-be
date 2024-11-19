@@ -1,4 +1,5 @@
 import { Prisma, PrismaClient } from "@prisma/client";
+import { debugLog } from "../services/helper";
 
 const createService = async (prisma: PrismaClient, data: Prisma.serviceCreateInput) => {
   try {
@@ -8,7 +9,7 @@ const createService = async (prisma: PrismaClient, data: Prisma.serviceCreateInp
     });
     return result;
   } catch (error) {
-    console.log(error);
+    debugLog(error);
     throw error;
   }
 };
@@ -20,7 +21,7 @@ const getService = async (prisma: PrismaClient, id: number) => {
     });
     return result;
   } catch (error) {
-    console.log(error);
+    debugLog(error);
     throw error;
   }
 };
@@ -33,7 +34,7 @@ const updateService = async (prisma: PrismaClient, id: number, data: Prisma.serv
     });
     return result;
   } catch (error) {
-    console.log(error);
+    debugLog(error);
     throw error;
   }
 };

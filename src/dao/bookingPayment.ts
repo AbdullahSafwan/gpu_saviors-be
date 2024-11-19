@@ -1,4 +1,5 @@
 import { Prisma, PrismaClient } from "@prisma/client";
+import { debugLog } from "../services/helper";
 
 const createBookingPayment = async (prisma: PrismaClient, data: Prisma.booking_paymentCreateInput) => {
   try {
@@ -8,7 +9,7 @@ const createBookingPayment = async (prisma: PrismaClient, data: Prisma.booking_p
     });
     return result;
   } catch (error) {
-    console.log(error);
+    debugLog(error);
     throw error;
   }
 };
@@ -20,7 +21,7 @@ const getBookingPayment = async (prisma: PrismaClient, id: number) => {
     });
     return result;
   } catch (error) {
-    console.log(error);
+    debugLog(error);
     throw error;
   }
 };
@@ -33,7 +34,7 @@ const updateBookingPayment = async (prisma: PrismaClient, id: number, data: Pris
     });
     return result;
   } catch (error) {
-    console.log(error);
+    debugLog(error);
     throw error;
   }
 };
