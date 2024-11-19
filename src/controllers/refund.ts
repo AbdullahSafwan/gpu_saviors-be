@@ -11,7 +11,7 @@ const createRefund = async (req: Request, res: Response) => {
     sendSuccessResponse(res, 200, "Successfully created refund", result);
   } catch (error) {
     debugLog(error);
-    sendErrorResponse(res, 400, "Error created refund", error);
+    sendErrorResponse(res, 400, "Error creating refund", error);
   }
 };
 
@@ -19,7 +19,7 @@ const getRefundDetails = async (req: Request, res: Response) => {
   try {
     const id = req.params.id ? +req.params?.id : null;
     if (!id) {
-      throw Error("id is required");
+      throw new Error("id is required");
     }
     const result = await refundDao.getRefund(prisma, id);
     if (!result) {
