@@ -1,15 +1,17 @@
 import { Request, Response } from "express";
 import { refundDao } from "../dao/refund";
 import prisma from "../prisma";
+import { debugLog } from "../services/helper";
+import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
 
 const createRefund = async (req: Request, res: Response) => {
   try {
     const data = req.body;
     const result = await refundDao.createRefund(prisma, data);
-    res.status(200).send(result);
+    sendSuccessResponse(res, 200, "Successfully created refund", result);
   } catch (error) {
-    console.log(error);
-    res.status(400).send(error);
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error creating refund", error);
   }
 };
 
@@ -17,13 +19,16 @@ const getRefundDetails = async (req: Request, res: Response) => {
   try {
     const id = req.params.id ? +req.params?.id : null;
     if (!id) {
-      throw Error("id is required");
+      throw new Error("id is required");
     }
     const result = await refundDao.getRefund(prisma, id);
-    res.status(200).send(result);
+    if (!result) {
+      throw new Error(`refund not found against id: ${id}`);
+    }
+    sendSuccessResponse(res, 200, "Successfully fetched refund", result);
   } catch (error) {
-    console.log(error);
-    res.status(400).send(error);
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error fetching refund", error);
   }
 };
 
@@ -32,10 +37,10 @@ const updateRefund = async (req: Request, res: Response) => {
     const data = req.body;
     const id = +req.params.id;
     const result = await refundDao.updateRefund(prisma, id, data);
-    res.status(200).send(result);
+    sendSuccessResponse(res, 200, "Successfully updated refund", result);
   } catch (error) {
-    console.log(error);
-    res.status(400).send(error);
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error updating refund", error);
   }
 };
 
