@@ -19,7 +19,7 @@ const getDeliveryDetails = async (req: Request, res: Response) => {
   try {
     const id = req.params.id ? +req.params?.id : null;
     if (!id) {
-      throw Error("id is required");
+      throw new Error("id is required");
     }
     const result = await deliveryDao.getDelivery(prisma, id);
     if (!result) {
@@ -28,8 +28,9 @@ const getDeliveryDetails = async (req: Request, res: Response) => {
     sendSuccessResponse(res, 200, "Successfully fetched delivery", result);
   } catch (error) {
     debugLog(error);
-    sendErrorResponse(res, 400, "Error creating delivery", error);
+    sendErrorResponse(res, 400, "Error fetching delivery", error);
   }
+  
 };
 
 const updateDelivery = async (req: Request, res: Response) => {

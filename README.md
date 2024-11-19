@@ -12,3 +12,6 @@ npm install
 npx prisma migrate dev
 npm run dev
 npx prisma db push
+
+
+npm jest

@@ -11,7 +11,7 @@ const createService = async (req: Request, res: Response) => {
     sendSuccessResponse(res, 200, "Successfully created service", result);
   } catch (error) {
     debugLog(error);
-    sendErrorResponse(res, 400, "Error created service", error);
+    sendErrorResponse(res, 400, "Error creating service", error);
   }
 };
 
@@ -19,7 +19,7 @@ const getServiceDetails = async (req: Request, res: Response) => {
   try {
     const id = req.params.id ? +req.params?.id : null;
     if (!id) {
-      throw Error("id is required");
+      throw new Error("id is required");
     }
     const result = await serviceDao.getService(prisma, id);
     if (!result) {

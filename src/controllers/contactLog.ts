@@ -19,13 +19,13 @@ const getContactLogDetails = async (req: Request, res: Response) => {
   try {
     const id = req.params.id ? +req.params?.id : null;
     if (!id) {
-      throw Error("id is required");
+      throw new Error("id is required");
     }
     const result = await contactLogDao.getContactLog(prisma, id);
     if (!result) {
       throw new Error(`contact log not found against id: ${id}`);
     }
-    sendSuccessResponse(res, 200, "Successfully created contactLog", result);
+    sendSuccessResponse(res, 200, "Successfully fetched contactLog", result);
   } catch (error) {
     debugLog(error);
     sendErrorResponse(res, 400, "Error fetching contact log", error);
