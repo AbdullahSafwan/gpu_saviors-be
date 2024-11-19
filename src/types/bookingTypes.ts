@@ -28,6 +28,7 @@ export interface UpdateBookingRequest {
 
 
 export interface UpdateBookingItem {
+  id: number;
   name?: string;
   type?: booking_item_type;
   payableAmount?: number;
