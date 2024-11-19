@@ -29,7 +29,7 @@ const createBooking = async (req: Request<{},{},CreateBookingRequest>, res: Resp
   }
 };
 
-const getBookingDetails = async (req: Request<{id: number},{}, {}>, res: Response) => {
+const getBookingDetails = async (req: Request<{id: string},{}, {}>, res: Response) => {
   try {
     const id = req.params.id ? +req.params?.id : null;
     if (!id) {
@@ -46,7 +46,7 @@ const getBookingDetails = async (req: Request<{id: number},{}, {}>, res: Respons
   }
 };
 
-const updateBooking = async (req: Request<{id: number},{}, UpdateBookingRequest>, res: Response) => {
+const updateBooking = async (req: Request<{id: string},{}, UpdateBookingRequest>, res: Response) => {
   try {
     // const data = req.body;
     const { booking_items, ...otherData } = req.body;
