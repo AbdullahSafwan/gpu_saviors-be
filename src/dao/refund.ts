@@ -1,4 +1,5 @@
 import { Prisma, PrismaClient } from "@prisma/client";
+import { debugLog } from "../services/helper";
 
 const createRefund = async (prisma: PrismaClient, data: Prisma.refundCreateInput) => {
   try {
@@ -8,7 +9,7 @@ const createRefund = async (prisma: PrismaClient, data: Prisma.refundCreateInput
     });
     return result;
   } catch (error) {
-    console.log(error);
+    debugLog(error);
     throw error;
   }
 };
@@ -20,7 +21,7 @@ const getRefund = async (prisma: PrismaClient, id: number) => {
     });
     return result;
   } catch (error) {
-    console.log(error);
+    debugLog(error);
     throw error;
   }
 };
@@ -33,7 +34,7 @@ const updateRefund = async (prisma: PrismaClient, id: number, data: Prisma.refun
     });
     return result;
   } catch (error) {
-    console.log(error);
+    debugLog(error);
     throw error;
   }
 };

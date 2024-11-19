@@ -5,7 +5,7 @@ const createRefundValidator = [
 
   body("amount").isInt().notEmpty().withMessage("Amount is required"),
 
-  body("remarks").optional(),
+  body("remarks").optional().isString(),
 
   body("refundDate").notEmpty().withMessage("RefundDate is required").bail().isISO8601().toDate(),
 ];
@@ -15,7 +15,7 @@ const updateRefundValidator = [
 
   body("amount").optional().isInt().notEmpty().withMessage("Amount is required"),
 
-  body("remarks").optional(),
+  body("remarks").optional().isString(),
 
   body("refundDate").optional().isInt().notEmpty().withMessage("RefundDate is optional"),
 ];
