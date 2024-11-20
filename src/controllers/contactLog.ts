@@ -1,13 +1,12 @@
 import { Request, Response } from "express";
-import { contactLogDao } from "../dao/contactLog";
-import prisma from "../prisma";
 import { debugLog } from "../services/helper";
 import { sendErrorResponse, sendSuccessResponse } from "../services/responseHelper";
+import { contactLogService } from "../services/contactLog";
 
 const createContactLog = async (req: Request, res: Response) => {
   try {
     const data = req.body;
-    const result = await contactLogDao.createContactLog(prisma, data);
+    const result = await contactLogService.createContactLog(data)
     sendSuccessResponse(res, 200, "Successfully created contactLog", result);
   } catch (error) {
     debugLog(error);
@@ -21,10 +20,7 @@ const getContactLogDetails = async (req: Request, res: Response) => {
     if (!id) {
       throw new Error("id is required");
     }
-    const result = await contactLogDao.getContactLog(prisma, id);
-    if (!result) {
-      throw new Error(`contact log not found against id: ${id}`);
-    }
+    const result = await contactLogService.getContactLog(id)
     sendSuccessResponse(res, 200, "Successfully fetched contactLog", result);
   } catch (error) {
     debugLog(error);
@@ -36,7 +32,7 @@ const updateContactLog = async (req: Request, res: Response) => {
   try {
     const data = req.body;
     const id = +req.params.id;
-    const result = await contactLogDao.updateContactLog(prisma, id, data);
+    const result = await contactLogService.updateContactLog(id, data)
     sendSuccessResponse(res, 200, "Successfully updated contactLog", result);
   } catch (error) {
     debugLog(error);
