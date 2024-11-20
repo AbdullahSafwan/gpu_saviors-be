@@ -3,6 +3,7 @@ import { deliveryController } from "../../src/controllers/delivery"; // adjust t
 import { deliveryDao } from "../../src/dao/delivery"; // adjust the path
 import prisma from "../../src/prisma"; // adjust the path to your Prisma instance
 import * as responseHelper from "./../../src/services/responseHelper"; // Adjust the import path as needed
+import { delivery_status } from "@prisma/client";
 
 // Type the methods of deliveryDao as Jest mocks
 jest.mock("../../src/dao/delivery");
@@ -72,7 +73,7 @@ describe("Delivery Controller", () => {
       const mockDelivery = { id: mockId, status: "Delivered" };
       const mockRequest = {
         params: { id: "1" },
-      } as unknown as Request;
+      }  as Request<{ id: string }, {}, {}>;;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
@@ -94,7 +95,7 @@ describe("Delivery Controller", () => {
     it("should return error when id is not provided", async () => {
       const mockRequest = {
         params: {},
-      } as Request;
+      }  as Request<{ id: string }, {}, {}>;;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
@@ -115,7 +116,7 @@ describe("Delivery Controller", () => {
       const mockId = 1;
       const mockRequest = {
         params: { id: mockId.toString() },
-      } as unknown as Request;
+      }  as Request<{ id: string }, {}, {}>;;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
@@ -139,13 +140,13 @@ describe("Delivery Controller", () => {
   describe("updateDelivery", () => {
     it("should update a delivery successfully", async () => {
       const mockId = 1;
-      const mockData = { status: "Shipped" };
+      const mockData = { status: delivery_status.DELIVERED };
       const mockResult = { id: mockId, ...mockData };
 
       const mockRequest = {
         body: mockData,
         params: { id: mockId.toString() },
-      } as unknown as Request;
+      } as Request<{ id: string }, {}, typeof mockData>;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
@@ -166,12 +167,12 @@ describe("Delivery Controller", () => {
 
     it("should return error when updateDelivery fails", async () => {
       const mockId = 1;
-      const mockData = { status: "Failed" };
+      const mockData = { status: delivery_status.IN_TRANSIT_OUTBOUND };
 
       const mockRequest = {
         body: mockData,
         params: { id: mockId.toString() },
-      } as unknown as Request;
+      } as Request<{ id: string }, {}, typeof mockData>;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
