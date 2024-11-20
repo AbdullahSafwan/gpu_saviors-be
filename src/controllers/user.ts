@@ -1,14 +1,13 @@
 import { Request, Response } from "express";
-import { userDao } from "../dao/user";
-import prisma from "../prisma";
 import { CreateUserRequest, UpdateUserRequest } from "../types/userTypes";
 import { debugLog } from "../services/helper";
 import { sendErrorResponse, sendSuccessResponse } from "../services/responseHelper";
+import { userService } from "../services/user";
 
 const createUser = async (req: Request<{}, {}, CreateUserRequest>, res: Response) => {
   try {
     const data = req.body;
-    const result = await userDao.createUser(prisma, data);
+    const result = await userService.createUser(data);
     sendSuccessResponse(res, 200, "Successfully created user", result);
   } catch (error) {
     debugLog(error);
@@ -22,10 +21,7 @@ const getUserDetails = async (req: Request<{ id: string }>, res: Response) => {
     if (!id) {
       throw new Error("id is required");
     }
-    const result = await userDao.getUser(prisma, id);
-    if (!result) {
-      throw new Error(`user not found against id: ${id}`);
-    }
+    const result = await userService.getUser(id);
     sendSuccessResponse(res, 200, "Successfully fetched user", result);
   } catch (error) {
     debugLog(error);
@@ -37,7 +33,7 @@ const updateUser = async (req: Request<{ id: string }, {}, UpdateUserRequest>, r
   try {
     const data = req.body;
     const id = +req.params.id;
-    const result = await userDao.updateUser(prisma, id, data);
+    const result = await userService.updateUser(id, data);
     sendSuccessResponse(res, 200, "Successfully updated user", result);
   } catch (error) {
     debugLog(error);
