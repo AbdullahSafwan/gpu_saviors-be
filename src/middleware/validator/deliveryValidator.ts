@@ -19,10 +19,14 @@ const createDeliveryValidator = [
 
   body("landmark").optional(),
 
-  body("secondaryPhoneNumber").optional().trim().notEmpty().withMessage("Secondary PhoneNumber is optional")
-  .bail()
-  .matches(/^0[1-9]{2}[0-9]{7}$|^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
-  .withMessage("Invalid Phone Number"),
+  body("secondaryPhoneNumber")
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage("Secondary PhoneNumber is optional")
+    .bail()
+    .matches(/^0[1-9]{2}[0-9]{7}$|^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
+    .withMessage("Invalid Phone Number"),
 
   body("bookingId").isInt().notEmpty().withMessage("BookingId is required"),
 
@@ -30,11 +34,11 @@ const createDeliveryValidator = [
 
   body("deliveryDate").notEmpty().withMessage("DateTime is required").isISO8601().toDate(),
 
-  body ("postalCode").notEmpty().withMessage("Postal code is required").isInt(),
+  body("postalCode").notEmpty().withMessage("Postal code is required").isInt(),
 
-  body ("courier").notEmpty().isString().withMessage("Courier name is required"),
+  body("courier").notEmpty().isString().withMessage("Courier name is required"),
 
-  body ("type").notEmpty().withMessage("courier type is required").bail().isIn(Object.values(courier_type))
+  body("type").notEmpty().withMessage("courier type is required").bail().isIn(Object.values(courier_type)),
 ];
 
 const updateDeliveryValidator = [
@@ -43,24 +47,27 @@ const updateDeliveryValidator = [
   body("address").optional().notEmpty().withMessage("address is req"),
 
   body("phoneNumber")
-  .optional()
-  .notEmpty()
-  .trim()
-  .withMessage("Phone number is optional") // Validate if it's not empty
-  .bail()
-  .isString()
-  .withMessage("Phone number should be a valid string") // Validate if it's a string
-  .bail()
-  .matches(/^0[1-9]{2}[0-9]{7}$|^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
-  .withMessage("Invalid phone number"),
+    .optional()
+    .notEmpty()
+    .trim()
+    .withMessage("Phone number is optional") // Validate if it's not empty
+    .bail()
+    .isString()
+    .withMessage("Phone number should be a valid string") // Validate if it's a string
+    .bail()
+    .matches(/^0[1-9]{2}[0-9]{7}$|^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
+    .withMessage("Invalid phone number"),
 
-  
   body("landmark").optional(),
 
-  body("secondaryPhoneNumber").optional().trim().notEmpty().withMessage("Secondary PhoneNumber is optional")
-  .bail()
-  .matches(/^0[1-9]{2}[0-9]{7}$|^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
-  .withMessage("Invalid Phone Number"),
+  body("secondaryPhoneNumber")
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage("Secondary PhoneNumber is optional")
+    .bail()
+    .matches(/^0[1-9]{2}[0-9]{7}$|^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
+    .withMessage("Invalid Phone Number"),
 
   body("bookingId").isInt().optional().notEmpty().withMessage("BookingId is required"),
 
@@ -68,11 +75,11 @@ const updateDeliveryValidator = [
 
   body("deliveryDate").optional().notEmpty().withMessage("DateTime is required").isISO8601().toDate(),
 
-  body ("postalCode").optional().notEmpty().withMessage("Postal code is required").isInt(),
+  body("postalCode").optional().notEmpty().withMessage("Postal code is required").isInt(),
 
-  body ("courier").optional().notEmpty().isString().withMessage("Courier name is required"),
+  body("courier").optional().notEmpty().isString().withMessage("Courier name is required"),
 
-  body ("type").optional().notEmpty().withMessage("courier type is required").bail().isIn(Object.values(courier_type))
+  body("type").optional().notEmpty().withMessage("courier type is required").bail().isIn(Object.values(courier_type)),
 ];
 
 export const deliveryValidator = { createDeliveryValidator, updateDeliveryValidator };
