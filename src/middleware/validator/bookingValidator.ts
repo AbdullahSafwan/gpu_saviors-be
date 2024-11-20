@@ -59,7 +59,7 @@ const updateBookingValidator = [
   .withMessage("Invalid phone number"),
 
   // body("whatsappNumber").optional().isString().withMessage("WhatsApp number must be a valid string"),
-  body("whatsappNumber").notEmpty().withMessage("whatsapp Number is required").bail().isString().withMessage("whatsapp number should be valid string")
+  body("whatsappNumber").trim().notEmpty().withMessage("whatsapp Number is required").bail().isString().withMessage("whatsapp number should be valid string")
   .bail()
   .matches(/^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/).withMessage("Invalid Phone Number"),
 
