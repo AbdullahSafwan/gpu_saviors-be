@@ -4,7 +4,7 @@ import { bookingDao } from "../../dao/booking";
 import prisma from "../../prisma";
 import { debugLog } from "../helper";
 
-export const createBooking = async (data: CreateBookingRequest) => {
+const createBooking = async (data: CreateBookingRequest) => {
   try {
     data.payableAmount = data.booking_items.reduce((total: number, item) => total + item.payableAmount, 0);
 
@@ -26,7 +26,7 @@ export const createBooking = async (data: CreateBookingRequest) => {
   }
 };
 
-export const getBooking = async (id: number) => {
+const getBooking = async (id: number) => {
   try {
     const result = await bookingDao.getBooking(prisma, id);
     if (!result) {
@@ -39,7 +39,7 @@ export const getBooking = async (id: number) => {
   }
 };
 
-export const updateBooking = async (id: number, data: UpdateBookingRequest) => {
+const updateBooking = async (id: number, data: UpdateBookingRequest) => {
   try {
     const { booking_items, ...otherData } = data;
     // Separate items based on the presence of `id`
