@@ -6,7 +6,16 @@ const createUserValidator = [
 
   body("lastName").notEmpty().withMessage("LastName is required"),
 
-  body("phoneNumber").notEmpty().withMessage("phoneNumber is required").bail().isMobilePhone("any").withMessage("Invalid Phone Number"),
+  body("phoneNumber")
+  .notEmpty()
+  .trim()
+  .withMessage("Phone number is required") // Validate if it's not empty
+  .bail()
+  .isString()
+  .withMessage("Phone number should be a valid string") // Validate if it's a string
+  .bail()
+  .matches(/^0[1-9]{2}[0-9]{7}$|^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
+  .withMessage("Invalid phone number"),
 
   body("email").isEmail().optional().notEmpty().withMessage("Email is optional"),
 
@@ -20,7 +29,17 @@ const updateUserValidator = [
 
   body("lastName").optional().notEmpty().withMessage("LastName is required"),
 
-  body("phoneNumber").optional().notEmpty().isMobilePhone("any").withMessage("Invalid Phone Number"),
+  body("phoneNumber")
+  .optional()
+  .notEmpty()
+  .trim()
+  .withMessage("Phone number is optional") // Validate if it's not empty
+  .bail()
+  .isString()
+  .withMessage("Phone number should be a valid string") // Validate if it's a string
+  .bail()
+  .matches(/^0[1-9]{2}[0-9]{7}$|^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
+  .withMessage("Invalid phone number"),
 
   body("email").isEmail().optional().notEmpty().withMessage("Email is optional"),
 

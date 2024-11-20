@@ -5,8 +5,22 @@ const createBookingValidator = [
   // Validate booking fields
   body("paidAmount").optional().isInt({ min: 0 }).withMessage("Paid amount must be a positive integer"),
   body("clientName").notEmpty().withMessage("name is required").bail().isString().withMessage("name should be valid string"),
-  body("phoneNumber").notEmpty().withMessage("phone Number is required").bail().isString().withMessage("phone number should be valid string"),
-  body("whatsappNumber").notEmpty().withMessage("whatsapp Number is required").bail().isString().withMessage("whatsapp number should be valid string"),
+  // body("phoneNumber").notEmpty().withMessage("phone Number is required").bail().isString().withMessage("phone number should be valid string"),
+  // body("phoneNumber").notEmpty().withMessage("phone number is required").matches(/^(?:\+92|92|0)?(3[0-9]{2})[ -]?[0-9]{7}$/),
+  body("phoneNumber")
+    .trim()
+    .notEmpty()
+    .withMessage("Phone number is required") // Validate if it's not empty
+    .bail()
+    .isString()
+    .withMessage("Phone number should be a valid string") // Validate if it's a string
+    .bail()
+    .matches(/^0[1-9]{2}[0-9]{7}$|^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
+    .withMessage("Invalid phone number"),
+
+  body("whatsappNumber").trim().notEmpty().withMessage("whatsapp Number is required").bail().isString().withMessage("whatsapp number should be valid string")
+  .bail()
+  .matches(/^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/).withMessage("Invalid Phone Number"),
 
   // Validate each booking_item in the array
   body("booking_items").isArray({ min: 1 }).withMessage("Booking items are required"),
@@ -32,7 +46,22 @@ const updateBookingValidator = [
 
   body("paidAmount").optional().isInt({ min: 0 }).withMessage("Paid amount must be a positive integer"),
 
-  body("whatsappNumber").optional().isString().withMessage("WhatsApp number must be a valid string"),
+  body("phoneNumber")
+  .optional()
+  .trim()
+  .notEmpty()
+  .withMessage("Phone number is optional") // Validate if it's not empty
+  .bail()
+  .isString()
+  .withMessage("Phone number should be a valid string") // Validate if it's a string
+  .bail()
+  .matches(/^0[1-9]{2}[0-9]{7}$|^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
+  .withMessage("Invalid phone number"),
+
+  // body("whatsappNumber").optional().isString().withMessage("WhatsApp number must be a valid string"),
+  body("whatsappNumber").notEmpty().withMessage("whatsapp Number is required").bail().isString().withMessage("whatsapp number should be valid string")
+  .bail()
+  .matches(/^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/).withMessage("Invalid Phone Number"),
 
   // Validate the booking_items array if it is provided
   body("booking_items").optional().isArray().withMessage("Booking items must be an array if provided"),
