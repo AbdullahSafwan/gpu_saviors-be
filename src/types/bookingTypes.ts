@@ -22,7 +22,7 @@ export interface UpdateBookingRequest {
   phoneNumber?: string;
   whatsappNumber?: string;
   paidAmount?: number;
-  booking_items?: UpdateBookingItem[];
+  booking_items?:( UpdateBookingItem | CreateBookingItem)[];
 }
 
 
@@ -32,5 +32,12 @@ export interface UpdateBookingItem {
   name?: string;
   type?: booking_item_type;
   payableAmount?: number;
+  paidAmount?: number;
+}
+
+export interface CreateBookingItem {
+  name: string;
+  type: booking_item_type;
+  payableAmount: number;
   paidAmount?: number;
 }
