@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { CreateBookingRequest, UpdateBookingRequest } from "../../types/bookingTypes";
+import { CreateBookingItem, CreateBookingRequest, UpdateBookingItem, UpdateBookingRequest } from "../../types/bookingTypes";
 import { bookingDao } from "../../dao/booking";
 import prisma from "../../prisma";
 import { debugLog } from "../helper";
@@ -42,19 +42,30 @@ export const getBooking = async (id: number) => {
 export const updateBooking = async (id: number, data: UpdateBookingRequest) => {
   try {
     const { booking_items, ...otherData } = data;
+    // Separate items based on the presence of `id`
+    // if id is present, then the item is to be updated, if not then it is to be created
+    const itemsToUpdate = booking_items?.filter((item): item is UpdateBookingItem => "id" in item && !!item.id) || [];
+
+    const itemsToCreate = booking_items?.filter((item): item is CreateBookingItem => !("id" in item)) || [];
+
     const updateData: Prisma.bookingUpdateInput = {
       ...otherData,
       ...(booking_items && {
         booking_items: {
-          updateMany: booking_items.map((item) => ({
-            where: { id: item.id },
-            data: { ...item },
+          updateMany: itemsToUpdate.map(({ id, ...data }) => ({
+            where: { id },
+            data,
           })),
+          ...(itemsToCreate.length > 0 && {
+            createMany: {
+              data: itemsToCreate,
+            },
+          }),
         },
       }),
     };
 
-    const result = bookingDao.updateBooking(prisma, id, updateData);
+    const result = await bookingDao.updateBooking(prisma, id, updateData);
     return result;
   } catch (error) {
     debugLog(error);
