@@ -1,13 +1,12 @@
 import { Request, Response } from "express";
-import { refundDao } from "../dao/refund";
-import prisma from "../prisma";
 import { debugLog } from "../services/helper";
 import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
+import { refundService } from "../services/refund";
 
 const createRefund = async (req: Request, res: Response) => {
   try {
     const data = req.body;
-    const result = await refundDao.createRefund(prisma, data);
+    const result = await refundService.createRefund(data);
     sendSuccessResponse(res, 200, "Successfully created refund", result);
   } catch (error) {
     debugLog(error);
@@ -21,10 +20,7 @@ const getRefundDetails = async (req: Request, res: Response) => {
     if (!id) {
       throw new Error("id is required");
     }
-    const result = await refundDao.getRefund(prisma, id);
-    if (!result) {
-      throw new Error(`refund not found against id: ${id}`);
-    }
+    const result = await refundService.getRefund(id);
     sendSuccessResponse(res, 200, "Successfully fetched refund", result);
   } catch (error) {
     debugLog(error);
@@ -36,7 +32,7 @@ const updateRefund = async (req: Request, res: Response) => {
   try {
     const data = req.body;
     const id = +req.params.id;
-    const result = await refundDao.updateRefund(prisma, id, data);
+    const result = await refundService.updateRefund(id, data);
     sendSuccessResponse(res, 200, "Successfully updated refund", result);
   } catch (error) {
     debugLog(error);
