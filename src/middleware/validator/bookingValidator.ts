@@ -27,7 +27,9 @@ const createBookingValidator = [
     .withMessage("whatsapp number should be valid string")
     .bail()
     .matches(/^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
-    .withMessage("Invalid WhatsApp Number"),
+    .withMessage("Invalid WhatsApp Number")
+    .bail()
+    .customSanitizer((value) => formatWhatsAppNumber(value)), // Convert Whatsapp Numbers in One format "92"
 
   // Validate each booking_item in the array
   body("booking_items").isArray({ min: 1 }).withMessage("Booking items are required"),
@@ -75,7 +77,10 @@ const updateBookingValidator = [
     .withMessage("whatsapp number should be valid string")
     .bail()
     .matches(/^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
-    .withMessage("Invalid WhatsApp Number"),
+    .withMessage("Invalid WhatsApp Number")
+    .bail()
+    .customSanitizer((value) => formatWhatsAppNumber(value)),
+
 
   // Validate the booking_items array if it is provided
   body("booking_items").optional().isArray().withMessage("Booking items must be an array if provided"),
@@ -93,3 +98,29 @@ const updateBookingValidator = [
 ];
 
 export const bookingValidator = { createBookingValidator, updateBookingValidator };
+
+
+const formatWhatsAppNumber = (number: string): string => {
+  // Remove any non-digit characters (including spaces, dashes, etc.)
+  let cleanedNumber = number.replace(/[^\d]/g, "");
+
+  // Check for different variations of the number (like +92, 0092, etc.) and normalize
+  if (cleanedNumber.startsWith("+92") && cleanedNumber.length === 11) {
+    // If the number starts with "92" (Pakistan country code) and is 11 digits, return as is
+    return `+${cleanedNumber}`;
+  } else if (cleanedNumber.startsWith("0092") && cleanedNumber.length === 14) {
+    // If the number starts with "0092" and is 13 digits, replace with +92
+    return `92${cleanedNumber.slice(4)}`;
+  } else if (cleanedNumber.startsWith("92") && cleanedNumber.length === 13) {
+    // If the number already starts with +92 and is 13 digits, return it as is
+    return cleanedNumber;
+  } else if (cleanedNumber.startsWith("0") && cleanedNumber.length === 11) {
+    // If the number starts with "0", replace it with "+92"
+    return `92${cleanedNumber.slice(1)}`;
+  } else if (cleanedNumber.startsWith("3")&& cleanedNumber.length === 10) {
+    
+    return `92${cleanedNumber.slice(0)}`;
+  } 
+  // If the number is not valid, return null or an empty string
+  return cleanedNumber;  // or return "" if you want to keep it empty when invalid
+};
