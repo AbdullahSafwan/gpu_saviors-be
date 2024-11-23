@@ -1,6 +1,4 @@
 import { Request, Response } from "express";
-import { serviceDao } from "../dao/service";
-import prisma from "../prisma";
 import { debugLog } from "../services/helper";
 import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
 import { serviceService } from "../services/service";
@@ -22,7 +20,7 @@ const getServiceDetails = async (req: Request, res: Response) => {
     if (!id) {
       throw new Error("id is required");
     }
-    const result = await serviceDao.getService(prisma, id);
+    const result = await serviceService.getService(id);
     if (!result) {
       throw new Error(`service not found against id: ${id}`);
     }
