@@ -9,7 +9,7 @@ const createBooking = async (req: Request<{}, {}, CreateBookingRequest>, res: Re
     const data = req.body;
 
     const result = await bookingService.createBooking(data);
-    res.status(200).send(result);
+    sendSuccessResponse(res, 200, "Successfully created booking", result);
   } catch (error) {
     debugLog(error);
     sendErrorResponse(res, 400, "Error creating booking", error);
