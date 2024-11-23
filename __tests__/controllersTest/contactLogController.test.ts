@@ -35,7 +35,7 @@ describe("contactLogController", () => {
         json: jest.fn(),
       } as unknown as Response;
 
-      // Mock the `createContactLog` method in contactLogDao
+      // Mock the `createContactLog` method in contactLogService
       contactLogService.createContactLog = jest.fn().mockResolvedValue(mockContactLogData);
       // Spy on sendSuccessResponse
       const sendSuccessSpy = jest.spyOn(responseHelper, "sendSuccessResponse").mockImplementation();
@@ -93,7 +93,7 @@ describe("contactLogController", () => {
         json: jest.fn(),
       } as unknown as Response;
 
-      // Mock the `getContactLog` method in contactLogDao
+      // Mock the `getContactLog` method in contactLogService
       contactLogService.getContactLog = jest.fn().mockResolvedValue(mockContactLog);
 
       // Spy on sendSuccessResponse
@@ -169,7 +169,7 @@ describe("contactLogController", () => {
         id: 1,
         ...mockUpdatedData,
       };
-      // Mock the `updateContactLog` method in contactLogDao
+      // Mock the `updateContactLog` method in contactLogService
       (contactLogService.updateContactLog as jest.Mock).mockResolvedValue(updateContactLog);
       // Spy on sendSuccessResponse
       const sendSuccessSpy = jest.spyOn(responseHelper, "sendSuccessResponse").mockImplementation();

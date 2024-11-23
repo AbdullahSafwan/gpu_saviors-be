@@ -25,7 +25,6 @@ describe("Delivery Controller", () => {
           },
         },
       };
-      const mockResult = { id: 1, ...mockData };
 
       const mockRequest = {
         body: mockData,

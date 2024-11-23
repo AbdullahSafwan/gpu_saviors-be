@@ -28,7 +28,7 @@ describe("refundController", () => {
         json: jest.fn(),
       } as unknown as Response;
 
-      // Mock the refundDao.createRefund function
+      // Mock the refundService.createRefund function
       refundService.createRefund = jest.fn().mockResolvedValue(mockRefundData);
 
       // Spy on sendSuccessResponse
@@ -154,7 +154,7 @@ describe("refundController", () => {
 
       const updatedRefund = { id: 1, amount: 150, orderId: 1 };
 
-      // Mock the refundDao.updateRefund function
+      // Mock the refundService.updateRefund function
       refundService.updateRefund = jest.fn().mockResolvedValue(updatedRefund);
 
       // Spy on sendSuccessResponse
