@@ -12,7 +12,6 @@ jest.mock("../../src/prisma", () => ({
 }));
 
 describe("bookingController", () => {
-  let req: Partial<Request>;
   let res: Partial<Response>;
   let sendMock: jest.Mock;
   let statusMock: jest.Mock;
