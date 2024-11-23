@@ -1,19 +1,11 @@
 import { bookingController } from "../../src/controllers/booking";
 import { Request, Response } from "express";
-import { bookingDao } from "../../src/dao/booking";
-import prisma from "../../src/prisma";
 import * as responseHelper from "./../../src/services/responseHelper"; // Adjust the import path as needed
 import { booking_item_type } from "@prisma/client";
 import { bookingService } from "../../src/services/booking";
 
 // Mock the dependencies
-jest.mock("../../src/dao/booking", () => ({
-  bookingDao: {
-    createBooking: jest.fn(),
-    getBooking: jest.fn(),
-    updateBooking: jest.fn(),
-  },
-}));
+jest.mock("../../src/services/booking");
 
 jest.mock("../../src/prisma", () => ({
   // Add any mock prisma methods that may be used
