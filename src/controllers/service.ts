@@ -1,13 +1,12 @@
 import { Request, Response } from "express";
-import { serviceDao } from "../dao/service";
-import prisma from "../prisma";
 import { debugLog } from "../services/helper";
 import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
-
-const createService = async (req: Request, res: Response) => {
+import { serviceService } from "../services/service";
+import { CreateServiceRequest, UpdateServiceRequest } from "../types/serviceTypes";
+const createService = async (req: Request<{},{}, CreateServiceRequest>, res: Response) => {
   try {
     const data = req.body;
-    const result = await serviceDao.createService(prisma, data);
+    const result = await serviceService.createService(data);
     sendSuccessResponse(res, 200, "Successfully created service", result);
   } catch (error) {
     debugLog(error);
@@ -15,13 +14,13 @@ const createService = async (req: Request, res: Response) => {
   }
 };
 
-const getServiceDetails = async (req: Request, res: Response) => {
+const getServiceDetails = async (req: Request<{ id: string }>, res: Response) => {
   try {
     const id = req.params.id ? +req.params?.id : null;
     if (!id) {
       throw new Error("id is required");
     }
-    const result = await serviceDao.getService(prisma, id);
+    const result = await serviceService.getService(id);
     if (!result) {
       throw new Error(`service not found against id: ${id}`);
     }
@@ -32,11 +31,11 @@ const getServiceDetails = async (req: Request, res: Response) => {
   }
 };
 
-const updateService = async (req: Request, res: Response) => {
+const updateService = async (req: Request<{id: string},{}, UpdateServiceRequest>, res: Response) => {
   try {
     const data = req.body;
     const id = +req.params.id;
-    const result = await serviceDao.updateService(prisma, id, data);
+    const result = await serviceService.updateService(id, data);
     sendSuccessResponse(res, 200, "Successfully updating service", result);
   } catch (error) {
     debugLog(error);
