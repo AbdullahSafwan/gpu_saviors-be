@@ -28,6 +28,10 @@ const getUser = async (id: number) => {
 
 const updateUser = async (id: number, data: UpdateUserRequest) => {
   try {
+    const record = await userDao.getUser(prisma, id);
+    if (!record) {
+      throw new Error(`user not found against id: ${id}`);
+    }
     const result = await userDao.updateUser(prisma, id, data);
     return result;
   } catch (error) {

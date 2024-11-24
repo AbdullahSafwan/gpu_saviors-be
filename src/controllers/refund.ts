@@ -2,8 +2,9 @@ import { Request, Response } from "express";
 import { debugLog } from "../services/helper";
 import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
 import { refundService } from "../services/refund";
+import { CreateRefundRequest,UpdateRefundRequest } from "../types/refundTypes";
 
-const createRefund = async (req: Request, res: Response) => {
+const createRefund = async (req: Request<{},{},CreateRefundRequest>, res: Response) => {
   try {
     const data = req.body;
     const result = await refundService.createRefund(data);
@@ -14,7 +15,7 @@ const createRefund = async (req: Request, res: Response) => {
   }
 };
 
-const getRefundDetails = async (req: Request, res: Response) => {
+const getRefundDetails = async (req: Request<{id: string},{},{}> , res: Response) => {
   try {
     const id = req.params.id ? +req.params?.id : null;
     if (!id) {
@@ -28,7 +29,7 @@ const getRefundDetails = async (req: Request, res: Response) => {
   }
 };
 
-const updateRefund = async (req: Request, res: Response) => {
+const updateRefund = async (req: Request<{id: string},{}, UpdateRefundRequest>, res: Response) => {
   try {
     const data = req.body;
     const id = +req.params.id;

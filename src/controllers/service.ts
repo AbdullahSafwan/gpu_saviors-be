@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import { debugLog } from "../services/helper";
 import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
 import { serviceService } from "../services/service";
-
-const createService = async (req: Request, res: Response) => {
+import { CreateServiceRequest, UpdateServiceRequest } from "../types/serviceTypes";
+const createService = async (req: Request<{},{}, CreateServiceRequest>, res: Response) => {
   try {
     const data = req.body;
     const result = await serviceService.createService(data);
@@ -14,7 +14,7 @@ const createService = async (req: Request, res: Response) => {
   }
 };
 
-const getServiceDetails = async (req: Request, res: Response) => {
+const getServiceDetails = async (req: Request<{ id: string }>, res: Response) => {
   try {
     const id = req.params.id ? +req.params?.id : null;
     if (!id) {
@@ -31,7 +31,7 @@ const getServiceDetails = async (req: Request, res: Response) => {
   }
 };
 
-const updateService = async (req: Request, res: Response) => {
+const updateService = async (req: Request<{id: string},{}, UpdateServiceRequest>, res: Response) => {
   try {
     const data = req.body;
     const id = +req.params.id;

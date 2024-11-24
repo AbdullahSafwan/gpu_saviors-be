@@ -37,6 +37,10 @@ const getDelivery = async (id: number) => {
 
 const updateDelivery = async (id: number, data: UpdateDeliveryRequest) => {
   try {
+    const record = await deliveryDao.getDelivery(prisma, id);
+    if (!record) {
+      throw new Error(`delivery not found against id: ${id}`);
+    }
     const result = await deliveryDao.updateDelivery(prisma, id, data);
     return result;
   } catch (error) {
