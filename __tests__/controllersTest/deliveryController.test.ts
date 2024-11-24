@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 import { deliveryController } from "../../src/controllers/delivery"; // adjust the path
-import { deliveryDao } from "../../src/dao/delivery"; // adjust the path
-import prisma from "../../src/prisma"; // adjust the path to your Prisma instance
 import * as responseHelper from "./../../src/services/responseHelper"; // Adjust the import path as needed
+import { delivery_status } from "@prisma/client";
+import { deliveryService } from "../../src/services/delivery";
 
-// Type the methods of deliveryDao as Jest mocks
-jest.mock("../../src/dao/delivery");
+// Type the methods of deliveryService as Jest mocks
+jest.mock("../../src/services/delivery")
 
 describe("Delivery Controller", () => {
   beforeEach(() => {});
@@ -17,8 +17,14 @@ describe("Delivery Controller", () => {
   // Test for createDelivery
   describe("createDelivery", () => {
     it("should create a delivery successfully", async () => {
-      const mockData = { status: "Pending", bookingId: 123 };
-      const mockResult = { id: 1, ...mockData };
+      const mockData = {
+        status: "Pending",
+        booking: {
+          connect: {
+            id: 123,
+          },
+        },
+      };
 
       const mockRequest = {
         body: mockData,
@@ -29,19 +35,26 @@ describe("Delivery Controller", () => {
         json: jest.fn(),
       } as unknown as Response;
 
-      deliveryDao.createDelivery = jest.fn().mockResolvedValue(mockData);
+      deliveryService.createDelivery = jest.fn().mockResolvedValue(mockData);
 
       // Spy on sendSuccessResponse
       const sendSuccessSpy = jest.spyOn(responseHelper, "sendSuccessResponse").mockImplementation();
 
       await deliveryController.createDelivery(mockRequest, mockResponse);
 
-      expect(deliveryDao.createDelivery).toHaveBeenCalledWith(prisma, mockData);
+      expect(deliveryService.createDelivery).toHaveBeenCalledWith(mockData);
       expect(sendSuccessSpy).toHaveBeenCalledWith(mockResponse, 200, expect.any(String), mockData);
     });
 
     it("should return error when createDelivery fails", async () => {
-      const mockData = { status: "Pending", bookingId: 123 };
+      const mockData = {
+        status: "Pending",
+        booking: {
+          connect: {
+            id: 123,
+          },
+        },
+      };
       const mockRequest = {
         body: mockData,
       } as Request;
@@ -53,14 +66,14 @@ describe("Delivery Controller", () => {
 
       const mockError = new Error("Failed to create delivery");
 
-      deliveryDao.createDelivery = jest.fn().mockRejectedValue(mockError);
+      deliveryService.createDelivery = jest.fn().mockRejectedValue(mockError);
 
       // Spy on sendErrorResponse
       const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse").mockImplementation();
 
       await deliveryController.createDelivery(mockRequest, mockResponse);
 
-      expect(deliveryDao.createDelivery).toHaveBeenCalledWith(prisma, mockRequest.body);
+      expect(deliveryService.createDelivery).toHaveBeenCalledWith(mockRequest.body);
       expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, expect.any(String), mockError);
     });
   });
@@ -72,20 +85,20 @@ describe("Delivery Controller", () => {
       const mockDelivery = { id: mockId, status: "Delivered" };
       const mockRequest = {
         params: { id: "1" },
-      } as unknown as Request;
+      } as Request<{ id: string }, {}, {}>;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
       } as unknown as Response;
 
-      deliveryDao.getDelivery = jest.fn().mockResolvedValue(mockDelivery);
+      deliveryService.getDelivery = jest.fn().mockResolvedValue(mockDelivery);
       // Spy on sendSuccessResponse
       const sendSuccessSpy = jest.spyOn(responseHelper, "sendSuccessResponse").mockImplementation();
 
       await deliveryController.getDeliveryDetails(mockRequest, mockResponse);
 
-      expect(deliveryDao.getDelivery).toHaveBeenCalledWith(prisma, mockId);
+      expect(deliveryService.getDelivery).toHaveBeenCalledWith(mockId);
       expect(sendSuccessSpy).toHaveBeenCalledWith(mockResponse, 200, expect.any(String), mockDelivery);
       // Restore the original implementation
       sendSuccessSpy.mockRestore();
@@ -94,7 +107,7 @@ describe("Delivery Controller", () => {
     it("should return error when id is not provided", async () => {
       const mockRequest = {
         params: {},
-      } as Request;
+      } as Request<{ id: string }, {}, {}>;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
@@ -115,7 +128,7 @@ describe("Delivery Controller", () => {
       const mockId = 1;
       const mockRequest = {
         params: { id: mockId.toString() },
-      } as unknown as Request;
+      } as Request<{ id: string }, {}, {}>;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
@@ -123,14 +136,14 @@ describe("Delivery Controller", () => {
       } as unknown as Response;
 
       const mockError = new Error("Delivery not found");
-      deliveryDao.getDelivery = jest.fn().mockRejectedValue(mockError);
+      deliveryService.getDelivery = jest.fn().mockRejectedValue(mockError);
       // mockGetDelivery.mockResolvedValue(null); // Simulate no data found
       // Spy on sendErrorResponse
       const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse");
 
       await deliveryController.getDeliveryDetails(mockRequest, mockResponse);
 
-      expect(deliveryDao.getDelivery).toHaveBeenCalledWith(prisma, mockId);
+      expect(deliveryService.getDelivery).toHaveBeenCalledWith(mockId);
       expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, expect.any(String), mockError);
     });
   });
@@ -139,26 +152,26 @@ describe("Delivery Controller", () => {
   describe("updateDelivery", () => {
     it("should update a delivery successfully", async () => {
       const mockId = 1;
-      const mockData = { status: "Shipped" };
+      const mockData = { status: delivery_status.DELIVERED };
       const mockResult = { id: mockId, ...mockData };
 
       const mockRequest = {
         body: mockData,
         params: { id: mockId.toString() },
-      } as unknown as Request;
+      } as Request<{ id: string }, {}, typeof mockData>;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
       } as unknown as Response;
 
-      deliveryDao.updateDelivery = jest.fn().mockResolvedValue(mockResult);
+      deliveryService.updateDelivery = jest.fn().mockResolvedValue(mockResult);
       // Spy on sendSuccessResponse
       const sendSuccessSpy = jest.spyOn(responseHelper, "sendSuccessResponse").mockImplementation();
 
       await deliveryController.updateDelivery(mockRequest, mockResponse);
 
-      expect(deliveryDao.updateDelivery).toHaveBeenCalledWith(prisma, mockId, mockData);
+      expect(deliveryService.updateDelivery).toHaveBeenCalledWith(mockId, mockData);
       expect(sendSuccessSpy).toHaveBeenCalledWith(mockResponse, 200, expect.any(String), mockResult);
       // Restore spy (optional for consistency across tests)
       sendSuccessSpy.mockRestore();
@@ -166,12 +179,12 @@ describe("Delivery Controller", () => {
 
     it("should return error when updateDelivery fails", async () => {
       const mockId = 1;
-      const mockData = { status: "Failed" };
+      const mockData = { status: delivery_status.IN_TRANSIT_OUTBOUND };
 
       const mockRequest = {
         body: mockData,
         params: { id: mockId.toString() },
-      } as unknown as Request;
+      } as Request<{ id: string }, {}, typeof mockData>;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
@@ -180,13 +193,13 @@ describe("Delivery Controller", () => {
 
       const mockError = new Error("Refund update failed");
 
-      deliveryDao.updateDelivery = jest.fn().mockRejectedValue(mockError);
+      deliveryService.updateDelivery = jest.fn().mockRejectedValue(mockError);
       // Spy on sendErrorResponse
       const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse").mockImplementation();
 
       await deliveryController.updateDelivery(mockRequest, mockResponse);
 
-      expect(deliveryDao.updateDelivery).toHaveBeenCalledWith(prisma, mockId, mockData);
+      expect(deliveryService.updateDelivery).toHaveBeenCalledWith(mockId, mockData);
       expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, expect.any(String), mockError);
       // Restore spy (optional for consistency across tests)
       sendErrorSpy.mockRestore();
