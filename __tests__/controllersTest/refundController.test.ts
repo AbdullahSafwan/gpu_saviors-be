@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { refundController } from "../../src/controllers/refund";
-import { refundDao } from "../../src/dao/refund";
-import prisma from "../../src/prisma";
 import * as responseHelper from "./../../src/services/responseHelper"; // Adjust the import path as needed
+import { refundService } from "../../src/services/refund";
 
-jest.mock("../../src/dao/refund");
+jest.mock("../../src/services/refund");
+
 jest.mock("../../src/prisma", () => ({
   refund: {
     // Mock any necessary Prisma models if needed
@@ -28,15 +28,15 @@ describe("refundController", () => {
         json: jest.fn(),
       } as unknown as Response;
 
-      // Mock the refundDao.createRefund function
-      refundDao.createRefund = jest.fn().mockResolvedValue(mockRefundData);
+      // Mock the refundService.createRefund function
+      refundService.createRefund = jest.fn().mockResolvedValue(mockRefundData);
 
       // Spy on sendSuccessResponse
       const sendSuccessSpy = jest.spyOn(responseHelper, "sendSuccessResponse").mockImplementation();
 
       await refundController.createRefund(mockRequest, mockResponse);
 
-      expect(refundDao.createRefund).toHaveBeenCalledWith(prisma, mockRequest.body);
+      expect(refundService.createRefund).toHaveBeenCalledWith(mockRequest.body);
       expect(sendSuccessSpy).toHaveBeenCalledWith(mockResponse, 200, expect.any(String), mockRefundData);
       // Restore the original implementation
       sendSuccessSpy.mockRestore();
@@ -53,14 +53,14 @@ describe("refundController", () => {
       } as unknown as Response;
 
       const mockError = new Error("Refund creation failed");
-      refundDao.createRefund = jest.fn().mockRejectedValue(mockError);
+      refundService.createRefund = jest.fn().mockRejectedValue(mockError);
 
       // Spy on sendErrorResponse
       const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse").mockImplementation();
 
       await refundController.createRefund(mockRequest, mockResponse);
 
-      expect(refundDao.createRefund).toHaveBeenCalledWith(prisma, mockRequest.body);
+      expect(refundService.createRefund).toHaveBeenCalledWith(mockRequest.body);
       expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, expect.any(String), mockError);
       // Restore the original implementation
       sendErrorSpy.mockRestore();
@@ -83,13 +83,13 @@ describe("refundController", () => {
 
       const mockRefund = { id: 1, amount: 100, orderId: 1 };
 
-      refundDao.getRefund = jest.fn().mockResolvedValue(mockRefund);
+      refundService.getRefund = jest.fn().mockResolvedValue(mockRefund);
       // Spy on sendSuccessResponse
       const sendSuccessSpy = jest.spyOn(responseHelper, "sendSuccessResponse").mockImplementation();
 
       await refundController.getRefundDetails(mockRequest, mockResponse);
 
-      expect(refundDao.getRefund).toHaveBeenCalledWith(prisma, 1);
+      expect(refundService.getRefund).toHaveBeenCalledWith(1);
       expect(sendSuccessSpy).toHaveBeenCalledWith(mockResponse, 200, expect.any(String), mockRefund);
       // Restore the original implementation
       sendSuccessSpy.mockRestore();
@@ -124,14 +124,14 @@ describe("refundController", () => {
       } as unknown as Response;
 
       const mockError = new Error("Refund fetch failed");
-      (refundDao.getRefund as jest.Mock).mockRejectedValue(mockError);
+      (refundService.getRefund as jest.Mock).mockRejectedValue(mockError);
 
       // Spy on sendErrorResponse
       const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse");
 
       await refundController.getRefundDetails(mockRequest, mockResponse);
 
-      expect(refundDao.getRefund).toHaveBeenCalledWith(prisma, 1);
+      expect(refundService.getRefund).toHaveBeenCalledWith(1);
       expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, expect.any(String), mockError);
       sendErrorSpy.mockRestore();
     });
@@ -154,15 +154,15 @@ describe("refundController", () => {
 
       const updatedRefund = { id: 1, amount: 150, orderId: 1 };
 
-      // Mock the refundDao.updateRefund function
-      refundDao.updateRefund = jest.fn().mockResolvedValue(updatedRefund);
+      // Mock the refundService.updateRefund function
+      refundService.updateRefund = jest.fn().mockResolvedValue(updatedRefund);
 
       // Spy on sendSuccessResponse
       const sendSuccessSpy = jest.spyOn(responseHelper, "sendSuccessResponse").mockImplementation();
 
       await refundController.updateRefund(mockRequest, mockResponse);
 
-      expect(refundDao.updateRefund).toHaveBeenCalledWith(prisma, 1, mockRequest.body);
+      expect(refundService.updateRefund).toHaveBeenCalledWith(1, mockRequest.body);
       expect(sendSuccessSpy).toHaveBeenCalledWith(mockResponse, 200, expect.any(String), updatedRefund);
       // Restore spy (optional for consistency across tests)
       sendSuccessSpy.mockRestore();
@@ -182,14 +182,14 @@ describe("refundController", () => {
       const mockError = new Error("Refund update failed");
 
       // Mock the DAO function to reject
-      refundDao.updateRefund = jest.fn().mockRejectedValue(mockError);
+      refundService.updateRefund = jest.fn().mockRejectedValue(mockError);
 
       // Spy on sendErrorResponse
       const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse").mockImplementation();
 
       await refundController.updateRefund(mockRequest, mockResponse);
 
-      expect(refundDao.updateRefund).toHaveBeenCalledWith(prisma, 1, mockRequest.body);
+      expect(refundService.updateRefund).toHaveBeenCalledWith(1, mockRequest.body);
       expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, expect.any(String), mockError);
       // Restore spy (optional for consistency across tests)
       sendErrorSpy.mockRestore();
