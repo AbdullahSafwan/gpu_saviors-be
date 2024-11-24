@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 import { booking_status, booking_item_type } from "@prisma/client";
-import {formatWhatsAppNumber} from "../validator/validationHelper";
+import { formatWhatsAppNumber } from "./helper";
 
 const createBookingValidator = [
   // Validate booking fields
@@ -82,7 +82,6 @@ const updateBookingValidator = [
     .bail()
     .customSanitizer((value) => formatWhatsAppNumber(value)),
 
-
   // Validate the booking_items array if it is provided
   body("booking_items").optional().isArray().withMessage("Booking items must be an array if provided"),
 
@@ -99,5 +98,3 @@ const updateBookingValidator = [
 ];
 
 export const bookingValidator = { createBookingValidator, updateBookingValidator };
-
-
