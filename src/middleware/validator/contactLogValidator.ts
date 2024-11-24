@@ -6,8 +6,6 @@ const createContactLogValidator = [
 
   body("userId").notEmpty().withMessage("userId is required").isInt(),
 
-  body("bookingId").notEmpty().withMessage("bookingId is required").isInt(),
-
   body("contactedAt").notEmpty().isISO8601().toDate(),
 
   body("status").notEmpty().withMessage("status is required").bail().isIn(Object.values(contact_method)),
@@ -21,8 +19,6 @@ const updateContactLogValidator = [
   body("bookingItemId").optional().notEmpty().withMessage("BookingItemId is required").isInt(),
 
   body("userId").optional().notEmpty().withMessage("userId is required").isInt(),
-
-  body("bookingId").optional().notEmpty().withMessage("bookingId is required").isInt(),
 
   body("contactedAt").optional().notEmpty().isISO8601().toDate(),
 

@@ -30,7 +30,7 @@ const getBooking = async (id: number) => {
   try {
     const result = await bookingDao.getBooking(prisma, id);
     if (!result) {
-      throw new Error(`delivery not found against id: ${id}`);
+      throw new Error(`Booking not found against id: ${id}`);
     }
     return result;
   } catch (error) {
@@ -64,6 +64,11 @@ const updateBooking = async (id: number, data: UpdateBookingRequest) => {
         },
       }),
     };
+
+    const record = await bookingDao.getBooking(prisma, id);
+    if (!record) {
+      throw new Error(`Booking not found against id: ${id}`);
+    }
 
     const result = await bookingDao.updateBooking(prisma, id, updateData);
     return result;

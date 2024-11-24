@@ -2,8 +2,9 @@ import { Request, Response } from "express";
 import { debugLog } from "../services/helper";
 import { sendErrorResponse, sendSuccessResponse } from "../services/responseHelper";
 import { contactLogService } from "../services/contactLog";
+import { CreateContactLogRequest,UpdateContactLogRequest } from "../types/contactLogTypes";
 
-const createContactLog = async (req: Request, res: Response) => {
+const createContactLog = async (req: Request<{},{},CreateContactLogRequest>, res: Response) => {
   try {
     const data = req.body;
     const result = await contactLogService.createContactLog(data)
@@ -14,7 +15,7 @@ const createContactLog = async (req: Request, res: Response) => {
   }
 };
 
-const getContactLogDetails = async (req: Request, res: Response) => {
+const getContactLogDetails = async (req: Request<{id: string},{},{}>, res: Response) => {
   try {
     const id = req.params.id ? +req.params?.id : null;
     if (!id) {
@@ -28,7 +29,7 @@ const getContactLogDetails = async (req: Request, res: Response) => {
   }
 };
 
-const updateContactLog = async (req: Request, res: Response) => {
+const updateContactLog = async (req: Request<{id: string},{},UpdateContactLogRequest>, res: Response) => {
   try {
     const data = req.body;
     const id = +req.params.id;
