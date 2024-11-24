@@ -79,7 +79,7 @@ model delivery {
   phoneNumber          String
   createdAt            DateTime        @default(now())
   modifiedAt           DateTime        @default(now())
-  landmark             Int?
+  landmark             String?
   secondaryPhoneNumber String?
   deliveryDate         DateTime
   isActive             Boolean         @default(true)
