@@ -25,6 +25,22 @@ const getBookingItem = async (prisma: PrismaClient, id: number) => {
     throw error;
   }
 };
+const getBookingIdByBookingItemId = async (prisma: PrismaClient, id: number) => {
+  try {
+    const result = await prisma.booking_item.findUnique({
+      where: { id },
+      select: { bookingId: true },
+    }); // Fetch only the bookingId
+
+    if (!result) {
+      throw new Error(`Booking not found for bookingItemId: ${id}`);
+    }
+    return result;
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
 
 const updateBookingItem = async (prisma: PrismaClient, id: number, data: Prisma.booking_itemUpdateInput) => {
   try {
@@ -39,4 +55,4 @@ const updateBookingItem = async (prisma: PrismaClient, id: number, data: Prisma.
   }
 };
 
-export const bookingItemDao = { createBookingItem, getBookingItem, updateBookingItem };
+export const bookingItemDao = { createBookingItem, getBookingItem, updateBookingItem, getBookingIdByBookingItemId };

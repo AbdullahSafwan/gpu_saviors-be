@@ -1,25 +1,24 @@
 import { Request, Response, NextFunction } from "express";
-import { validationResult } from "express-validator";
+import { validationResult, ValidationError } from "express-validator";
 
 export const throwValidationResult = (req: Request, res: Response, next: NextFunction) => {
   const valResult = validationResult(req);
 
   if (!valResult.isEmpty()) {
-    return res.status(400).json({ errors: valResult.array() });
+    const errors: ValidationError[] = valResult.array();
+    return res.status(400).json({ errors });
   }
   next();
 };
-
-
 
 // Create a utility function to get line number, file name, and function name
 export function getDebugInfo() {
   try {
     throw new Error();
   } catch (e: any) {
-    const stackLines = e.stack?.split('\n') || [];
+    const stackLines = e.stack?.split("\n") || [];
     // Assuming that the third line of the stack trace contains the file and line information
-    const callerLine = stackLines[3] || '';
+    const callerLine = stackLines[3] || "";
     // const matchResult = callerLine.match(/at (.+?) \((.+?):(\d+):(\d+)\)/);
     if (callerLine) {
       return {
@@ -33,7 +32,7 @@ export function getDebugInfo() {
         // functionName: 'UnknownFunction',
         // fileName: 'UnknownFile',
         // lineNumber: 'UnknownLine',
-        errorLocation: 'UnknownLocation',
+        errorLocation: "UnknownLocation",
       };
     }
   }
