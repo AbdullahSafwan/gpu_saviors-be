@@ -17,7 +17,7 @@ const createDeliveryValidator = [
     .matches(/^0[1-9]{2}[0-9]{7}$|^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
     .withMessage("Invalid phone number"),
 
-  body("landmark").optional(),
+  body("landmark").optional().isString(),
 
   body("secondaryPhoneNumber")
     .optional()
@@ -58,7 +58,7 @@ const updateDeliveryValidator = [
     .matches(/^0[1-9]{2}[0-9]{7}$|^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
     .withMessage("Invalid phone number"),
 
-  body("landmark").optional(),
+  body("landmark").optional().isString(),
 
   body("secondaryPhoneNumber")
     .optional()
