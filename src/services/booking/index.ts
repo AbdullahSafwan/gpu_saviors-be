@@ -41,6 +41,10 @@ const getBooking = async (id: number) => {
 
 const updateBooking = async (id: number, data: UpdateBookingRequest) => {
   try {
+    const record = await bookingDao.getBooking(prisma, id);
+    if (!record) {
+      throw new Error(`Booking not found against id: ${id}`);
+    }
     const { booking_items, ...otherData } = data;
     // Separate items based on the presence of `id`
     // if id is present, then the item is to be updated, if not then it is to be created
@@ -64,11 +68,6 @@ const updateBooking = async (id: number, data: UpdateBookingRequest) => {
         },
       }),
     };
-
-    const record = await bookingDao.getBooking(prisma, id);
-    if (!record) {
-      throw new Error(`Booking not found against id: ${id}`);
-    }
 
     const result = await bookingDao.updateBooking(prisma, id, updateData);
     return result;
