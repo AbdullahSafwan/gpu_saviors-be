@@ -17,6 +17,10 @@ export interface CreateBookingRequest {
   booking_items: BookingItem[];
 }
 
+export interface GetBookingDetailsRequest {
+  id: number;
+}
+
 export interface UpdateBookingRequest {
   clientName?: string;
   phoneNumber?: string;
