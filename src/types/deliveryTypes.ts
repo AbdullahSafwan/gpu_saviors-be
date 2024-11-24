@@ -9,7 +9,7 @@ export interface CreateDeliveryRequest {
   courier: string;
   type: courier_type;
   phoneNumber: string;
-  landmark?: number;
+  landmark?: string;
   secondaryPhoneNumber?: string;
   deliveryDate: Date;
   isActive?: boolean; // Optional, defaults to true in the model
@@ -29,7 +29,7 @@ export interface UpdateDeliveryRequest {
   courier?: string;
   type?: courier_type;
   phoneNumber?: string;
-  landmark?: number;
+  landmark?: string;
   secondaryPhoneNumber?: string;
   deliveryDate?: Date;
   isActive?: boolean;
