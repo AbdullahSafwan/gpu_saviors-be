@@ -17,6 +17,12 @@ const getBooking = async (prisma: PrismaClient, id: number) => {
   try {
     const result = await prisma.booking.findUnique({
       where: { id },
+      include: {
+        booking_items: true,
+        booking_payments: true,
+        contact_log: true,
+        delivery: true, 
+      }
     });
     return result;
   } catch (error) {
@@ -30,6 +36,12 @@ const updateBooking = async (prisma: PrismaClient, id: number, data: Prisma.book
     const result = await prisma.booking.update({
       where: { id },
       data,
+      include: {
+        booking_items: true,
+        booking_payments: true,
+        contact_log: true,
+        delivery: true,
+      }
     });
     return result;
   } catch (error) {

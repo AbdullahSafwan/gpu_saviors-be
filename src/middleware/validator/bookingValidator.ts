@@ -1,12 +1,36 @@
 import { body } from "express-validator";
 import { booking_status, booking_item_type } from "@prisma/client";
+import { formatWhatsAppNumber } from "./helper";
 
 const createBookingValidator = [
   // Validate booking fields
   body("paidAmount").optional().isInt({ min: 0 }).withMessage("Paid amount must be a positive integer"),
+
   body("clientName").notEmpty().withMessage("name is required").bail().isString().withMessage("name should be valid string"),
-  body("phoneNumber").notEmpty().withMessage("phone Number is required").bail().isString().withMessage("phone number should be valid string"),
-  body("whatsappNumber").notEmpty().withMessage("whatsapp Number is required").bail().isString().withMessage("whatsapp number should be valid string"),
+
+  body("phoneNumber")
+    .trim()
+    .notEmpty()
+    .withMessage("Phone number is required") // Validate if it's not empty
+    .bail()
+    .isString()
+    .withMessage("Phone number should be a valid string") // Validate if it's a string
+    .bail()
+    .matches(/^0[1-9]{2}[0-9]{7}$|^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
+    .withMessage("Invalid phone number"),
+
+  body("whatsappNumber")
+    .trim()
+    .notEmpty()
+    .withMessage("whatsapp Number is required")
+    .bail()
+    .isString()
+    .withMessage("whatsapp number should be valid string")
+    .bail()
+    .matches(/^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
+    .withMessage("Invalid WhatsApp Number")
+    .bail()
+    .customSanitizer((value) => formatWhatsAppNumber(value)), // Convert Whatsapp Numbers in One format "92"
 
   // Validate each booking_item in the array
   body("booking_items").isArray({ min: 1 }).withMessage("Booking items are required"),
@@ -32,7 +56,31 @@ const updateBookingValidator = [
 
   body("paidAmount").optional().isInt({ min: 0 }).withMessage("Paid amount must be a positive integer"),
 
-  body("whatsappNumber").optional().isString().withMessage("WhatsApp number must be a valid string"),
+  body("phoneNumber")
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage("Phone number is optional") // Validate if it's not empty
+    .bail()
+    .isString()
+    .withMessage("Phone number should be a valid string") // Validate if it's a string
+    .bail()
+    .matches(/^0[1-9]{2}[0-9]{7}$|^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
+    .withMessage("Invalid phone number"),
+
+  body("whatsappNumber")
+    .trim()
+    .optional()
+    .notEmpty()
+    .withMessage("whatsapp Number is optional")
+    .bail()
+    .isString()
+    .withMessage("whatsapp number should be valid string")
+    .bail()
+    .matches(/^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
+    .withMessage("Invalid WhatsApp Number")
+    .bail()
+    .customSanitizer((value) => formatWhatsAppNumber(value)),
 
   // Validate the booking_items array if it is provided
   body("booking_items").optional().isArray().withMessage("Booking items must be an array if provided"),
