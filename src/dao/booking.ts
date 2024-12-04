@@ -21,8 +21,36 @@ const getBooking = async (prisma: PrismaClient, id: number) => {
         booking_items: true,
         booking_payments: true,
         contact_log: true,
-        delivery: true, 
-      }
+        delivery: true,
+      },
+    });
+    return result;
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+
+const listBookings = async (prisma: PrismaClient, page: number, pageSize: number) => {
+  try {
+    console.log(page, pageSize);
+    const result = await prisma.booking.findMany({
+      select: {
+        clientName: true,
+        code: true,
+        createdAt: true,
+        appointmentDate: true,
+        whatsappNumber: true,
+        id: true,
+        booking_items: {
+          select: {
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
     return result;
   } catch (error) {
@@ -41,7 +69,7 @@ const updateBooking = async (prisma: PrismaClient, id: number, data: Prisma.book
         booking_payments: true,
         contact_log: true,
         delivery: true,
-      }
+      },
     });
     return result;
   } catch (error) {
@@ -50,4 +78,4 @@ const updateBooking = async (prisma: PrismaClient, id: number, data: Prisma.book
   }
 };
 
-export const bookingDao = { createBooking, getBooking, updateBooking };
+export const bookingDao = { createBooking, getBooking, updateBooking, listBookings };

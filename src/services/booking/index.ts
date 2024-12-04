@@ -39,6 +39,19 @@ const getBooking = async (id: number) => {
   }
 };
 
+const listBookings = async (page: number = 1, pageSize: number = 10) => {
+  try {
+    const result = await bookingDao.listBookings(prisma, page, pageSize);
+    if (!result) {
+      throw new Error(`Booking list not found`);
+    }
+    return result;
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+
 const updateBooking = async (id: number, data: UpdateBookingRequest) => {
   try {
     const record = await bookingDao.getBooking(prisma, id);
@@ -77,4 +90,4 @@ const updateBooking = async (id: number, data: UpdateBookingRequest) => {
   }
 };
 
-export const bookingService = { updateBooking, createBooking, getBooking };
+export const bookingService = { updateBooking, createBooking, getBooking, listBookings };

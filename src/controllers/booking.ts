@@ -30,6 +30,18 @@ const getBookingDetails = async (req: Request<{ id: string }, {}, {}>, res: Resp
   }
 };
 
+const listBookings = async (req: Request, res: Response) => {
+  try {
+    const page = req.query.page ? parseInt(req.query.page as string) : undefined;
+    const pageSize = req.query.pageSize ? parseInt(req.query.pageSize as string) : undefined;
+    const result = await bookingService.listBookings(page, pageSize);
+    sendSuccessResponse(res, 200, "Successfully fetched bookings list", result);
+  } catch (error) {
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error fetching bookings list", error);
+  }
+};
+
 const updateBooking = async (req: Request<{ id: string }, {}, UpdateBookingRequest>, res: Response) => {
   try {
     const id = +req.params.id;
@@ -42,4 +54,4 @@ const updateBooking = async (req: Request<{ id: string }, {}, UpdateBookingReque
   }
 };
 
-export const bookingController = { createBooking, getBookingDetails, updateBooking };
+export const bookingController = { createBooking, getBookingDetails, updateBooking, listBookings };
