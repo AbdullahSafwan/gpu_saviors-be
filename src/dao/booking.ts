@@ -67,7 +67,6 @@ const listBookings = async (prisma: PrismaClient, page: number, pageSize: number
        totalPages,         // Total number of pages
        totalBookings,      // Total number of bookings
      };
-  // return result;
   } catch (error) {
     debugLog(error);
     throw error;
