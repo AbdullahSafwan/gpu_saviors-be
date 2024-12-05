@@ -34,8 +34,9 @@ const getBooking = async (prisma: PrismaClient, id: number) => {
 const listBookings = async (prisma: PrismaClient, page: number, pageSize: number) => {
   try {
     const result = await prisma.booking.findMany({
-      skip: (page - 1) * pageSize,
-      take: (pageSize = 11),
+      // Offset pagination 
+      skip: (page - 1) * pageSize, // calculate the pages
+      take: (pageSize = 11), // calculate how many records display in each page (10)
 
       select: {
         clientName: true,
@@ -52,10 +53,21 @@ const listBookings = async (prisma: PrismaClient, page: number, pageSize: number
       },
 
       orderBy: {
-        createdAt: "desc",
+        createdAt: "desc", // order by creation date, descending 
       },
     });
-    return result;
+     // Total bookings
+     const totalBookings = await prisma.booking.count();
+
+     // Total number of booking pages
+     const totalPages = Math.ceil(totalBookings / pageSize);
+ 
+     return {
+       bookings: result,  // The current page of bookings
+       totalPages,         // Total number of pages
+       totalBookings,      // Total number of bookings
+     };
+  // return result;
   } catch (error) {
     debugLog(error);
     throw error;
