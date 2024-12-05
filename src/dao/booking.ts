@@ -33,8 +33,10 @@ const getBooking = async (prisma: PrismaClient, id: number) => {
 
 const listBookings = async (prisma: PrismaClient, page: number, pageSize: number) => {
   try {
-    console.log(page, pageSize);
     const result = await prisma.booking.findMany({
+      skip: (page - 1) * pageSize,
+      take: (pageSize = 11),
+
       select: {
         clientName: true,
         code: true,
@@ -48,6 +50,7 @@ const listBookings = async (prisma: PrismaClient, page: number, pageSize: number
           },
         },
       },
+
       orderBy: {
         createdAt: "desc",
       },
