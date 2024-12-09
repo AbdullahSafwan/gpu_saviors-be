@@ -33,9 +33,9 @@ const getBooking = async (prisma: PrismaClient, id: number) => {
 
 const listBookings = async (prisma: PrismaClient, page: number, pageSize: number, _sort: string | null, _orderBy: string | null) => {
   try {
-    const sort = (_sort ?? "id").toString();
-    const order = _orderBy;
-    const orderBy = { [sort]: order };
+    const sort = (_sort ?? "id").toString(); // Determine the field to sort by, default to "id" if not provided
+    const order = _orderBy;  // Determine the sorting order, default is Descending order
+    const orderBy = { [sort]: order }; // Construct the orderBy object for querying based on the sort and order
 
     const result = await prisma.booking.findMany({
       orderBy,
