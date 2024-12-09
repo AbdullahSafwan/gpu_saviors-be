@@ -31,12 +31,19 @@ const getBooking = async (prisma: PrismaClient, id: number) => {
   }
 };
 
-const listBookings = async (prisma: PrismaClient, page: number, pageSize: number) => {
+const listBookings = async (prisma: PrismaClient, page: number, pageSize: number, _sort: string | null, _orderBy: "asc" | "desc") => {
   try {
+    const sort = (_sort ?? "id").toString();
+    const order = _orderBy;
+    const orderBy = { [sort]: order };
+
     const result = await prisma.booking.findMany({
-      // Offset pagination 
-      skip: (page - 1) * pageSize, // calculate the pages
-      take: (pageSize = 11), // calculate how many records display in each page (10)
+      orderBy,
+
+      // Offset pagination
+
+      skip: (page - 1) * pageSize,
+      take: pageSize,
 
       select: {
         clientName: true,
@@ -45,6 +52,7 @@ const listBookings = async (prisma: PrismaClient, page: number, pageSize: number
         appointmentDate: true,
         whatsappNumber: true,
         id: true,
+        status: true,
         booking_items: {
           select: {
             name: true,
@@ -52,21 +60,31 @@ const listBookings = async (prisma: PrismaClient, page: number, pageSize: number
         },
       },
 
-      orderBy: {
-        createdAt: "desc", // order by creation date, descending 
-      },
-    });
-     // Total bookings
-     const totalBookings = await prisma.booking.count();
+      // orderBy: [
+      //   {
+      //     appointmentDate: "desc",
+      //   },
+      //   {
+      //     createdAt: "desc"
+      //   },
+      //   {
+      //     id: "desc"
+      //   },
 
-     // Total number of booking pages
-     const totalPages = Math.ceil(totalBookings / pageSize);
- 
-     return {
-       bookings: result,  // The current page of bookings
-       totalPages,         // Total number of pages
-       totalBookings,      // Total number of bookings
-     };
+      // createdAt: "desc", // order by creation date, descendin
+      // ],
+    });
+    // Total bookings
+    const totalBookings = await prisma.booking.count();
+
+    // Total number of booking pages
+    const totalPages = Math.ceil(totalBookings / pageSize);
+
+    return {
+      bookings: result, // The current page of bookings
+      totalPages, // Total number of pages
+      totalBookings, // Total number of bookings
+    };
   } catch (error) {
     debugLog(error);
     throw error;
