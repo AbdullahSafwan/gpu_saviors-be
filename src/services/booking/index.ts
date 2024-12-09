@@ -38,6 +38,22 @@ const getBooking = async (id: number) => {
     throw error;
   }
 };
+/**
+ * Fetches a list of bookings with pagination, sorting, and ordering.
+ *
+ * This function interacts with the booking data access object (DAO) to retrieve the list of bookings.
+ * It supports pagination via `page` and `pageSize` parameters, and allows sorting and ordering based on
+ * the `sortBy` and `orderBy` parameters.
+ *
+ * @param page - The current page number for pagination.
+ * @param pageSize - The number of records per page.
+ * @param sortBy - The field to sort the bookings by (e.g., 'date', 'status').
+ * @param orderBy - The direction of sorting: can be 'asc' for ascending or 'desc' for descending.
+ *
+ * @returns The list of bookings for the requested page, or throws an error if no bookings are found.
+ *
+ * @throws Will throw an error if no bookings are found or if the DAO call fails.
+ */
 
 const listBookings = async (page: number, pageSize: number, sortBy: string | null, orderBy: string | null) => {
   try {

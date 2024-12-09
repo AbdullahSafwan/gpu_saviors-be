@@ -37,13 +37,6 @@ const listBookings = async (req: Request, res: Response) => {
     const sort = req.query.sortBy ? req.query.sortBy.toString() : null;
     const orderBy = req.query.orderBy ? req.query.orderBy.toString() : "desc";
 
-    // if (orderBy == "desc" ) {
-    //   sendSuccessResponse(res, 200, "Successfully fetched bookings list");
-    // }
-    // if (orderBy !== "asc" && orderBy !== "desc") {
-    //   throw Error("orderBy should be asc or desc");
-    // }
-
     const result = await bookingService.listBookings(page, pageSize, sort, orderBy);
     sendSuccessResponse(res, 200, "Successfully fetched bookings list", result);
   } catch (error) {
