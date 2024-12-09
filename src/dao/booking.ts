@@ -31,7 +31,7 @@ const getBooking = async (prisma: PrismaClient, id: number) => {
   }
 };
 
-const listBookings = async (prisma: PrismaClient, page: number, pageSize: number, _sort: string | null, _orderBy: "asc" | "desc") => {
+const listBookings = async (prisma: PrismaClient, page: number, pageSize: number, _sort: string | null, _orderBy: string | null) => {
   try {
     const sort = (_sort ?? "id").toString();
     const order = _orderBy;
@@ -59,20 +59,6 @@ const listBookings = async (prisma: PrismaClient, page: number, pageSize: number
           },
         },
       },
-
-      // orderBy: [
-      //   {
-      //     appointmentDate: "desc",
-      //   },
-      //   {
-      //     createdAt: "desc"
-      //   },
-      //   {
-      //     id: "desc"
-      //   },
-
-      // createdAt: "desc", // order by creation date, descendin
-      // ],
     });
     // Total bookings
     const totalBookings = await prisma.booking.count();
