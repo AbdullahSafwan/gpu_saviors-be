@@ -39,9 +39,9 @@ const getBooking = async (id: number) => {
   }
 };
 
-const listBookings = async (page: number = 1, pageSize: number = 10) => {
+const listBookings = async (page: number, pageSize: number, sortBy: string | null, orderBy: "asc" | "desc") => {
   try {
-    const result = await bookingDao.listBookings(prisma, page, pageSize);
+    const result = await bookingDao.listBookings(prisma, page, pageSize, sortBy, orderBy);
     if (!result) {
       throw new Error(`Booking list not found`);
     }

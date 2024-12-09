@@ -22,9 +22,9 @@ router.get("/user/:id", userController.getUserDetails);
 router.patch("/user/:id", userValidator.updateUserValidator, throwValidationResult, userController.updateUser);
 
 router.post("/booking/", bookingValidator.createBookingValidator, throwValidationResult, bookingController.createBooking);
-router.get("/booking/:id", bookingController.getBookingDetails);
 router.get("/booking/", bookingController.listBookings);
 router.patch("/booking/:id", bookingValidator.updateBookingValidator, throwValidationResult, bookingController.updateBooking);
+router.get("/booking/:id", bookingController.getBookingDetails);
 
 router.post("/service/", serviceValidator.createServiceValidator, throwValidationResult, serviceController.createService);
 router.get("/service/:id", serviceController.getServiceDetails);
