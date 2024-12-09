@@ -39,7 +39,7 @@ const getBooking = async (id: number) => {
   }
 };
 
-const listBookings = async (page: number, pageSize: number, sortBy: string | null, orderBy: "asc" | "desc") => {
+const listBookings = async (page: number, pageSize: number, sortBy: string | null, orderBy: string | null) => {
   try {
     const result = await bookingDao.listBookings(prisma, page, pageSize, sortBy, orderBy);
     if (!result) {

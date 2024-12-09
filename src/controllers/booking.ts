@@ -35,10 +35,9 @@ const listBookings = async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const pageSize = parseInt(req.query.pageSize as string) || 11;
     const sort = req.query.sortBy ? req.query.sortBy.toString() : null;
-    const orderBy = req.query.orderBy ? req.query.orderBy.toString() : undefined;
-    if (orderBy !== "asc" && orderBy !== "desc" && orderBy !== null) {
-      throw Error("orderBy should be asc or desc");
-    }
+    const orderBy = req.query.orderBy ? req.query.orderBy.toString() : "desc";
+
+   
     const result = await bookingService.listBookings(page, pageSize, sort, orderBy);
     sendSuccessResponse(res, 200, "Successfully fetched bookings list", result);
   } catch (error) {
@@ -60,3 +59,9 @@ const updateBooking = async (req: Request<{ id: string }, {}, UpdateBookingReque
 };
 
 export const bookingController = { createBooking, getBookingDetails, updateBooking, listBookings };
+ // if (orderBy == "desc" ) {
+    //   sendSuccessResponse(res, 200, "Successfully fetched bookings list");
+    // }
+    // if (orderBy !== "asc" && orderBy !== "desc") {
+    //   throw Error("orderBy should be asc or desc");
+    // }
