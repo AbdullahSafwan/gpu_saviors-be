@@ -55,9 +55,9 @@ const getBooking = async (id: number) => {
  * @throws Will throw an error if no bookings are found or if the DAO call fails.
  */
 
-const listBookings = async (page: number, pageSize: number, sortBy: string | null, orderBy: string | null) => {
+const listBookings = async (page: number, pageSize: number, sortBy: string | null, orderBy: string | null, status: string | undefined) => {
   try {
-    const result = await bookingDao.listBookings(prisma, page, pageSize, sortBy, orderBy);
+    const result = await bookingDao.listBookings(prisma, page, pageSize, sortBy, orderBy, status);
     if (!result) {
       throw new Error(`Booking list not found`);
     }

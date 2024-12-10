@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { booking_status, Prisma, PrismaClient } from "@prisma/client";
 import { debugLog } from "../services/helper";
 
 const createBooking = async (prisma: PrismaClient, data: Prisma.bookingCreateInput) => {
@@ -31,14 +31,22 @@ const getBooking = async (prisma: PrismaClient, id: number) => {
   }
 };
 
-const listBookings = async (prisma: PrismaClient, page: number, pageSize: number, _sort: string | null, _orderBy: string | null) => {
+const listBookings = async (
+  prisma: PrismaClient,
+  page: number,
+  pageSize: number,
+  _sort: string | null,
+  _orderBy: string | null,
+  status: string | undefined
+) => {
   try {
     const sort = (_sort ?? "id").toString(); // Determine the field to sort by, default to "id" if not provided
-    const order = _orderBy;  // Determine the sorting order, default is Descending order
+    const order = _orderBy; // Determine the sorting order, default is Descending order
     const orderBy = { [sort]: order }; // Construct the orderBy object for querying based on the sort and order
 
     const result = await prisma.booking.findMany({
       orderBy,
+      where: { status: status as unknown as booking_status }, // default sort by first Draft, pending and so on
 
       // Offset pagination
 
@@ -70,6 +78,7 @@ const listBookings = async (prisma: PrismaClient, page: number, pageSize: number
       bookings: result, // The current page of bookings
       totalPages, // Total number of pages
       totalBookings, // Total number of bookings
+      // orderBy,
     };
   } catch (error) {
     debugLog(error);
