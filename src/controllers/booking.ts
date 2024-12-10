@@ -33,11 +33,12 @@ const getBookingDetails = async (req: Request<{ id: string }, {}, {}>, res: Resp
 const listBookings = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
-    const pageSize = parseInt(req.query.pageSize as string) || 11;
+    const pageSize = parseInt(req.query.pageSize as string) || 10;
     const sort = req.query.sortBy ? req.query.sortBy.toString() : null;
     const orderBy = req.query.orderBy ? req.query.orderBy.toString() : "desc";
+    const status = req.query.status ? req.query.status.toString() : undefined;
 
-    const result = await bookingService.listBookings(page, pageSize, sort, orderBy);
+    const result = await bookingService.listBookings(page, pageSize, sort, orderBy, status);
     sendSuccessResponse(res, 200, "Successfully fetched bookings list", result);
   } catch (error) {
     debugLog(error);
