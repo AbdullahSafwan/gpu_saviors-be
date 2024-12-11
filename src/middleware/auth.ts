@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from "express";
 // import jwt, { JwtPayload } from "jsonwebtoken";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
+import { sendErrorResponse } from "../services/responseHelper";
 
 const accessKeySecret = process.env.JWT_ACCESS_KEY_SECRET!;
 
@@ -23,7 +24,7 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
 
     jwt.verify(token, accessKeySecret, (err, user) => {
       if (err) {
-        return res.sendStatus(403);
+        sendErrorResponse(res, 403, "Forbidden", "Invalid access token");
       }
       (req as CustomRequest).user = user;
       next();

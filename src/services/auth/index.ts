@@ -7,6 +7,12 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import "dotenv/config";
 
 const accessKeySecret = process.env.JWT_ACCESS_KEY_SECRET!;
+const refreshKeySecret = process.env.JWT_REFRESH_KEY_SECRET!;
+
+interface CustomJwtPayload extends JwtPayload {
+  email: string;
+  userId: number;
+}
 
 const signUpUser = async (data: SignUpRequest) => {
   try {
@@ -29,11 +35,11 @@ const signInUser = async (data: SignInRequest) => {
     const user = await userDao.findUserByEmail(prisma, email);
     if (!user) throw new Error("User not found");
 
-    //validate password
+    // Validate password
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) throw new Error("Wrong password");
-    const refreshKeySecret = process.env.JWT_REFRESH_KEY_SECRET!;
-    const jwtPayload = {
+
+    const jwtPayload: CustomJwtPayload = {
       email: user.email,
       userId: user.id,
     };
@@ -46,28 +52,31 @@ const signInUser = async (data: SignInRequest) => {
   }
 };
 
-const refreshAccessToken = async (data: RefreshTokenRequest) => {
+const refreshAccessToken = async (data: RefreshTokenRequest): Promise<string> => {
   try {
-    const refreshToken = data.refreshToken;
-    jwt.verify(refreshToken, process.env.REFRESH_SECRET_KEY!, (err, user) => {
-      if (err || !user) {
-        throw new Error("Invalid token");
-      }
-      const accessToken = generateAccessToken({ email: user.email, userId: user.id });
-      return accessToken;
-    });
+    const { refreshToken } = data;
+
+    const user = jwt.verify(refreshToken, refreshKeySecret) as CustomJwtPayload;
+
+    if (!user || !user.email || !user.userId) {
+      throw new Error("Invalid token payload");
+    }
+
+    const accessToken = generateAccessToken({ email: user.email, userId: user.userId });
+    return accessToken;
   } catch (error) {
     debugLog(error);
     throw error;
   }
 };
 
-function generateAccessToken(jwtPayload: JwtPayload) {
+function generateAccessToken(jwtPayload: CustomJwtPayload): string {
   try {
-    return jwt.sign(jwtPayload, accessKeySecret, { expiresIn: "7d" });
+    return jwt.sign(jwtPayload, accessKeySecret, { expiresIn: "5s" }); // Adjust expiration as needed
   } catch (error) {
     debugLog(error);
     throw error;
   }
 }
+
 export const authService = { signUpUser, signInUser, refreshAccessToken };

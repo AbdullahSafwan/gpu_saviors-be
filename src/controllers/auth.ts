@@ -23,8 +23,6 @@ const signIn = async (req: Request<{}, {}, SignInRequest>, res: Response) => {
 
     const data = req.body
     const tokens = await authService.signInUser(data)
-    res.cookie("accessToken", tokens.accessToken)
-    res.cookie("refreshToken", tokens.refreshToken)
     sendSuccessResponse(res, 200, "Successfully signed in", tokens);
   } catch (error) {
     debugLog(error);
@@ -36,11 +34,11 @@ const signIn = async (req: Request<{}, {}, SignInRequest>, res: Response) => {
     try {
       //TODO add body validation
       //TODO check refresh token inside db
-      const result = await authService.refreshAccessToken(req.body)
-      sendSuccessResponse(res, 200, "Successfully created user", result);
+      const accessToken = await authService.refreshAccessToken(req.body)
+      sendSuccessResponse(res, 200, "Access token refreshed successfully", {accessToken});
     } catch (error) {
       debugLog(error);
-      sendErrorResponse(res, 400, "Error updating booking", error);
+      sendErrorResponse(res, 400, "Error refreshing access token", error);
     }
   };
 
