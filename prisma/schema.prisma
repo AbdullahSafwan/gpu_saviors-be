@@ -12,7 +12,9 @@ model user {
   firstName    String
   lastName     String
   phoneNumber  String
-  email        String?
+  email        String        @unique
+  password     String
+  isVerified   Boolean       @default(false)
   status       user_status   @default(ENABLED)
   createdAt    DateTime      @default(now())
   modifiedAt   DateTime      @default(now()) @updatedAt
@@ -28,21 +30,21 @@ model system_configuration {
 }
 
 model booking {
-  id              Int               @unique @default(autoincrement())
-  clientName      String
-  phoneNumber     String
+  id               Int               @unique @default(autoincrement())
+  clientName       String
+  phoneNumber      String
   whatsappNumber   String
-  status          booking_status    @default(DRAFT)
-  code            String?           @unique
-  payableAmount   Int?
-  paidAmount      Int?
-  createdAt       DateTime          @default(now())
-  modifiedAt      DateTime          @default(now())
-  isActive        Boolean           @default(true)
-  appointmentDate DateTime?
+  status           booking_status    @default(DRAFT)
+  code             String?           @unique
+  payableAmount    Int?
+  paidAmount       Int?
+  createdAt        DateTime          @default(now())
+  modifiedAt       DateTime          @default(now())
+  isActive         Boolean           @default(true)
+  appointmentDate  DateTime?
   booking_items    booking_item[]
-  delivery        delivery[]
-  contact_log     contact_log[]
+  delivery         delivery[]
+  contact_log      contact_log[]
   booking_payments booking_payment[]
 }
 
