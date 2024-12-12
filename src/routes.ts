@@ -24,8 +24,9 @@ router.get("/user/:id", userController.getUserDetails);
 router.patch("/user/:id", userValidator.updateUserValidator, throwValidationResult, userController.updateUser);
 
 router.post("/auth/signup", authController.signUp);
-router.post("/auth/signin", authController.signIn);
+router.post("/auth/login", authController.logIn);
 router.post("/auth/refresh", authController.refreshToken);
+router.delete("/auth/logout", authController.logOut);
 
 
 

@@ -1,10 +1,11 @@
 import { userDao } from "../../dao/user";
 import prisma from "../../prisma";
-import { RefreshTokenRequest, SignInRequest, SignUpRequest } from "../../types/authTypes";
+import { RefreshTokenRequest, LogInRequest, SignUpRequest } from "../../types/authTypes";
 import { debugLog } from "../helper";
 import bcrypt from "bcrypt";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import "dotenv/config";
+import { userSessionDao } from "../../dao/userSession";
 
 const accessKeySecret = process.env.JWT_ACCESS_KEY_SECRET!;
 const refreshKeySecret = process.env.JWT_REFRESH_KEY_SECRET!;
@@ -29,7 +30,7 @@ const signUpUser = async (data: SignUpRequest) => {
   }
 };
 
-const signInUser = async (data: SignInRequest) => {
+const logInUser = async (data: LogInRequest) => {
   try {
     const { email, password } = data;
     const user = await userDao.findUserByEmail(prisma, email);
@@ -45,6 +46,8 @@ const signInUser = async (data: SignInRequest) => {
     };
     const accessToken = generateAccessToken(jwtPayload);
     const refreshToken = jwt.sign(jwtPayload, refreshKeySecret, { expiresIn: "7d" });
+    await userSessionDao.createSession(prisma, user.id, refreshToken);
+
     return { accessToken, refreshToken };
   } catch (error) {
     debugLog(error);
@@ -55,6 +58,10 @@ const signInUser = async (data: SignInRequest) => {
 const refreshAccessToken = async (data: RefreshTokenRequest): Promise<string> => {
   try {
     const { refreshToken } = data;
+    if (!refreshToken) throw new Error("Refresh token required");
+
+    const session = await userSessionDao.findSessionByToken(prisma, refreshToken);
+    if (!session) throw new Error("Invalid refresh token");
 
     const user = jwt.verify(refreshToken, refreshKeySecret) as CustomJwtPayload;
 
@@ -72,11 +79,21 @@ const refreshAccessToken = async (data: RefreshTokenRequest): Promise<string> =>
 
 function generateAccessToken(jwtPayload: CustomJwtPayload): string {
   try {
-    return jwt.sign(jwtPayload, accessKeySecret, { expiresIn: "5s" }); // Adjust expiration as needed
+    return jwt.sign(jwtPayload, accessKeySecret, { expiresIn: "15s" }); // Adjust expiration as needed
   } catch (error) {
     debugLog(error);
     throw error;
   }
 }
 
-export const authService = { signUpUser, signInUser, refreshAccessToken };
+const logOut = async (data: RefreshTokenRequest) => {
+  try {
+    const { refreshToken } = data;
+    const result = await userSessionDao.deleteSessionByToken(prisma, refreshToken);
+    return result;
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+export const authService = { signUpUser, logInUser, refreshAccessToken, logOut };
