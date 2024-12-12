@@ -24,7 +24,7 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
 
     jwt.verify(token, accessKeySecret, (err, user) => {
       if (err) {
-        sendErrorResponse(res, 403, "Forbidden", "Invalid access token");
+        return sendErrorResponse(res, 403, "Forbidden", "Invalid access token");
       }
       (req as CustomRequest).user = user;
       next();
