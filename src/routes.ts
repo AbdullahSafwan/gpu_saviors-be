@@ -27,6 +27,10 @@ router.post("/auth/signup", authController.signUp);
 router.post("/auth/login", authController.logIn);
 router.post("/auth/refresh", authController.refreshToken);
 router.delete("/auth/logout", authController.logOut);
+router.post("/auth/sendverificationemail", authController.sendVerificationMail);
+router.post("/auth/verifyemail", authController.verifyEmail);
+router.post("/auth/forgotpassword", authController.forgotPassword);
+router.post("/auth/resetpassword", authController.resetPassword);
 
 
 

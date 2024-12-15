@@ -21,6 +21,7 @@ model user {
   contact_logs  contact_log[]
   user_role     user_role[]
   user_sessions user_session[]
+  user_verification_tokens user_verification_token[]
 }
 
 model user_session {
@@ -29,6 +30,22 @@ model user_session {
   refreshToken String   @unique
   createdAt    DateTime @default(now())
   user         user     @relation(fields: [userId], references: [id])
+}
+
+model user_verification_token {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  token     String    @unique
+  type      token_type
+  expiresAt DateTime
+
+  user      user      @relation(fields: [userId], references: [id])
+  @@unique([userId, type])
+}
+
+enum token_type {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
 }
 
 model system_configuration {
