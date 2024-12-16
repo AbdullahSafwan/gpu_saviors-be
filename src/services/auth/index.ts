@@ -92,7 +92,7 @@ const refreshAccessToken = async (data: RefreshTokenRequest): Promise<string> =>
 
 function generateAccessToken(jwtPayload: CustomJwtPayload): string {
   try {
-    return jwt.sign(jwtPayload, accessKeySecret, { expiresIn: "15s" }); // Adjust expiration as needed
+    return jwt.sign(jwtPayload, accessKeySecret, { expiresIn: "60m" });
   } catch (error) {
     debugLog(error);
     throw error;
