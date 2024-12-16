@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { debugLog } from "../services/helper";
 import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
-import { CreateBookingRequest, UpdateBookingRequest } from "../types/bookingTypes";
+import { CreateBookingRequest, ListBookingsRequest, UpdateBookingRequest } from "../types/bookingTypes";
 import { bookingService } from "../services/booking";
 
 const createBooking = async (req: Request<{}, {}, CreateBookingRequest>, res: Response) => {
@@ -30,7 +30,7 @@ const getBookingDetails = async (req: Request<{ id: string }, {}, {}>, res: Resp
   }
 };
 
-const listBookings = async (req: Request, res: Response) => {
+const listBookings = async (req: Request<unknown, unknown, unknown, ListBookingsRequest>, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const pageSize = parseInt(req.query.pageSize as string) || 10;
