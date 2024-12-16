@@ -16,6 +16,7 @@ import { deliveryValidator } from "./middleware/validator/deliveryValidator";
 import { serviceValidator } from "./middleware/validator/serviceValidator";
 import { authController } from "./controllers/auth";
 import { verifyToken } from "./middleware/auth";
+import { authValidator } from "./middleware/validator/authValidator";
 
 const router = express.Router();
 
@@ -23,8 +24,8 @@ router.post("/user/", userValidator.createUserValidator, throwValidationResult, 
 router.get("/user/:id", userController.getUserDetails);
 router.patch("/user/:id", userValidator.updateUserValidator, throwValidationResult, userController.updateUser);
 
-router.post("/auth/signup", authController.signUp);
-router.post("/auth/login", authController.logIn);
+router.post("/auth/signup", authValidator.signUpValidator, throwValidationResult, authController.signUp);
+router.post("/auth/login", authValidator.logInValidator, throwValidationResult, authController.logIn);
 router.post("/auth/refresh", authController.refreshToken);
 router.delete("/auth/logout", authController.logOut);
 router.post("/auth/sendverificationemail", authController.sendVerificationMail);
