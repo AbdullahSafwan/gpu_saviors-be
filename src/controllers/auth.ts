@@ -14,8 +14,6 @@ import {
 
 const signUp = async (req: Request<{}, {}, SignUpRequest>, res: Response) => {
   try {
-    //TODO add body validation
-
     const data = req.body;
     const result = await authService.signUpUser(data);
     sendSuccessResponse(res, 200, "Successfully signed up user", result);
@@ -27,8 +25,6 @@ const signUp = async (req: Request<{}, {}, SignUpRequest>, res: Response) => {
 
 const logIn = async (req: Request<{}, {}, LogInRequest>, res: Response) => {
   try {
-    //TODO add body validation
-
     const data = req.body;
     const tokens = await authService.logInUser(data);
     sendSuccessResponse(res, 200, "Successfully signed in", tokens);
@@ -95,9 +91,6 @@ const forgotPassword = async (req: Request<{}, {}, ForgotPasswordRequest>, res: 
 
 const resetPassword = async (req: Request<{}, {}, ResetPasswordRequest>, res: Response) => {
   try {
-    if (!req.body.newPassword) throw new Error("New password is required");
-    if (!req.body.token) throw new Error("Token is required");
-
     const result = await authService.resetPassword(req.body);
     sendSuccessResponse(res, 200, "Password reset successfully", { result });
   } catch (error) {

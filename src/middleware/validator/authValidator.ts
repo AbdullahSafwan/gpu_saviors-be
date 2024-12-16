@@ -34,4 +34,11 @@ const logInValidator = [
   body("password").notEmpty().withMessage("Password is required."),
 ];
 
-export const authValidator = { signUpValidator, logInValidator };
+const resetPasswordValidator = [
+  body("newPassword")
+    .isStrongPassword({ minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 0 })
+    .withMessage("Password must be at least 8 characters long, contain atleast one Uppercase letter and one number"),
+  body("token").notEmpty().isString(),
+];
+
+export const authValidator = { signUpValidator, logInValidator, resetPasswordValidator };
