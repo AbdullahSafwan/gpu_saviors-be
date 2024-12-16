@@ -12,7 +12,6 @@ jest.mock("../../src/prisma", () => ({
 }));
 
 describe("bookingController", () => {
-  let res: Partial<Response>;
   let sendMock: jest.Mock;
   let statusMock: jest.Mock;
 
@@ -20,10 +19,6 @@ describe("bookingController", () => {
     // Create mock functions for response
     sendMock = jest.fn();
     statusMock = jest.fn().mockReturnValue({ send: sendMock });
-
-    res = {
-      status: statusMock,
-    };
   });
 
   afterEach(() => {
@@ -57,7 +52,6 @@ describe("bookingController", () => {
 
       // Mock the behavior of the `createBooking` method in bookingService
       bookingService.createBooking = jest.fn().mockResolvedValue(mockBookingData);
-      
 
       // Spy on sendSuccessResponse
       const sendSuccessSpy = jest.spyOn(responseHelper, "sendSuccessResponse").mockImplementation();
@@ -74,7 +68,7 @@ describe("bookingController", () => {
     it("should return an error if the data is invalid", async () => {
       const invalidBookingData = {
         clientName: "x1",
-        phoneNumber : " 2",
+        phoneNumber: " 2",
         whatsappNumber: "123",
         booking_items: [],
         code: "",
@@ -154,6 +148,91 @@ describe("bookingController", () => {
       expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, expect.any(String), new Error("id is required"));
 
       sendErrorSpy.mockRestore(); // Restore the original function
+    });
+  });
+
+  describe("listBookings", () => {
+    it("should return a successful response with bookings", async () => {
+      const mockBookings = [
+        { id: 1, bookingName: "Booking 1" },
+        { id: 2, bookingName: "Booking 2" },
+      ];
+      const mockPaginationResult = {
+        data: mockBookings,
+        total: 2,
+        page: 1,
+        pageSize: 11,
+      };
+
+      // Mock the booking service to return the expected result
+      bookingService.listBookings = jest.fn().mockResolvedValue(mockPaginationResult);
+
+      // Mock the success response handler
+      const sendSuccessSpy = jest
+        .spyOn(responseHelper, "sendSuccessResponse")
+        .mockImplementation((res: Response, statusCode: number, message: string | string[], data: any) => {
+          res.status(statusCode).json({ message, data });
+        });
+
+      // Setting query parameters in the request
+      const req = {
+        query: {
+          page: "1",
+          pageSize: "11",
+          sortBy: "id",
+          orderBy: "desc",
+          status: "DRAFT",
+        },
+      } as unknown as Request;
+
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+
+      await bookingController.listBookings(req, res);
+
+      expect(bookingService.listBookings).toHaveBeenCalledWith(1, 11, "id", "desc", "DRAFT");
+      expect(sendSuccessSpy).toHaveBeenCalledWith(res, 200, "Successfully fetched bookings list", mockPaginationResult);
+
+      sendSuccessSpy.mockRestore(); // Restore the spy after test
+    });
+
+    it("should handle errors and return an error response", async () => {
+      const mockError = new Error("Something went wrong");
+
+      // Mock the booking service to throw an error
+      bookingService.listBookings = jest.fn().mockRejectedValue(mockError);
+
+      // Mock the error response handler
+      const sendErrorSpy = jest
+        .spyOn(responseHelper, "sendErrorResponse")
+        .mockImplementation((res: Response, statusCode: number, message: string | string[], error: any) => {
+          res.status(statusCode).json({ message, error });
+        });
+
+      // Setting query parameters in the request
+      const req = {
+        query: {
+          page: "1",
+          pageSize: "11",
+          sortBy: "id",
+          orderBy: "desc",
+          status: "DRAFT",
+        },
+      } as unknown as Request;
+
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as unknown as Response;
+
+      await bookingController.listBookings(req, res);
+
+      expect(bookingService.listBookings).toHaveBeenCalledWith(1, 11, "id", "desc", "DRAFT");
+      expect(sendErrorSpy).toHaveBeenCalledWith(res, 400, "Error fetching bookings list", mockError);
+
+      sendErrorSpy.mockRestore(); // Restore the spy after test
     });
   });
 
