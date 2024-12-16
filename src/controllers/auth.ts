@@ -21,7 +21,7 @@ const signUp = async (req: Request<{}, {}, SignUpRequest>, res: Response) => {
     sendSuccessResponse(res, 200, "Successfully signed up user", result);
   } catch (error) {
     debugLog(error);
-    sendErrorResponse(res, 400, "Error logging up user", error);
+    sendErrorResponse(res, 400, "Error signing up user", error);
   }
 };
 
@@ -40,8 +40,6 @@ const logIn = async (req: Request<{}, {}, LogInRequest>, res: Response) => {
 
 const refreshToken = async (req: Request<{}, {}, RefreshTokenRequest>, res: Response) => {
   try {
-    //TODO add body validation
-    //TODO check refresh token inside db
     const accessToken = await authService.refreshAccessToken(req.body);
     sendSuccessResponse(res, 200, "Access token refreshed successfully", { accessToken });
   } catch (error) {

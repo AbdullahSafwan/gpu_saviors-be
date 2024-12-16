@@ -35,6 +35,7 @@ const signUpUser = async (data: SignUpRequest) => {
     const hashedPassword = await bcrypt.hash(data.password, 10);
     data.password = hashedPassword;
     const result = await userDao.createUser(prisma, data);
+    await sendVerificationMail({ email: result.email });
     return result;
   } catch (error) {
     debugLog(error);
@@ -121,7 +122,6 @@ const sendVerificationMail = async (data: VerifyMailRequest) => {
     const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
 
     const emailRes = await sendEmail(email, "Email Verification", `Verify your email by clicking this link: ${verificationUrl}`);
-    // const result = await userSessionDao.deleteSessionByToken(prisma, refreshToken);
     return emailRes;
   } catch (error) {
     debugLog(error);
@@ -158,7 +158,6 @@ const forgotPassword = async (data: ForgotPasswordRequest) => {
 
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
     const emailRes = await sendEmail(email, "Password Reset", `Reset your password by clicking this link: ${resetUrl}`);
-    // const result = await userSessionDao.deleteSessionByToken(prisma, refreshToken);
     return emailRes;
   } catch (error) {
     debugLog(error);
