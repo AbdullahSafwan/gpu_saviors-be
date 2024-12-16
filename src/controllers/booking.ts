@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { debugLog } from "../services/helper";
 import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
-import { CreateBookingRequest, UpdateBookingRequest } from "../types/bookingTypes";
+import { CreateBookingRequest, ListBookingsRequest, UpdateBookingRequest } from "../types/bookingTypes";
 import { bookingService } from "../services/booking";
+import { booking_status } from "@prisma/client";
 
 const createBooking = async (req: Request<{}, {}, CreateBookingRequest>, res: Response) => {
   try {
@@ -30,6 +31,22 @@ const getBookingDetails = async (req: Request<{ id: string }, {}, {}>, res: Resp
   }
 };
 
+const listBookings = async (req: Request<unknown, unknown, unknown, ListBookingsRequest>, res: Response) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = parseInt(req.query.pageSize as string) || 10;
+    const sort = req.query.sortBy ? req.query.sortBy.toString() : null;
+    const orderBy = req.query.orderBy ? req.query.orderBy.toString() : "desc";
+    const status = req.query.status ? (req.query.status.toString() as booking_status) : undefined;
+
+    const result = await bookingService.listBookings(page, pageSize, sort, orderBy, status);
+    sendSuccessResponse(res, 200, "Successfully fetched bookings list", result);
+  } catch (error) {
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error fetching bookings list", error);
+  }
+};
+
 const updateBooking = async (req: Request<{ id: string }, {}, UpdateBookingRequest>, res: Response) => {
   try {
     const id = +req.params.id;
@@ -42,4 +59,4 @@ const updateBooking = async (req: Request<{ id: string }, {}, UpdateBookingReque
   }
 };
 
-export const bookingController = { createBooking, getBookingDetails, updateBooking };
+export const bookingController = { createBooking, getBookingDetails, updateBooking, listBookings };
