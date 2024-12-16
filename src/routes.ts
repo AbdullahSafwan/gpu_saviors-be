@@ -21,15 +21,10 @@ router.post("/user/", userValidator.createUserValidator, throwValidationResult, 
 router.get("/user/:id", userController.getUserDetails);
 router.patch("/user/:id", userValidator.updateUserValidator, throwValidationResult, userController.updateUser);
 
-
-
 router.post("/booking/", bookingValidator.createBookingValidator, throwValidationResult, bookingController.createBooking);
+router.get("/booking/",bookingValidator.listBookingsValidator, throwValidationResult, bookingController.listBookings);
+router.patch("/booking/:id", bookingValidator.updateBookingValidator, throwValidationResult, bookingController.updateBooking);
 router.get("/booking/:id", bookingController.getBookingDetails);
-router.patch("/booking/:id",bookingValidator.updateBookingValidator,throwValidationResult, bookingController.updateBooking);
-
-// router.post("/systemConfiguration/", systemConfigurationController.createSystemConfiguration);
-// router.get("/systemConfiguration/:key", systemConfigurationController.getSystemConfigurationDetails);
-// router.patch("/systemConfiguration/:key", systemConfigurationController.updateSystemConfiguration);
 
 router.post("/service/", serviceValidator.createServiceValidator, throwValidationResult, serviceController.createService);
 router.get("/service/:id", serviceController.getServiceDetails);
@@ -47,14 +42,14 @@ router.post(
   "/systemConfiguration/",
   systemConfigurationValidator.createSystemConfigurationValidator,
   throwValidationResult,
-  systemConfigurationController.createSystemConfiguration,
+  systemConfigurationController.createSystemConfiguration
 );
 router.get("/systemConfiguration/:id", systemConfigurationController.getSystemConfigurationDetails);
 router.patch(
   "/systemConfiguration/:id",
   systemConfigurationValidator.updateSystemConfigurationValidator,
   throwValidationResult,
-  systemConfigurationController.updateSystemConfiguration,
+  systemConfigurationController.updateSystemConfiguration
 );
 
 router.post("/contactLog", contactLogValidator.createContactLogValidator, throwValidationResult, contactLogController.createContactLog);
