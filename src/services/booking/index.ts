@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { booking_status, Prisma } from "@prisma/client";
 import { CreateBookingItem, CreateBookingRequest, UpdateBookingItem, UpdateBookingRequest } from "../../types/bookingTypes";
 import { bookingDao } from "../../dao/booking";
 import prisma from "../../prisma";
@@ -49,13 +49,14 @@ const getBooking = async (id: number) => {
  * @param pageSize - The number of records per page.
  * @param sortBy - The field to sort the bookings by (e.g., 'date', 'status').
  * @param orderBy - The direction of sorting: can be 'asc' for ascending or 'desc' for descending.
+ * @param status - Filter by status field
  *
  * @returns The list of bookings for the requested page, or throws an error if no bookings are found.
  *
  * @throws Will throw an error if no bookings are found or if the DAO call fails.
  */
 
-const listBookings = async (page: number, pageSize: number, sortBy: string | null, orderBy: string | null, status: string | undefined) => {
+const listBookings = async (page: number, pageSize: number, sortBy: string | null, orderBy: string | null, status: booking_status | undefined) => {
   try {
     const result = await bookingDao.listBookings(prisma, page, pageSize, sortBy, orderBy, status);
     if (!result) {

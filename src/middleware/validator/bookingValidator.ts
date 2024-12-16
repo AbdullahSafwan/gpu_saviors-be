@@ -1,4 +1,4 @@
-import { body } from "express-validator";
+import { body, query } from "express-validator";
 import { booking_status, booking_item_type } from "@prisma/client";
 import { formatWhatsAppNumber } from "./helper";
 
@@ -97,4 +97,12 @@ const updateBookingValidator = [
   body("appointmentDate").optional().isISO8601().toDate().withMessage("Appointment date must be a valid date format"),
 ];
 
-export const bookingValidator = { createBookingValidator, updateBookingValidator };
+const listBookingsValidator = [
+  query("page").optional().isInt({ min: 1 }).withMessage("Page must be a positive integer.").toInt(),
+  query("pageSize").optional().isInt({ min: 1, max: 100 }).withMessage("Page size must be between 1 and 100.").toInt(),
+  query("sortBy").optional().isString().isIn(["id", "clientName", "status", "appointmentDate", "createdAt"]).withMessage("Invalid value."),
+  query("orderBy").optional().isIn(["asc", "desc"]).withMessage("OrderBy must be 'asc' or 'desc'.").default("desc"),
+  query("status").optional().isString().isIn(Object.values(booking_status)).withMessage("Invalid booking status"),
+];
+
+export const bookingValidator = { createBookingValidator, updateBookingValidator, listBookingsValidator };

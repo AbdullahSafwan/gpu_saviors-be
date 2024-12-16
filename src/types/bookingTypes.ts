@@ -1,4 +1,4 @@
-import { booking_item_type } from "@prisma/client";
+import { booking_item_type, booking_status } from "@prisma/client";
 
 export interface BookingItem {
   name: string;
@@ -34,7 +34,7 @@ export interface ListBookingsRequest {
   pageSize?: string;
   sortBy?: string;
   orderBy?: string;
-  status?: string;
+  status?: booking_status;
 }
 
 export interface UpdateBookingItem {
