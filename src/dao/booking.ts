@@ -37,7 +37,7 @@ const listBookings = async (
   pageSize: number,
   _sort: string | null,
   _orderBy: string | null,
-  status: string | undefined
+  status: booking_status | undefined
 ) => {
   try {
     const sort = (_sort ?? "id").toString(); // Determine the field to sort by, default to "id" if not provided
@@ -46,7 +46,7 @@ const listBookings = async (
 
     const result = await prisma.booking.findMany({
       orderBy,
-      where: { status: status as unknown as booking_status }, // default sort by first Draft, pending and so on
+      where: { status }, // default sort by first Draft, pending and so on
 
       // Offset pagination
 
