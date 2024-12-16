@@ -181,6 +181,7 @@ describe("bookingController", () => {
           pageSize: "11",
           sortBy: "id",
           orderBy: "desc",
+          status: "DRAFT",
         },
       } as unknown as Request;
 
@@ -191,7 +192,7 @@ describe("bookingController", () => {
 
       await bookingController.listBookings(req, res);
 
-      expect(bookingService.listBookings).toHaveBeenCalledWith(1, 11, "id", "desc");
+      expect(bookingService.listBookings).toHaveBeenCalledWith(1, 11, "id", "desc", "DRAFT");
       expect(sendSuccessSpy).toHaveBeenCalledWith(res, 200, "Successfully fetched bookings list", mockPaginationResult);
 
       sendSuccessSpy.mockRestore(); // Restore the spy after test
@@ -217,6 +218,7 @@ describe("bookingController", () => {
           pageSize: "11",
           sortBy: "id",
           orderBy: "desc",
+          status: "DRAFT",
         },
       } as unknown as Request;
 
@@ -227,7 +229,7 @@ describe("bookingController", () => {
 
       await bookingController.listBookings(req, res);
 
-      expect(bookingService.listBookings).toHaveBeenCalledWith(1, 11, "id", "desc");
+      expect(bookingService.listBookings).toHaveBeenCalledWith(1, 11, "id", "desc", "DRAFT");
       expect(sendErrorSpy).toHaveBeenCalledWith(res, 400, "Error fetching bookings list", mockError);
 
       sendErrorSpy.mockRestore(); // Restore the spy after test
