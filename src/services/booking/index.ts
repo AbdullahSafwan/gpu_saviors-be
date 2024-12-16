@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { booking_status, Prisma } from "@prisma/client";
 import { CreateBookingItem, CreateBookingRequest, UpdateBookingItem, UpdateBookingRequest } from "../../types/bookingTypes";
 import { bookingDao } from "../../dao/booking";
 import prisma from "../../prisma";
@@ -31,6 +31,36 @@ const getBooking = async (id: number) => {
     const result = await bookingDao.getBooking(prisma, id);
     if (!result) {
       throw new Error(`Booking not found against id: ${id}`);
+    }
+    return result;
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+/**
+ * Fetches a list of bookings with pagination, sorting, and ordering.
+ *
+ * This function interacts with the booking data access object (DAO) to retrieve the list of bookings.
+ * It supports pagination via `page` and `pageSize` parameters, and allows sorting and ordering based on
+ * the `sortBy` and `orderBy` parameters.
+ *
+ * @param page - The current page number for pagination.
+ * @param pageSize - The number of records per page.
+ * @param sortBy - The field to sort the bookings by (e.g., 'date', 'status').
+ * @param orderBy - The direction of sorting: can be 'asc' for ascending or 'desc' for descending.
+ * @param status - Filter by status field
+ *
+ * @returns The list of bookings for the requested page, or throws an error if no bookings are found.
+ *
+ * @throws Will throw an error if no bookings are found or if the DAO call fails.
+ */
+
+const listBookings = async (page: number, pageSize: number, sortBy: string | null, orderBy: string | null, status: booking_status | undefined) => {
+  try {
+    const result = await bookingDao.listBookings(prisma, page, pageSize, sortBy, orderBy, status);
+    if (!result) {
+      throw new Error(`Booking list not found`);
     }
     return result;
   } catch (error) {
@@ -77,4 +107,4 @@ const updateBooking = async (id: number, data: UpdateBookingRequest) => {
   }
 };
 
-export const bookingService = { updateBooking, createBooking, getBooking };
+export const bookingService = { updateBooking, createBooking, getBooking, listBookings };
