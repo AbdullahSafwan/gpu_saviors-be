@@ -24,6 +24,18 @@ const getUser = async (prisma: PrismaClient, id: number) => {
     throw error;
   }
 };
+const findUserByEmail = async (prisma: PrismaClient, email: string) => {
+  try {
+    const result = await prisma.user.findUnique({
+      where: { email },
+    });
+    return result;
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+
 
 const updateUser = async (prisma: PrismaClient, id: number, data: Prisma.userUpdateInput) => {
   try {
@@ -38,4 +50,4 @@ const updateUser = async (prisma: PrismaClient, id: number, data: Prisma.userUpd
   }
 };
 
-export const userDao = { createUser, getUser, updateUser };
+export const userDao = { createUser, getUser, updateUser, findUserByEmail };
