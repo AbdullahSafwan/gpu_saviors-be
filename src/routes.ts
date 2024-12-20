@@ -18,11 +18,48 @@ import { serviceValidator } from "./middleware/validator/serviceValidator";
 const router = express.Router();
 
 router.post("/user/", userValidator.createUserValidator, throwValidationResult, userController.createUser);
+
+/**
+ * @openapi
+ * /user/{id}:
+ *   get:
+ *     tags:
+ *       - User
+ *     summary: Get user details
+ *     description: Retrieve details of a user by their ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The unique ID of the user.
+ *         schema:
+ *           type: string
+ *           example: "1"
+ *     responses:
+ *       200:
+ *         description: Successfully fetched user details.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   example: "1"
+ *                 name:
+ *                   type: string
+ *                   example: "John Doe"
+ *                 email:
+ *                   type: string
+ *                   example: "john.doe@example.com"
+ *       404:
+ *         description: User not found.
+ */
 router.get("/user/:id", userController.getUserDetails);
 router.patch("/user/:id", userValidator.updateUserValidator, throwValidationResult, userController.updateUser);
 
 router.post("/booking/", bookingValidator.createBookingValidator, throwValidationResult, bookingController.createBooking);
-router.get("/booking/",bookingValidator.listBookingsValidator, throwValidationResult, bookingController.listBookings);
+router.get("/booking/", bookingValidator.listBookingsValidator, throwValidationResult, bookingController.listBookings);
 router.patch("/booking/:id", bookingValidator.updateBookingValidator, throwValidationResult, bookingController.updateBooking);
 router.get("/booking/:id", bookingController.getBookingDetails);
 
