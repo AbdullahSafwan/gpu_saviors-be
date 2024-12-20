@@ -1,36 +1,20 @@
 import { Express, Request, Response } from "express";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
-import { version } from "../package.json";
-// import app from "./app";
-// import port from "../src/index"
 
-const option: swaggerJsdoc.Options = {
+const options: swaggerJsdoc.Options = {
   definition: {
     openapi: "3.0.0",
     info: {
       title: "REST API Docs",
-      version,
+      version: "1.0.0",
+      description: "Managing Booking For Gpu Savior",
     },
-    components: {
-      securitySchemas: {
-        bearerAuth: {
-          type: "http",
-          scheme: "bearer",
-          bearerFormat: "JWT",
-        },
-      },
-    },
-    security: [
-      {
-        bearerAuth: [],
-      },
-    ],
   },
-  apis: ["./route.ts", "../prisma/*.ts"],
+  apis: ["./src/routes*.ts"],
 };
 
-const swaggerSpec = swaggerJsdoc(option);
+const swaggerSpec = swaggerJsdoc(options);
 
 function swaggerDocs(app: Express, port: number) {
   // swagger page
