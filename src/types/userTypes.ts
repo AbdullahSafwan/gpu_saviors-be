@@ -5,7 +5,8 @@ export interface CreateUserRequest {
   firstName: string;
   lastName: string;
   phoneNumber: string;
-  email?: string;
+  email: string;
+  password: string;
   status?: user_status; // Optional, defaults to ENABLED in Prisma model
 }
 
@@ -20,5 +21,6 @@ export interface UpdateUserRequest {
   lastName?: string;
   phoneNumber?: string;
   email?: string;
+  password?: string;
   status?: user_status;
 }

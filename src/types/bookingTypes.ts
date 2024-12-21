@@ -1,4 +1,4 @@
-import { booking_item_type } from "@prisma/client";
+import { booking_item_type, booking_status } from "@prisma/client";
 
 export interface BookingItem {
   name: string;
@@ -26,10 +26,16 @@ export interface UpdateBookingRequest {
   phoneNumber?: string;
   whatsappNumber?: string;
   paidAmount?: number;
-  booking_items?:( UpdateBookingItem | CreateBookingItem)[];
+  booking_items?: (UpdateBookingItem | CreateBookingItem)[];
 }
 
-
+export interface ListBookingsRequest {
+  page?: string;
+  pageSize?: string;
+  sortBy?: string;
+  orderBy?: string;
+  status?: booking_status;
+}
 
 export interface UpdateBookingItem {
   id: number;
