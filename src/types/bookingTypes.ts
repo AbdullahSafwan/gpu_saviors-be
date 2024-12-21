@@ -27,6 +27,7 @@ export interface UpdateBookingRequest {
   whatsappNumber?: string;
   paidAmount?: number;
   booking_items?: (UpdateBookingItem | CreateBookingItem)[];
+  status?: booking_status;
 }
 
 export interface ListBookingsRequest {
