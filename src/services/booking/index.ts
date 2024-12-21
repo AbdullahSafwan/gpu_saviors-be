@@ -107,4 +107,18 @@ const updateBooking = async (id: number, data: UpdateBookingRequest) => {
   }
 };
 
-export const bookingService = { updateBooking, createBooking, getBooking, listBookings };
+const dashboard = async () => {
+  try {
+    const draft = await bookingDao.fetchingBookingsByFilter(prisma, booking_status.DRAFT);
+    const confirmed = await bookingDao.fetchingBookingsByFilter(prisma, booking_status.CONFIRMED);
+    const inProgress = await bookingDao.fetchingBookingsByFilter(prisma, booking_status.IN_PROGRESS);
+
+    const result = { draft, confirmed, inProgress };
+    return result;
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+
+export const bookingService = { updateBooking, createBooking, getBooking, listBookings, dashboard };
