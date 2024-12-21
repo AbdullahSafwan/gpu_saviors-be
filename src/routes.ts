@@ -33,6 +33,7 @@ router.post("/auth/verifyemail", authController.verifyEmail);
 router.post("/auth/forgotpassword", authController.forgotPassword);
 router.post("/auth/resetpassword", authValidator.resetPasswordValidator, throwValidationResult, authController.resetPassword);
 
+router.get("/dashboard/", bookingController.dashboard);
 router.post("/booking/", bookingValidator.createBookingValidator, throwValidationResult, bookingController.createBooking);
 router.get("/booking/", bookingValidator.listBookingsValidator, throwValidationResult, bookingController.listBookings);
 router.patch("/booking/:id", bookingValidator.updateBookingValidator, throwValidationResult, bookingController.updateBooking);

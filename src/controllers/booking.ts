@@ -59,4 +59,14 @@ const updateBooking = async (req: Request<{ id: string }, {}, UpdateBookingReque
   }
 };
 
-export const bookingController = { createBooking, getBookingDetails, updateBooking, listBookings };
+const dashboard = async (req: Request, res: Response) => {
+  try {
+    console.log(req);
+    const result = await bookingService.dashboard();
+    sendSuccessResponse(res, 200, "Successfully updated booking", result);
+  } catch (error) {
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error fetching dashboard", error);
+  }
+};
+export const bookingController = { createBooking, getBookingDetails, updateBooking, listBookings, dashboard };

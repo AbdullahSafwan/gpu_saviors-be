@@ -8,19 +8,19 @@ datasource db {
 }
 
 model user {
-  id            Int            @unique @default(autoincrement())
-  firstName     String
-  lastName      String
-  phoneNumber   String
-  email         String         @unique
-  password      String
-  isVerified    Boolean        @default(false)
-  status        user_status    @default(ENABLED)
-  createdAt     DateTime       @default(now())
-  modifiedAt    DateTime       @default(now()) @updatedAt
-  contact_logs  contact_log[]
-  user_role     user_role[]
-  user_sessions user_session[]
+  id                       Int                       @unique @default(autoincrement())
+  firstName                String
+  lastName                 String
+  phoneNumber              String
+  email                    String                    @unique
+  password                 String
+  isVerified               Boolean                   @default(false)
+  status                   user_status               @default(ENABLED)
+  createdAt                DateTime                  @default(now())
+  modifiedAt               DateTime                  @default(now()) @updatedAt
+  contact_logs             contact_log[]
+  user_role                user_role[]
+  user_sessions            user_session[]
   user_verification_tokens user_verification_token[]
 }
 
@@ -33,13 +33,14 @@ model user_session {
 }
 
 model user_verification_token {
-  id        Int       @id @default(autoincrement())
+  id        Int        @id @default(autoincrement())
   userId    Int
-  token     String    @unique
+  token     String     @unique
   type      token_type
   expiresAt DateTime
 
-  user      user      @relation(fields: [userId], references: [id])
+  user user @relation(fields: [userId], references: [id])
+
   @@unique([userId, type])
 }
 
@@ -228,10 +229,15 @@ enum delivery_status {
 enum booking_status {
   DRAFT
   PENDING
+  IN_REVIEW
   CONFIRMED
+  PENDING_DELIVERY
+  IN_QUEUE
+  IN_PROGRESS
+  RESOLVED
+  REJECTED
   COMPLETED
   CANCELLED
-  CONTACTED
 }
 
 enum booking_item_status {
