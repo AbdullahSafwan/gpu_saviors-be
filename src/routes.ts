@@ -520,6 +520,141 @@ router.patch("/service/:id", serviceValidator.updateServiceValidator, throwValid
  */
 router.post("/delivery/", deliveryValidator.createDeliveryValidator, throwValidationResult, deliveryController.createDelivery);
 router.get("/delivery/:id", deliveryController.getDeliveryDetails);
+
+/**
+ * @openapi
+ * /delivery/{id}:
+ *   patch:
+ *     summary: Update a delivery
+ *     description: Update the details of an existing delivery by its ID.
+ *     tags:
+ *       - Delivery
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the delivery to update.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               bookingId:
+ *                 type: integer
+ *                 example: 70
+ *                 description: Unique identifier for the booking associated with the delivery.
+ *               address:
+ *                 type: string
+ *                 example: "new town"
+ *                 description: Updated delivery address.
+ *               phoneNumber:
+ *                 type: string
+ *                 example: "923048667563"
+ *                 description: Updated primary contact number for the delivery.
+ *               deliveryDate:
+ *                 type: string
+ *                 format: date-time
+ *                 example: "2024-11-25 18:00:00.000"
+ *                 description: Updated scheduled delivery date and time in ISO8601 format.
+ *               status:
+ *                 type: string
+ *                 enum: [PENDING, DELIVERED, IN_TRANSIT_INBOUND ,IN_TRANSIT_OUTBOUND, CANCELLED, IN_WAREHOUSE, PENDING_INBOUND,PENDING_OUTBOUND]
+ *                 example: "PENDING"
+ *               postalCode:
+ *                 type: integer
+ *                 example: 231
+ *               courier:
+ *                 type: string
+ *                 example: "leoperd"
+ *               type:
+ *                 type: string
+ *                 enum: [INBOUND, OUTBOUND]
+ *                 example: "OUTBOUND"
+ *               secondaryPhoneNumber:
+ *                 type: string
+ *                 example: "0312353486"
+ *                 description: Updated secondary contact number for the delivery.
+ *             required: []
+ *     responses:
+ *       200:
+ *         description: Delivery updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Delivery updated successfully."
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     bookingId:
+ *                       type: integer
+ *                       example: 70
+ *                     address:
+ *                       type: string
+ *                       example: "new town"
+ *                     phoneNumber:
+ *                       type: string
+ *                       example: "923048667563"
+ *                     deliveryDate:
+ *                       type: string
+ *                       example: "2024-11-25 18:00:00.000"
+ *                     status:
+ *                       type: string
+ *                       example: "IN_TRANSIT"
+ *                     postalCode:
+ *                       type: integer
+ *                       example: 231
+ *                     courier:
+ *                       type: string
+ *                       example: "TCS"
+ *                     type:
+ *                       type: string
+ *                       example: "OUTBOUND"
+ *                     secondaryPhoneNumber:
+ *                       type: string
+ *                       example: "08123456789"
+ *       400:
+ *         description: Validation error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Validation error."
+ *                 errors:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       field:
+ *                         type: string
+ *                         example: "phoneNumber"
+ *                       message:
+ *                         type: string
+ *                         example: "Invalid phone number format."
+ *       404:
+ *         description: Delivery not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Delivery not found."
+ */
 router.patch("/delivery/:id", deliveryValidator.updateDeliveryValidator, throwValidationResult, deliveryController.updateDelivery);
 
 router.post("/refund/", refundValidator.createRefundValidator, throwValidationResult, refundController.createRefund);
