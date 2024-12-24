@@ -58,7 +58,6 @@ router.post("/user/", userValidator.createUserValidator, throwValidationResult, 
 router.get("/user/:id", userController.getUserDetails);
 router.patch("/user/:id", userValidator.updateUserValidator, throwValidationResult, userController.updateUser);
 
-
 /**
  * @openapi
  * /booking/:
@@ -76,33 +75,26 @@ router.patch("/user/:id", userValidator.updateUserValidator, throwValidationResu
  *             properties:
  *               clientName:
  *                 type: string
- *                 description: Name of the client. Cannot be empty.
  *                 example: John Doe
  *               phoneNumber:
  *                 type: string
- *                 description: Client's phone number in a valid format.
  *                 example: 03001234567
  *               whatsappNumber:
  *                 type: string
- *                 description: Client's WhatsApp number in a valid format.
  *                 example: +923001234567
  *               booking_items:
  *                 type: array
- *                 description: A list of items included in the booking.
  *                 items:
  *                   type: object
  *                   properties:
  *                     name:
  *                       type: string
- *                       description: Name of the booking item. Cannot be empty.
  *                       example: GPU NAME
  *                     type:
  *                       type: string
- *                       description: Type of the booking item. Must match one of the allowed types.
  *                       example: GPU
  *                     payableAmount:
  *                       type: integer
- *                       description: Payable amount for the booking item. Must be a positive integer.
  *                       example: 1500
  *     responses:
  *       200:
@@ -118,36 +110,56 @@ router.patch("/user/:id", userValidator.updateUserValidator, throwValidationResu
  *                 data:
  *                   type: object
  *                   properties:
- *                     id:
+ *                 id:
  *                       type: string
- *                       description: Unique booking ID.
  *                       example: "1"
- *                     clientName:
- *                       type: string
- *                       example: John Doe
- *                     phoneNumber:
- *                       type: string
- *                       example: 03001234567
- *                     whatsappNumber:
- *                       type: string
- *                       example: +923001234567
- *                     booking_items:
+ *                 clientName:
+ *                   type: string
+ *                   example: "John Doe"
+ *                 phoneNumber:
+ *                   type: string
+ *                   example: "03001234567"
+ *                 whatsappNumber:
+ *                   type: string
+ *                   example: "+923001234567"
+ *                 createdAt:
+ *                   type: string
+ *                   example: "2024-11-22T22:26:01.723Z"
+ *                 modifiedAt:
+ *                   type: string
+ *                   example: "2024-11-22T22:26:01.723Z"
+ *                 isActive:
+ *                   type: boolean
+ *                   example: true
+ *                 appointmentDate:
+ *                   type: string
+ *                   example: "null"
+ *                 status:
+ *                   type: string
+ *                   example: "DRAFT"
+ *                 code:
+ *                   type: string
+ *                   example: "XYZ"
+ *                 paidAmount:
+ *                   type: boolean
+ *                   example: null
+ *                 payableAmount:
+ *                   type: integer
+ *                   example: 7000
+ *                 booking_items:
  *                       type: array
  *                       items:
  *                         type: object
  *                         properties:
  *                           name:
  *                             type: string
- *                             example: Room Booking
+ *                             example: RTX 2090
  *                           type:
  *                             type: string
- *                             example: room
+ *                             example: GPU
  *                           payableAmount:
  *                             type: integer
  *                             example: 1500
- *                           paidAmount:
- *                             type: integer
- *                             example: 1000
  *       400:
  *         description: Validation error
  *         content:
@@ -167,7 +179,214 @@ router.patch("/user/:id", userValidator.updateUserValidator, throwValidationResu
 
 router.post("/booking/", bookingValidator.createBookingValidator, throwValidationResult, bookingController.createBooking);
 router.get("/booking/", bookingValidator.listBookingsValidator, throwValidationResult, bookingController.listBookings);
+
+/**
+ * @openapi
+ * /booking/{id}:
+ *   patch:
+ *     summary: Update booking details
+ *     description: Update the details of an existing booking by its ID. Only the provided fields will be updated.
+ *     tags:
+ *       - Bookings
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Unique identifier of the booking to update.
+ *         schema:
+ *           type: string
+ *           example: "1"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id: 
+ *                 type: integer
+ *                 example: "1"
+ *               clientName: 
+ *                 type: string
+ *                 example: "AK"
+ *               status:
+ *                 type: string
+ *                 enum: [pending, confirmed, cancelled,Draft ] 
+ *                 example: "DRAFT"
+ *               paidAmount:
+ *                 type: boolean
+ *                 example: null
+ *               payableAmount:
+ *                 type: integer
+ *                 example: 7000
+ *               createdAt:
+ *                 type: string
+ *                 example: "2024-11-22T22:26:01.723Z"
+ *               modifiedAt:
+ *                 type: string
+ *                 example: "2024-11-22T22:26:01.723Z"
+ *               phoneNumber:
+ *                 type: string
+ *                 example: "03001234567"
+ *               code:
+ *                 type: string
+ *                 example: "XYZ"
+ *               whatsappNumber:
+ *                 type: string
+ *                 example: "+923001234567"
+ *               isActive:
+ *                 type: boolean
+ *                 example: true
+ *               appointmentDate:
+ *                 type: string
+ *                 example: "2024-11-22T22:26:01.723Z"
+ *               booking_items:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                       example: "GPU"
+ *                     type:
+ *                       type: string
+ *                       enum: [GPU,LAPTOP,MOTHERBOARD] # Example enums for booking_item_type
+ *                       example: "GPU"
+ *                     payableAmount:
+ *                       type: integer
+ *                       example: 1500
+ *     responses:
+ *       200:
+ *         description: Booking updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Booking updated successfully."
+ *                 data:
+ *                   type: object
+ *                   description: The updated booking details.
+ *       400:
+ *         description: Validation error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid input data."
+ *                 errors:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       field:
+ *                         type: string
+ *                         example: "phoneNumber"
+ *                       message:
+ *                         type: string
+ *                         example: "Phone number should be a valid string."
+ *       404:
+ *         description: Booking not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Booking not found."
+ */
 router.patch("/booking/:id", bookingValidator.updateBookingValidator, throwValidationResult, bookingController.updateBooking);
+/**
+ * @openapi
+ * /booking/{id}:
+ *   get:
+ *     summary: Get booking details
+ *     description: Retrieve the details of a specific booking by its ID.
+ *     tags:
+ *       - Bookings
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Unique identifier of the booking.
+ *         schema:
+ *           type: string
+ *           example: "1"
+ *     responses:
+ *       200:
+ *         description: Booking details retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   example: "1"
+ *                 clientName:
+ *                   type: string
+ *                   example: "John Doe"
+ *                 phoneNumber:
+ *                   type: string
+ *                   example: "03001234567"
+ *                 whatsappNumber:
+ *                   type: string
+ *                   example: "+923001234567"
+ *                 createdAt:
+ *                   type: string
+ *                   example: "2024-11-22T22:26:01.723Z"
+ *                 modifiedAt:
+ *                   type: string
+ *                   example: "2024-11-22T22:26:01.723Z"
+ *                 isActive:
+ *                   type: boolean
+ *                   example: true
+ *                 appointmentDate:
+ *                   type: string
+ *                   example: "null"
+ *                 status:
+ *                   type: string
+ *                   example: "DRAFT"
+ *                 code:
+ *                   type: string
+ *                   example: "XYZ"
+ *                 paidAmount:
+ *                   type: boolean
+ *                   example: null
+ *                 payableAmount:
+ *                   type: integer
+ *                   example: 7000
+ *                 booking_items:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *                         example: "RTX 3060"
+ *                       type:
+ *                         type: string
+ *                         example: "GPU"
+ *                       payableAmount:
+ *                         type: integer
+ *                         example: 5000
+ *       404:
+ *         description: Booking not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "invalid id."
+ */
 router.get("/booking/:id", bookingController.getBookingDetails);
 
 router.post("/service/", serviceValidator.createServiceValidator, throwValidationResult, serviceController.createService);
