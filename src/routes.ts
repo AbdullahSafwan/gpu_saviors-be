@@ -394,7 +394,7 @@ router.get("/service/:id", serviceController.getServiceDetails);
 router.patch("/service/:id", serviceValidator.updateServiceValidator, throwValidationResult, serviceController.updateService);
 
 /**
- * @swagger
+ * @openapi
  * /delivery/:
  *   post:
  *     summary: Create a delivery
