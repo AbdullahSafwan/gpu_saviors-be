@@ -519,6 +519,82 @@ router.patch("/service/:id", serviceValidator.updateServiceValidator, throwValid
  *                         example: "Invalid phone number format."
  */
 router.post("/delivery/", deliveryValidator.createDeliveryValidator, throwValidationResult, deliveryController.createDelivery);
+/**
+ * @openapi
+ * /delivery/{id}:
+ *   get:
+ *     summary: Get delivery details
+ *     description: Retrieve the details of a specific delivery by its ID.
+ *     tags:
+ *       - Delivery
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the delivery to retrieve.
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved delivery details.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                   example: 1
+ *                 bookingId:
+ *                   type: integer
+ *                   example: 70
+ *                 address:
+ *                   type: string
+ *                   example: "town"
+ *                 phoneNumber:
+ *                   type: string
+ *                   example: "923048667563"
+ *                 deliveryDate:
+ *                   type: string
+ *                   format: date-time
+ *                   example: "2024-11-20 18:00:00.000"
+ *                 status:
+ *                   type: string
+ *                   example: "DELIVERED"
+ *                 postalCode:
+ *                   type: integer
+ *                   example: 231
+ *                 courier:
+ *                   type: string
+ *                   example: "leopard"
+ *                 type:
+ *                   type: string
+ *                   enum: [INBOUND, OUTBOUND]
+ *                   example: "INBOUND"
+ *                 secondaryPhoneNumber:
+ *                   type: string
+ *                   example: "0813456789"
+ *       404:
+ *         description: Delivery not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Delivery not found."
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "An error occurred while retrieving the delivery."
+ */
 router.get("/delivery/:id", deliveryController.getDeliveryDetails);
 
 /**
@@ -559,7 +635,6 @@ router.get("/delivery/:id", deliveryController.getDeliveryDetails);
  *                 type: string
  *                 format: date-time
  *                 example: "2024-11-25 18:00:00.000"
- *                 description: Updated scheduled delivery date and time in ISO8601 format.
  *               status:
  *                 type: string
  *                 enum: [PENDING, DELIVERED, IN_TRANSIT_INBOUND ,IN_TRANSIT_OUTBOUND, CANCELLED, IN_WAREHOUSE, PENDING_INBOUND,PENDING_OUTBOUND]
@@ -577,7 +652,12 @@ router.get("/delivery/:id", deliveryController.getDeliveryDetails);
  *               secondaryPhoneNumber:
  *                 type: string
  *                 example: "0312353486"
- *                 description: Updated secondary contact number for the delivery.
+ *               isActive:
+ *                 type: boolean
+ *                 example: true
+ *               landmark:
+ *                 type: boolean
+ *                 example: null
  *             required: []
  *     responses:
  *       200:
