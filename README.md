@@ -1,8 +1,7 @@
 ## ERP Project
 
 
-user enter form -> review form -> confirm booking by system -> confirm booking by contacting user -> 
-    enter delivery -> confirm delivery -> repair -> remarks -> contact customer for return -> confirm received
+user enter form -> review form -> confirm booking by system -> confirm booking by contacting user -> get appointment date -> enter queue -> assign resource -> contact for inbound delivery -> enter delivery -> confirm delivery -> in queue -> repair -> remarks -> contact customer for return -> confirm received
 
 
 
