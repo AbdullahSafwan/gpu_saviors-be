@@ -217,8 +217,8 @@ router.get("/booking/", bookingValidator.listBookingsValidator, throwValidationR
  *                 enum: [pending, confirmed, cancelled,Draft ] 
  *                 example: "DRAFT"
  *               paidAmount:
- *                 type: boolean
- *                 example: null
+ *                 type: integer
+ *                 example: 0
  *               payableAmount:
  *                 type: integer
  *                 example: 7000
@@ -391,6 +391,9 @@ router.patch("/booking/:id", bookingValidator.updateBookingValidator, throwValid
  *                   example: "invalid id."
  */
 router.get("/booking/:id", bookingController.getBookingDetails);
+router.get("/dashboard/", bookingController.dashboard);
+router.get("/booking/:id", verifyToken, bookingController.getBookingDetails);
+
 router.post("/auth/signup", authValidator.signUpValidator, throwValidationResult, authController.signUp);
 router.post("/auth/login", authValidator.logInValidator, throwValidationResult, authController.logIn);
 router.post("/auth/refresh", authController.refreshToken);
@@ -400,12 +403,34 @@ router.post("/auth/verifyemail", authController.verifyEmail);
 router.post("/auth/forgotpassword", authController.forgotPassword);
 router.post("/auth/resetpassword", authValidator.resetPasswordValidator, throwValidationResult, authController.resetPassword);
 
-router.get("/dashboard/", bookingController.dashboard);
-router.post("/booking/", bookingValidator.createBookingValidator, throwValidationResult, bookingController.createBooking);
-router.get("/booking/", bookingValidator.listBookingsValidator, throwValidationResult, bookingController.listBookings);
-router.patch("/booking/:id", bookingValidator.updateBookingValidator, throwValidationResult, bookingController.updateBooking);
-router.get("/booking/:id", verifyToken, bookingController.getBookingDetails);
 
+/**
+ * @openapi
+ * /service/:
+ *   post:
+ *     summary: Create a service
+ *     description: Endpoint to create a new service entry with the specified details.
+ *     tags:
+ *       - Service
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Service Name"
+ *               description:
+ *                 type: string
+ *                 example: "Service Description"
+ *     responses:
+ *       201:
+ *         description: Service created successfully
+ *       400:
+ *         description: Bad request
+ */
 router.post("/service/", serviceValidator.createServiceValidator, throwValidationResult, serviceController.createService);
 router.get("/service/:id", serviceController.getServiceDetails);
 router.patch("/service/:id", serviceValidator.updateServiceValidator, throwValidationResult, serviceController.updateService);
@@ -427,7 +452,7 @@ router.patch("/service/:id", serviceValidator.updateServiceValidator, throwValid
  *             properties:
  *               bookingId:
  *                 type: integer
- *                 example: 70
+ *                 example: 1
  *                 description: Unique identifier for the booking associated with the delivery.
  *               address:
  *                 type: string
@@ -591,6 +616,20 @@ router.post("/delivery/", deliveryValidator.createDeliveryValidator, throwValida
  *                 secondaryPhoneNumber:
  *                   type: string
  *                   example: "0813456789"
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                   example: "2024-11-20 18:00:00.000"
+ *                 modifiedAt:
+ *                   type: string
+ *                   format: date-time
+ *                   example: "2024-11-20 18:00:00.000"
+ *                 landmark:
+ *                   type: boolean
+ *                   example: null
+ *                 isActive:
+ *                   type: boolean
+ *                   example: true
  *       404:
  *         description: Delivery not found.
  *         content:
@@ -638,7 +677,7 @@ router.get("/delivery/:id", deliveryController.getDeliveryDetails);
  *             properties:
  *               bookingId:
  *                 type: integer
- *                 example: 70
+ *                 example: 1
  *                 description: Unique identifier for the booking associated with the delivery.
  *               address:
  *                 type: string
@@ -673,8 +712,8 @@ router.get("/delivery/:id", deliveryController.getDeliveryDetails);
  *                 type: boolean
  *                 example: true
  *               landmark:
- *                 type: boolean
- *                 example: null
+ *                 type: string
+ *                 example: "null"
  *             required: []
  *     responses:
  *       200:
@@ -720,6 +759,12 @@ router.get("/delivery/:id", deliveryController.getDeliveryDetails);
  *                     secondaryPhoneNumber:
  *                       type: string
  *                       example: "08123456789"
+ *                     isActive:
+ *                       type: boolean
+ *                       example: true
+ *                     landmark:
+ *                       type: boolean
+ *                       example: null
  *       400:
  *         description: Validation error.
  *         content:
