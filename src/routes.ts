@@ -306,6 +306,145 @@ router.get("/booking/", bookingValidator.listBookingsValidator, throwValidationR
  */
 router.patch("/booking/:id", bookingValidator.updateBookingValidator, throwValidationResult, bookingController.updateBooking);
 
+/**
+ * @openapi
+ * /dashboard/:
+ *   get:
+ *     summary: Get dashboard data
+ *     description: Retrieve dashboard data with optional query parameters for pagination, sorting, and filtering.
+ *     tags:
+ *       - Dashboard
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: Page number for pagination.
+ *         example: 1
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *         description: Number of items per page.
+ *         example: 10
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [id, clientName, status, appointmentDate, createdAt]
+ *         description: Field to sort by.
+ *         example: "createdAt"
+ *       - in: query
+ *         name: orderBy
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *         description: Order of sorting.
+ *         example: "desc"
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [DRAFT, PENDING, IN_REVIEW, CONFIRMED, PENDING_DELIVERY, IN_QUEUE, IN_PROGRESS, RESOLVED, REJECTED, COMPLETED, CANCELLED]
+ *         description: Filter by booking status.
+ *         example: "confirmed"
+ *     responses:
+ *       200:
+ *         description: Dashboard data retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     draft:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                             example: 1
+ *                           clientName:
+ *                             type: string
+ *                             example: "John Doe"
+ *                           status:
+ *                             type: string
+ *                             example: "DRAFT"
+ *                           appointmentDate:
+ *                             type: string
+ *                             format: date-time
+ *                             example: "2022-09-27T13:00:00.000Z"
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             example: "2022-09-20T13:00:00.000Z"
+ *                     confirmed:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                             example: 1
+ *                           clientName:
+ *                             type: string
+ *                             example: "John Doe"
+ *                           status:
+ *                             type: string
+ *                             example: "CONFIRMED"
+ *                           appointmentDate:
+ *                             type: string
+ *                             format: date-time
+ *                             example: "2022-09-27T13:00:00.000Z"
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             example: "2022-09-20T13:00:00.000Z"
+ *                     inProgress:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                             example: 1
+ *                           clientName:
+ *                             type: string
+ *                             example: "John Doe"
+ *                           status:
+ *                             type: string
+ *                             example: "IN_PROGRESS"
+ *                           appointmentDate:
+ *                             type: string
+ *                             format: date-time
+ *                             example: "2022-09-27T13:00:00.000Z"
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             example: "2022-09-20T13:00:00.000Z"
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Validation error"
+ */
 router.get("/dashboard/", bookingController.dashboard);
 /**
  * @openapi
@@ -408,7 +547,82 @@ router.get("/dashboard/", bookingController.dashboard);
  *                   example: "Booking not found."
  */
 router.get("/booking/:id", verifyToken, bookingController.getBookingDetails);
-
+/**
+ * @openapi
+ * /auth/signup:
+ *   post:
+ *     summary: Sign up a new user
+ *     description: Create a new user account.
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *                 example: "John"
+ *               lastName:
+ *                 type: string
+ *                 example: "Doe"
+ *               phoneNumber:
+ *                 type: string
+ *                 example: "03001234567"
+ *               email:
+ *                 type: string
+ *                 example: "user@example.com"
+ *               password:
+ *                 type: string
+ *                 example: "yourpassword"
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     firstName:
+ *                       type: string
+ *                       example: "John"
+ *                     lastName:
+ *                       type: string
+ *                       example: "Doe"
+ *                     phoneNumber:
+ *                       type: string
+ *                       example: "03001234567"
+ *                     email:
+ *                       type: string
+ *                       example: "user@example.com"
+ *                 message:
+ *                   type: string
+ *                   example: "User created successfully"
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Validation error"
+ */
 router.post("/auth/signup", authValidator.signUpValidator, throwValidationResult, authController.signUp);
 /**
  * @openapi
