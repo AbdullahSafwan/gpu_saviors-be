@@ -457,7 +457,7 @@ router.post("/auth/signup", authValidator.signUpValidator, throwValidationResult
  *                 message:
  *                   type: string
  *                   example: "Invalid credentials"
- */ 
+ */
 router.post("/auth/login", authValidator.logInValidator, throwValidationResult, authController.logIn);
 router.post("/auth/refresh", authController.refreshToken);
 router.delete("/auth/logout", authController.logOut);
@@ -1467,8 +1467,374 @@ router.patch(
   systemConfigurationController.updateSystemConfiguration
 );
 
+/**
+ * @openapi
+ * /contactLog:
+ *   post:
+ *     summary: Create a new contact log entry.
+ *     description: Creates a contact log entry associated with a booking item and user.
+ *     tags:
+ *       - ContactLog
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               bookingItemId:
+ *                 type: integer
+ *                 description: The ID of the booking item associated with the contact log.
+ *                 example: 1
+ *               userId:
+ *                 type: integer
+ *                 description: The ID of the user who made the contact.
+ *                 example: 5
+ *               contactedAt:
+ *                 type: string
+ *                 format: date-time
+ *                 description: The date and time when the contact was made.
+ *                 example: "2022-09-27T13:00:00.000Z"
+ *               status:
+ *                 type: string
+ *                 description: The method used for contacting (e.g., SMS, call, or email).
+ *                 enum:
+ *                   - SMS
+ *                   - CALL
+ *                   - EMAIL
+ *                 example: "SMS"
+ *               notes:
+ *                 type: string
+ *                 description: Notes regarding the contact log.
+ *                 example: "Customer requested an update on the delivery status."
+ *     responses:
+ *       201:
+ *         description: Successfully created the contact log entry.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       description: The ID of the newly created contact log entry.
+ *                       example: 1
+ *                     bookingItemId:
+ *                       type: integer
+ *                       description: The ID of the booking item associated with the contact log.
+ *                       example: 1
+ *                     userId:
+ *                       type: integer
+ *                       description: The ID of the user who made the contact.
+ *                       example: 5
+ *                     bookingId:
+ *                       type: integer
+ *                       description: The ID of the booking associated with the contact log.
+ *                       example: 1
+ *                     contactedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The date and time when the contact was made.
+ *                       example: "2022-09-27T13:00:00.000Z"
+ *                     status:
+ *                       type: string
+ *                       description: The method used for contacting (e.g., SMS, call, or email).
+ *                       example: "SMS"
+ *                     notes:
+ *                       type: string
+ *                       description: Notes regarding the contact log.
+ *                       example: "gdfas"
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: Timestamp when the contact log entry was created.
+ *                       example: "2024-12-26T13:09:55.192Z"
+ *                     modifiedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: Timestamp when the contact log entry was last modified.
+ *                       example: "2024-12-26T13:09:55.192Z"
+ *                     isActive:
+ *                       type: boolean
+ *                       description: Indicates whether the contact log entry is active.
+ *                       example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Successfully created contactLog"
+ *                 error:
+ *                   type: object
+ *                   nullable: true
+ *                   description: Error details if any occurred.
+ *       400:
+ *         description: Invalid input data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       code:
+ *                         type: integer
+ *                         example: 400
+ *                       messages:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                         example: ["BookingItemId is required"]
+ *       500:
+ *         description: Server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "An error occurred while creating the contact log."
+ */
 router.post("/contactLog", contactLogValidator.createContactLogValidator, throwValidationResult, contactLogController.createContactLog);
+/**
+ * @swagger
+ * /contactLog/{id}:
+ *   get:
+ *     summary: Retrieve contact log details.
+ *     description: Fetches the details of a specific contact log entry by its ID.
+ *     tags:
+ *       - ContactLog
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the contact log to retrieve.
+ *         example: 1
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved contact log details.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       description: The ID of the contact log entry.
+ *                       example: 1
+ *                     bookingItemId:
+ *                       type: integer
+ *                       description: The ID of the booking item associated with the contact log.
+ *                       example: 1
+ *                     userId:
+ *                       type: integer
+ *                       description: The ID of the user who made the contact.
+ *                       example: 5
+ *                     bookingId:
+ *                       type: integer
+ *                       description: The ID of the booking associated with the contact log.
+ *                       example: 1
+ *                     contactedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The date and time when the contact was made.
+ *                       example: "2022-09-27T13:00:00.000Z"
+ *                     status:
+ *                       type: string
+ *                       description: The method used for contacting (e.g., SMS, CALL, or EMAIL).
+ *                       example: "SMS"
+ *                     notes:
+ *                       type: string
+ *                       description: Notes regarding the contact log.
+ *                       example: "Customer requested an update on the delivery status."
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: Timestamp when the contact log entry was created.
+ *                       example: "2024-12-26T13:09:55.192Z"
+ *                     modifiedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: Timestamp when the contact log entry was last modified.
+ *                       example: "2024-12-26T13:09:55.192Z"
+ *                     isActive:
+ *                       type: boolean
+ *                       description: Indicates whether the contact log entry is active.
+ *                       example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Successfully retrieved contact log details."
+ *                 error:
+ *                   type: object
+ *                   nullable: true
+ *                   description: Error details if any occurred.
+ *       404:
+ *         description: Contact log not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Contact log not found."
+ *       500:
+ *         description: Server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "An error occurred while retrieving the contact log."
+ */
 router.get("/contactLog/:id", contactLogController.getContactLogDetails);
+/**
+ * @openapi
+ * /contactLog/{id}:
+ *   patch:
+ *     summary: Update a contact log
+ *     description: Update the details of an existing contact log by ID.
+ *     tags:
+ *       - ContactLog
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Unique identifier of the contact log to update.
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 example: 1
+ *               userId:
+ *                 type: integer
+ *                 example: 5
+ *               contactedAt:
+ *                 type: string
+ *                 format: date-time
+ *                 example: "2022-09-27T13:00:00.000Z"
+ *               status:
+ *                 type: string
+ *                 example: "SMS"
+ *               notes:
+ *                 type: string
+ *                 example: "NOTES"
+ *     responses:
+ *       200:
+ *         description: Contact log updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     bookingItemId:
+ *                       type: integer
+ *                       example: 1
+ *                     userId:
+ *                       type: integer
+ *                       example: 5
+ *                     bookingId:
+ *                       type: integer
+ *                       example: 1
+ *                     contactedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2022-09-27T13:00:00.000Z"
+ *                     status:
+ *                       type: string
+ *                       example: "SMS"
+ *                     notes:
+ *                       type: string
+ *                       example: "NOTES"
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-12-26T13:09:55.192Z"
+ *                     modifiedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-12-26T13:09:55.192Z"
+ *                     isActive:
+ *                       type: boolean
+ *                       example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Successfully updated contactLog"
+ *                 error:
+ *                   type: string
+ *                   example: null
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Validation error"
+ *       404:
+ *         description: Contact log not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Contact log not found"
+ */
 router.patch("/contactLog/:id", contactLogValidator.updateContactLogValidator, throwValidationResult, contactLogController.updateContactLog);
 
 export default router;
