@@ -10,9 +10,23 @@ const options: swaggerJsdoc.Options = {
       version: "1.0.0",
       description: "Managing Booking For Gpu Savior",
     },
-  },
-  apis: ["./src/routes*.ts"],
-};
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
+    },
+    apis: ["./src/routes*.ts"],
+  };
 
 const swaggerSpec = swaggerJsdoc(options);
 
@@ -23,7 +37,7 @@ function swaggerDocs(app: Express, port: number) {
 
   // Docs in JSON Format
 
-  app.get("docs.json", (_req: Request, res: Response) => {
+  app.get("/docs.json", (_req: Request, res: Response) => {
     res.setHeader("Content-Type", "application/json");
     res.send(swaggerSpec);
   });
