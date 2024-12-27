@@ -554,7 +554,7 @@ router.get("/booking/:id", verifyToken, bookingController.getBookingDetails);
  *     summary: Sign up a new user
  *     description: Create a new user account.
  *     tags:
- *       - Auth
+ *       - Authentication
  *     requestBody:
  *       required: true
  *       content:
@@ -573,10 +573,10 @@ router.get("/booking/:id", verifyToken, bookingController.getBookingDetails);
  *                 example: "03001234567"
  *               email:
  *                 type: string
- *                 example: "user@example.com"
+ *                 example: "geogeo102@mailinator.com"
  *               password:
  *                 type: string
- *                 example: "yourpassword"
+ *                 example: "Yourpassword1"
  *     responses:
  *       201:
  *         description: User created successfully
@@ -625,12 +625,13 @@ router.get("/booking/:id", verifyToken, bookingController.getBookingDetails);
  */
 router.post("/auth/signup", authValidator.signUpValidator, throwValidationResult, authController.signUp);
 /**
- * @openapi
+ * @swagger
  * /auth/login:
  *   post:
- *     summary: Generate a new JWT token
+ *     summary: User login
+ *     description: Authenticates a user and returns an access token and refresh token.
  *     tags:
- *       - Auth
+ *       - Authentication
  *     requestBody:
  *       required: true
  *       content:
@@ -638,15 +639,19 @@ router.post("/auth/signup", authValidator.signUpValidator, throwValidationResult
  *           schema:
  *             type: object
  *             properties:
- *               username:
+ *               email:
  *                 type: string
- *                 example: testuser
+ *                 format: email
+ *                 description: The user's email address.
+ *                 example: "user@example.com"
  *               password:
  *                 type: string
- *                 example: testpassword
+ *                 format: password
+ *                 description: The user's password.
+ *                 example: "securepassword123"
  *     responses:
  *       200:
- *         description: Successful response
+ *         description: Successfully signed in.
  *         content:
  *           application/json:
  *             schema:
@@ -655,11 +660,22 @@ router.post("/auth/signup", authValidator.signUpValidator, throwValidationResult
  *                 success:
  *                   type: boolean
  *                   example: true
- *                 token:
+ *                 message:
  *                   type: string
- *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
- *       401:
- *         description: Unauthorized
+ *                   example: "Successfully signed in"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     accessToken:
+ *                       type: string
+ *                       description: The JWT access token.
+ *                       example: "eyJhbGciOiJIUzI1NiIsInR..."
+ *                     refreshToken:
+ *                       type: string
+ *                       description: The refresh token.
+ *                       example: "eyJhbGciOiJIUzI1NiIsInR..."
+ *       400:
+ *         description: Error logging in.
  *         content:
  *           application/json:
  *             schema:
@@ -670,11 +686,99 @@ router.post("/auth/signup", authValidator.signUpValidator, throwValidationResult
  *                   example: false
  *                 message:
  *                   type: string
- *                   example: "Invalid credentials"
+ *                   example: "Error logging in"
+ *                 error:
+ *                   type: object
+ *                   description: The error details.
+ *                   example:
+ *                     message: "User not found"
+ *       500:
+ *         description: Server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "An internal server error occurred."
  */
+
 router.post("/auth/login", authValidator.logInValidator, throwValidationResult, authController.logIn);
 router.post("/auth/refresh", authController.refreshToken);
 router.delete("/auth/logout", authController.logOut);
+/**
+ * @openapi
+ * /auth/sendverificationemail:
+ *   post:
+ *     summary: Send a verification email to the user.
+ *     description: Sends a verification email to the provided email address for account verification purposes.
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       description: The email address to send the verification mail to.
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: user@example.com
+ *                 description: The email address of the user to send the verification mail.
+ *     responses:
+ *       200:
+ *         description: Verification mail sent successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   description: Details of the sent verification mail.
+ *                 message:
+ *                   type: string
+ *                   example: "Verification Mail sent successfully"
+ *                 error:
+ *                   type: null
+ *       400:
+ *         description: Error sending verification mail.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 data:
+ *                   type: null
+ *                 message:
+ *                   type: string
+ *                   example: "Error sending verification mail"
+ *                 error:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       code:
+ *                         type: integer
+ *                         example: 400
+ *                       messages:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                         example: ["Error sending verification mail", "Email is required"]
+ */
 router.post("/auth/sendverificationemail", authController.sendVerificationMail);
 router.post("/auth/verifyemail", authController.verifyEmail);
 router.post("/auth/forgotpassword", authController.forgotPassword);
