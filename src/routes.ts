@@ -780,8 +780,223 @@ router.delete("/auth/logout", authController.logOut);
  *                         example: ["Error sending verification mail", "Email is required"]
  */
 router.post("/auth/sendverificationemail", authController.sendVerificationMail);
+/**
+ * @swagger
+ * /auth/verifyemail:
+ *   post:
+ *     summary: Verify the user's email address.
+ *     description: Validates the email verification token and marks the user's email as verified.
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       description: The token required to verify the user's email address.
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *                 description: The email verification token.
+ *     responses:
+ *       200:
+ *         description: Email verified successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   description: Details of the verification result.
+ *                 message:
+ *                   type: string
+ *                   example: "Email verified successfully"
+ *                 error:
+ *                   type: null
+ *       400:
+ *         description: Error during email verification.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 data:
+ *                   type: null
+ *                 message:
+ *                   type: string
+ *                   example: "Error during email verification"
+ *                 error:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       code:
+ *                         type: integer
+ *                         example: 400
+ *                       messages:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                         example: ["Error during email verification", "Token is required"]
+ */
 router.post("/auth/verifyemail", authController.verifyEmail);
+/**
+ * @swagger
+ * /auth/forgotpassword:
+ *   post:
+ *     summary: Send a password reset link to the user's email.
+ *     description: Sends a password reset link to the specified email address if the user exists in the system.
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       description: The email address for which the password reset link should be sent.
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: "user@example.com"
+ *                 description: The email address of the user.
+ *     responses:
+ *       200:
+ *         description: Password reset link sent successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   description: Details of the reset link generation.
+ *                 message:
+ *                   type: string
+ *                   example: "Password reset link sent successfully"
+ *                 error:
+ *                   type: null
+ *       400:
+ *         description: Error sending the password reset email.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 data:
+ *                   type: null
+ *                 message:
+ *                   type: string
+ *                   example: "Error sending password reset email"
+ *                 error:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       code:
+ *                         type: integer
+ *                         example: 400
+ *                       messages:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                         example: ["Error sending password reset email", "Email is required"]
+ */
 router.post("/auth/forgotpassword", authController.forgotPassword);
+/**
+ * @swagger
+ * /auth/resetpassword:
+ *   post:
+ *     summary: Reset a user's password.
+ *     description: Resets the user's password using the provided reset token and new password.
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       description: The token and new password for the reset operation.
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               newPassword:
+ *                 type: string
+ *                 description: The new password for the user.
+ *                 example: "NewPassword123"
+ *                 minLength: 8
+ *                 pattern: "^(?=.*[A-Z])(?=.*\\d).{8,}$"
+ *               token:
+ *                 type: string
+ *                 description: The password reset token provided via email.
+ *                 example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *     responses:
+ *       200:
+ *         description: Password reset successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     result:
+ *                       type: string
+ *                       example: Password reset successfully
+ *                       description: Details about the password reset operation.
+ *                 message:
+ *                   type: string
+ *                   example: "Password reset successfully"
+ *                 error:
+ *                   type: null
+ *       400:
+ *         description: Error resetting the password.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 data:
+ *                   type: null
+ *                 message:
+ *                   type: string
+ *                   example: "Error sending password reset email"
+ *                 error:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       code:
+ *                         type: integer
+ *                         example: 400
+ *                       messages:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                         example: ["Error sending password reset email", "Password must be at least 8 characters long, contain at least one Uppercase letter and one number"]
+ */
 router.post("/auth/resetpassword", authValidator.resetPasswordValidator, throwValidationResult, authController.resetPassword);
 
 /**
