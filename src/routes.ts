@@ -708,7 +708,148 @@ router.post("/auth/signup", authValidator.signUpValidator, throwValidationResult
  */
 
 router.post("/auth/login", authValidator.logInValidator, throwValidationResult, authController.logIn);
+/**
+ * @swagger
+ * /auth/refresh:
+ *   post:
+ *     summary: Refresh the access token.
+ *     description: Generates a new access token using a valid refresh token.
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       description: The refresh token used to generate a new access token.
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: The refresh token issued during login.
+ *                 example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *     responses:
+ *       200:
+ *         description: Access token refreshed successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     accessToken:
+ *                       type: string
+ *                       description: The new access token.
+ *                       example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *                 message:
+ *                   type: string
+ *                   example: "Access token refreshed successfully"
+ *                 error:
+ *                   type: null
+ *       400:
+ *         description: Error refreshing access token.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 data:
+ *                   type: null
+ *                 message:
+ *                   type: string
+ *                   example: "Error refreshing access token"
+ *                 error:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       code:
+ *                         type: integer
+ *                         example: 400
+ *                       messages:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                         example: ["Error refreshing access token", "Invalid refresh token"]
+ */
 router.post("/auth/refresh", authController.refreshToken);
+/**
+ * @openapi
+ * /auth/logout:
+ *   delete:
+ *     summary: Log out the user.
+ *     description: Invalidates the refresh token and logs the user out by deleting the session.
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       description: The refresh token used to identify the session to terminate.
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: The refresh token issued during login.
+ *                 example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *     responses:
+ *       200:
+ *         description: Logged out successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: boolean
+ *                   description: Indicates if the logout operation was successful.
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Logged out successfully"
+ *                 error:
+ *                   type: null
+ *       400:
+ *         description: Error logging out.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 data:
+ *                   type: null
+ *                 message:
+ *                   type: string
+ *                   example: "Error logging out"
+ *                 error:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       code:
+ *                         type: integer
+ *                         example: 400
+ *                       messages:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                         example: ["Error logging out", "Refresh token required"]
+ */
 router.delete("/auth/logout", authController.logOut);
 /**
  * @openapi
