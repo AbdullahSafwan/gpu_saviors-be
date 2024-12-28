@@ -26,37 +26,124 @@ router.post("/user/", userValidator.createUserValidator, throwValidationResult, 
  * @openapi
  * /user/{id}:
  *   get:
+ *     summary: Retrieve user details by ID
  *     tags:
  *       - User
- *     summary: Get user details
- *     description: Retrieve details of a user by their ID.
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: The unique ID of the user.
+ *         description: The ID of the user to retrieve
  *         schema:
- *           type: string
- *           example: "1"
+ *           type: integer
+ *           example: 6
  *     responses:
  *       200:
- *         description: Successfully fetched user details.
+ *         description: User details retrieved successfully.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 id:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 6
+ *                     firstName:
+ *                       type: string
+ *                       example: "dsa"
+ *                     lastName:
+ *                       type: string
+ *                       example: "ss"
+ *                     phoneNumber:
+ *                       type: string
+ *                       example: "03048667563"
+ *                     email:
+ *                       type: string
+ *                       example: "abx@gmail.com"
+ *                     isVerified:
+ *                       type: boolean
+ *                       example: false
+ *                     status:
+ *                       type: string
+ *                       example: "ENABLED"
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-12-26T10:00:54.753Z"
+ *                     modifiedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-12-26T10:00:54.753Z"
+ *                 message:
  *                   type: string
- *                   example: "1"
- *                 name:
+ *                   example: "User details retrieved successfully"
+ *                 error:
+ *                   type: null
+ *                   example: null
+ *       400:
+ *         description: Bad request. Invalid user ID or other validation errors.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 data:
+ *                   type: null
+ *                   example: null
+ *                 message:
  *                   type: string
- *                   example: "John Doe"
- *                 email:
- *                   type: string
- *                   example: "john.doe@example.com"
+ *                   example: "Error retrieving user details"
+ *                 error:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       code:
+ *                         type: integer
+ *                         example: 400
+ *                       messages:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                           example: "Invalid user ID"
  *       404:
  *         description: User not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 data:
+ *                   type: null
+ *                   example: null
+ *                 message:
+ *                   type: string
+ *                   example: "User not found"
+ *                 error:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       code:
+ *                         type: integer
+ *                         example: 404
+ *                       messages:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                           example: "No user exists with the provided ID"
  */
 router.get("/user/:id", userController.getUserDetails);
 router.patch("/user/:id", userValidator.updateUserValidator, throwValidationResult, userController.updateUser);
