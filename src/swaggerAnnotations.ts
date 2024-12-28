@@ -1245,3 +1245,376 @@
  *                   type: string
  *                   example: "Delivery not found."
  */
+
+// POST Refund annotations
+
+/**
+ * @openapi
+ * /refund/:
+ *   post:
+ *     summary: Create a refund
+ *     description: Creates a refund record for a payment.
+ *     tags:
+ *       - Refund
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               paymentId:
+ *                 type: integer
+ *                 description: The ID of the payment to refund.
+ *                 example: 12345
+ *               amount:
+ *                 type: integer
+ *                 description: The amount to refund.
+ *                 example: 100
+ *               remarks:
+ *                 type: string
+ *                 description: Optional remarks for the refund.
+ *                 example: "Customer request"
+ *               refundDate:
+ *                 type: string
+ *                 format: date-time
+ *                 description: The date of the refund (ISO 8601 format).
+ *                 example: "2024-12-25T13:28:03.451Z"
+ *     responses:
+ *       200:
+ *         description: Refund created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   description: Indicates if the operation was successful.
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   description: Details of the created refund.
+ *                   properties:
+ *                     refundId:
+ *                       type: integer
+ *                       description: The unique ID of the created refund.
+ *                       example: 56789
+ *                     paymentId:
+ *                       type: integer
+ *                       description: The ID of the refunded payment.
+ *                       example: 12345
+ *                     amount:
+ *                       type: integer
+ *                       description: The refunded amount.
+ *                       example: 100
+ *                     remarks:
+ *                       type: string
+ *                       description: Remarks for the refund.
+ *                       example: "Customer request"
+ *                     refundDate:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The date of the refund.
+ *                       example: "2024-12-25T13:28:03.451Z"
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The date when the refund was created.
+ *                       example: "2024-12-25T13:28:03.451Z"
+ *                     isActive:
+ *                       type: boolean
+ *                       description: Indicates if the refund is active.
+ *                       example: true
+ *       400:
+ *         description: Bad request (validation failed)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   description: Indicates if the operation was successful.
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   description: Error message.
+ *                   example: "Validation error"
+ *                 errors:
+ *                   type: array
+ *                   description: List of validation errors.
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       field:
+ *                         type: string
+ *                         description: The field that failed validation.
+ *                         example: "paymentId"
+ *                       message:
+ *                         type: string
+ *                         description: The validation error message.
+ *                         example: "paymentId is required"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   description: Indicates if the operation was successful.
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   description: Error message.
+ *                   example: "An error occurred while creating the refund"
+ */
+
+// GET Refund annotations
+
+/**
+ * @openapi
+ * /refund/{id}:
+ *   get:
+ *     summary: Get refund details
+ *     description: Retrieve detailed information about a specific refund by its ID.
+ *     tags:
+ *       - Refund
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the refund to retrieve.
+ *         example: 1
+ *     responses:
+ *       200:
+ *         description: Refund details retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   description: Indicates if the operation was successful.
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   description: The details of the refund.
+ *                   properties:
+ *                     refundId:
+ *                       type: integer
+ *                       description: The unique ID of the refund.
+ *                       example: 56789
+ *                     paymentId:
+ *                       type: integer
+ *                       description: The ID of the refunded payment.
+ *                       example: 12345
+ *                     amount:
+ *                       type: integer
+ *                       description: The refunded amount.
+ *                       example: 100
+ *                     remarks:
+ *                       type: string
+ *                       description: Remarks for the refund.
+ *                       example: "Customer request"
+ *                     refundDate:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The date of the refund.
+ *                       example: "2024-12-25T13:28:03.451Z"
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The date when the refund was created.
+ *                       example: "2024-12-25T13:28:03.451Z"
+ *                     modifiedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The date when the refund was last updated.
+ *                       example: "2024-12-26T10:30:00.451Z"
+ *                     isActive:
+ *                       type: boolean
+ *                       description: Indicates if the refund is active.
+ *                       example: true
+ *       400:
+ *         description: Bad request (invalid input)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   description: Indicates if the operation was successful.
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   description: Error message.
+ *                   example: "Invalid refund ID"
+ *       404:
+ *         description: Refund not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   description: Indicates if the operation was successful.
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   description: Error message.
+ *                   example: "Refund not found"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   description: Indicates if the operation was successful.
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   description: Error message.
+ *                   example: "An error occurred while retrieving the refund details"
+ */
+
+// PATCH Refund annotations
+
+/**
+ * @openapi
+ * /refund/{id}:
+ *   patch:
+ *     summary: Update refund details
+ *     description: Update specific details of an existing refund using its ID.
+ *     tags:
+ *       - Refund
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the refund to update.
+ *         example: 56789
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               paymentId:
+ *                 type: integer
+ *                 description: The payment ID related to the refund.
+ *                 example: 1
+ *               amount:
+ *                 type: integer
+ *                 description: The amount to refund.
+ *                 example: 100
+ *               remarks:
+ *                 type: string
+ *                 description: Remarks or comments for the refund.
+ *                 example: "Partial refund for returned item."
+ *               refundDate:
+ *                 type: string
+ *                 format: date-time
+ *                 description: The date of the refund.
+ *                 example: "2022-09-27 18:00:00.000"
+ *     responses:
+ *       200:
+ *         description: Refund details updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   description: Indicates if the operation was successful.
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   description: The updated refund details.
+ *                   properties:
+ *                     refundId:
+ *                       type: integer
+ *                       description: The unique ID of the refund.
+ *                       example: 56789
+ *                     paymentId:
+ *                       type: integer
+ *                       description: The payment ID related to the refund.
+ *                       example: 12345
+ *                     amount:
+ *                       type: integer
+ *                       description: The updated refund amount.
+ *                       example: 150
+ *                     remarks:
+ *                       type: string
+ *                       description: Remarks or comments for the refund.
+ *                       example: "Refund adjusted."
+ *                     refundDate:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The updated date of the refund.
+ *                       example: "2024-12-27T11:00:00.451Z"
+ *                     modifiedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The date when the refund was last updated.
+ *                       example: "2024-12-28T10:00:00.451Z"
+ *       400:
+ *         description: Bad request (invalid input or missing required fields)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   description: Indicates if the operation was successful.
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   description: Error message.
+ *                   example: "Invalid input"
+ *       404:
+ *         description: Refund not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   description: Indicates if the operation was successful.
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   description: Error message.
+ *                   example: "Refund not found"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   description: Indicates if the operation was successful.
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   description: Error message.
+ *                   example: "An error occurred while updating the refund details"
+ */
