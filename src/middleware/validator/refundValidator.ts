@@ -17,7 +17,7 @@ const updateRefundValidator = [
 
   body("remarks").optional().isString(),
 
-  body("refundDate").optional().isInt().notEmpty().withMessage("RefundDate is optional"),
+  body("refundDate").optional().notEmpty().withMessage("RefundDate is required").bail().isISO8601().toDate(),
 ];
 
 export const refundValidator = { createRefundValidator, updateRefundValidator };
