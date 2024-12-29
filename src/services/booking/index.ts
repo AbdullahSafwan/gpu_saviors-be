@@ -3,6 +3,7 @@ import { CreateBookingItem, CreateBookingRequest, UpdateBookingItem, UpdateBooki
 import { bookingDao } from "../../dao/booking";
 import prisma from "../../prisma";
 import { debugLog } from "../helper";
+import { validateStatusTransition } from "./helper";
 
 const createBooking = async (data: CreateBookingRequest) => {
   try {
@@ -74,6 +75,10 @@ const updateBooking = async (id: number, data: UpdateBookingRequest) => {
     const record = await bookingDao.getBooking(prisma, id);
     if (!record) {
       throw new Error(`Booking not found against id: ${id}`);
+    }
+    //validating status transition, status can only be changed against allowed records
+    if (data.status && !validateStatusTransition(record.status, data.status)) {
+      throw new Error("Invalid status transition");
     }
     const { booking_items, ...otherData } = data;
     // Separate items based on the presence of `id`
