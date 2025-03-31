@@ -105,4 +105,19 @@ const updateBooking = async (prisma: PrismaClient, id: number, data: Prisma.book
   }
 };
 
-export const bookingDao = { createBooking, getBooking, updateBooking, listBookings };
+const fetchingBookingsByFilter = async (prisma: PrismaClient, status: booking_status) => {
+  try {
+    const data = await prisma.booking.findMany({
+      where: { status },
+      take: 3,
+    });
+    const count = await prisma.booking.count({ where: { status } });
+    const result = { data, count };
+    return result;
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+
+export const bookingDao = { createBooking, getBooking, updateBooking, listBookings, fetchingBookingsByFilter };

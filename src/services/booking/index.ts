@@ -3,6 +3,7 @@ import { CreateBookingItem, CreateBookingRequest, UpdateBookingItem, UpdateBooki
 import { bookingDao } from "../../dao/booking";
 import prisma from "../../prisma";
 import { debugLog } from "../helper";
+import { validateStatusTransition } from "./helper";
 
 const createBooking = async (data: CreateBookingRequest) => {
   try {
@@ -75,6 +76,10 @@ const updateBooking = async (id: number, data: UpdateBookingRequest) => {
     if (!record) {
       throw new Error(`Booking not found against id: ${id}`);
     }
+    //validating status transition, status can only be changed against allowed records
+    if (data.status && !validateStatusTransition(record.status, data.status)) {
+      throw new Error("Invalid status transition");
+    }
     const { booking_items, ...otherData } = data;
     // Separate items based on the presence of `id`
     // if id is present, then the item is to be updated, if not then it is to be created
@@ -107,4 +112,18 @@ const updateBooking = async (id: number, data: UpdateBookingRequest) => {
   }
 };
 
-export const bookingService = { updateBooking, createBooking, getBooking, listBookings };
+const dashboard = async () => {
+  try {
+    const draft = await bookingDao.fetchingBookingsByFilter(prisma, booking_status.DRAFT);
+    const confirmed = await bookingDao.fetchingBookingsByFilter(prisma, booking_status.CONFIRMED);
+    const inProgress = await bookingDao.fetchingBookingsByFilter(prisma, booking_status.IN_PROGRESS);
+
+    const result = { draft, confirmed, inProgress };
+    return result;
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+
+export const bookingService = { updateBooking, createBooking, getBooking, listBookings, dashboard };
