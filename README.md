@@ -59,7 +59,7 @@ tests/
 
 - **Node.js** (v16 or higher)
 - **npm** or **yarn**
-- **PostgreSQL** (or the database configured in `prisma/schema.prisma`)
+- **MySQL** (or the database configured in `prisma/schema.prisma`)
 
 ---
 
