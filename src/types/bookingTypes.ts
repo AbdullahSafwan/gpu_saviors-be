@@ -53,3 +53,7 @@ export interface CreateBookingItem {
   payableAmount: number;
   paidAmount?: number;
 }
+
+export interface DashboardRequest {
+  searchString?: string;
+}

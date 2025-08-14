@@ -114,10 +114,22 @@ const updateBooking = async (prisma: PrismaClient, id: number, data: Prisma.book
   }
 };
 
-const fetchingBookingsByFilter = async (prisma: PrismaClient, status: booking_status) => {
+const fetchingBookingsByFilter = async (
+  prisma: PrismaClient,
+  status: booking_status,
+  searchString?: string,
+  searchFields?: string[]
+) => {
   try {
+    const where = {
+      AND: [
+        { status },
+        searchString && searchFields ? buildSearchCondition(searchString, searchFields) : {}
+      ]
+    };
+
     const data = await prisma.booking.findMany({
-      where: { status },
+      where,
       take: 3,
       select: {
         id: true,
@@ -136,7 +148,7 @@ const fetchingBookingsByFilter = async (prisma: PrismaClient, status: booking_st
         },
       },
     });
-    const count = await prisma.booking.count({ where: { status } });
+    const count = await prisma.booking.count({ where });
     const result = { data, count };
     return result;
   } catch (error) {
