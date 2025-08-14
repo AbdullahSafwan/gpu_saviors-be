@@ -20,14 +20,14 @@ import { authValidator } from "./middleware/validator/authValidator";
 
 const router = express.Router();
 
-router.post("/user/", userValidator.createUserValidator, throwValidationResult, userController.createUser);
-router.get("/user/:id", userController.getUserDetails);
-router.patch("/user/:id", userValidator.updateUserValidator, throwValidationResult, userController.updateUser);
+router.post("/user/", verifyToken, userValidator.createUserValidator, throwValidationResult, userController.createUser);
+router.get("/user/:id", verifyToken, userController.getUserDetails);
+router.patch("/user/:id", verifyToken, userValidator.updateUserValidator, throwValidationResult, userController.updateUser);
 
-router.post("/booking/", bookingValidator.createBookingValidator, throwValidationResult, bookingController.createBooking);
-router.get("/booking/", bookingValidator.listBookingsValidator, throwValidationResult, bookingController.listBookings);
-router.patch("/booking/:id", bookingValidator.updateBookingValidator, throwValidationResult, bookingController.updateBooking);
-router.get("/dashboard/", bookingController.dashboard);
+router.post("/booking/", verifyToken, bookingValidator.createBookingValidator, throwValidationResult, bookingController.createBooking);
+router.get("/booking/", verifyToken, bookingValidator.listBookingsValidator, throwValidationResult, bookingController.listBookings);
+router.patch("/booking/:id", verifyToken, bookingValidator.updateBookingValidator, throwValidationResult, bookingController.updateBooking);
+router.get("/dashboard/", verifyToken, bookingController.dashboard);
 router.get("/booking/:id", verifyToken, bookingController.getBookingDetails);
 
 router.post("/auth/signup", authValidator.signUpValidator, throwValidationResult, authController.signUp);
@@ -39,34 +39,34 @@ router.post("/auth/verifyemail", authController.verifyEmail);
 router.post("/auth/forgotpassword", authController.forgotPassword);
 router.post("/auth/resetpassword", authValidator.resetPasswordValidator, throwValidationResult, authController.resetPassword);
 
-router.post("/service/", serviceValidator.createServiceValidator, throwValidationResult, serviceController.createService);
-router.get("/service/:id", serviceController.getServiceDetails);
-router.patch("/service/:id", serviceValidator.updateServiceValidator, throwValidationResult, serviceController.updateService);
+router.post("/service/", verifyToken, serviceValidator.createServiceValidator, throwValidationResult, serviceController.createService);
+router.get("/service/:id", verifyToken, serviceController.getServiceDetails);
+router.patch("/service/:id", verifyToken, serviceValidator.updateServiceValidator, throwValidationResult, serviceController.updateService);
 
-router.post("/delivery/", deliveryValidator.createDeliveryValidator, throwValidationResult, deliveryController.createDelivery);
-router.get("/delivery/:id", deliveryController.getDeliveryDetails);
-router.patch("/delivery/:id", deliveryValidator.updateDeliveryValidator, throwValidationResult, deliveryController.updateDelivery);
+router.post("/delivery/", verifyToken, deliveryValidator.createDeliveryValidator, throwValidationResult, deliveryController.createDelivery);
+router.get("/delivery/:id", verifyToken, deliveryController.getDeliveryDetails);
+router.patch("/delivery/:id", verifyToken, deliveryValidator.updateDeliveryValidator, throwValidationResult, deliveryController.updateDelivery);
 
-router.post("/refund/", refundValidator.createRefundValidator, throwValidationResult, refundController.createRefund);
-router.get("/refund/:id", refundController.getRefundDetails);
-router.patch("/refund/:id", refundValidator.updateRefundValidator, throwValidationResult, refundController.updateRefund);
+router.post("/refund/", verifyToken, refundValidator.createRefundValidator, throwValidationResult, refundController.createRefund);
+router.get("/refund/:id", verifyToken, refundController.getRefundDetails);
+router.patch("/refund/:id", verifyToken, refundValidator.updateRefundValidator, throwValidationResult, refundController.updateRefund);
 
 router.post(
-  "/systemConfiguration/",
+  "/systemConfiguration/", verifyToken,
   systemConfigurationValidator.createSystemConfigurationValidator,
   throwValidationResult,
   systemConfigurationController.createSystemConfiguration
 );
-router.get("/systemConfiguration/:id", systemConfigurationController.getSystemConfigurationDetails);
+router.get("/systemConfiguration/:id", verifyToken, systemConfigurationController.getSystemConfigurationDetails);
 router.patch(
-  "/systemConfiguration/:id",
+  "/systemConfiguration/:id", verifyToken,
   systemConfigurationValidator.updateSystemConfigurationValidator,
   throwValidationResult,
   systemConfigurationController.updateSystemConfiguration
 );
 
-router.post("/contactLog", contactLogValidator.createContactLogValidator, throwValidationResult, contactLogController.createContactLog);
-router.get("/contactLog/:id", contactLogController.getContactLogDetails);
-router.patch("/contactLog/:id", contactLogValidator.updateContactLogValidator, throwValidationResult, contactLogController.updateContactLog);
+router.post("/contactLog", verifyToken, contactLogValidator.createContactLogValidator, throwValidationResult, contactLogController.createContactLog);
+router.get("/contactLog/:id", verifyToken, contactLogController.getContactLogDetails);
+router.patch("/contactLog/:id", verifyToken, contactLogValidator.updateContactLogValidator, throwValidationResult, contactLogController.updateContactLog);
 
 export default router;
