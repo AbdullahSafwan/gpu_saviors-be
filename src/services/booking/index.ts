@@ -143,11 +143,20 @@ const updateBooking = async (id: number, data: UpdateBookingRequest) => {
   }
 };
 
-const dashboard = async () => {
+const dashboard = async (searchString?: string) => {
   try {
-    const draft = await bookingDao.fetchingBookingsByFilter(prisma, booking_status.DRAFT);
-    const confirmed = await bookingDao.fetchingBookingsByFilter(prisma, booking_status.CONFIRMED);
-    const inProgress = await bookingDao.fetchingBookingsByFilter(prisma, booking_status.IN_PROGRESS);
+    const searchFields = [
+      'clientName',
+      'code',
+      'whatsappNumber',
+      'phoneNumber',
+      'booking_items.serialNumber',
+      'booking_items.code'
+    ];
+    
+    const draft = await bookingDao.fetchingBookingsByFilter(prisma, booking_status.DRAFT, searchString, searchFields);
+    const confirmed = await bookingDao.fetchingBookingsByFilter(prisma, booking_status.CONFIRMED, searchString, searchFields);
+    const inProgress = await bookingDao.fetchingBookingsByFilter(prisma, booking_status.IN_PROGRESS, searchString, searchFields);
 
     const result = { draft, confirmed, inProgress };
     return result;
