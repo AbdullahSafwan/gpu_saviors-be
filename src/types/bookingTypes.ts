@@ -36,6 +36,7 @@ export interface ListBookingsRequest {
   sortBy?: string;
   orderBy?: string;
   status?: booking_status;
+  searchString?: string;
 }
 
 export interface UpdateBookingItem {

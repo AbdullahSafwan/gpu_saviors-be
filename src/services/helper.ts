@@ -41,5 +41,33 @@ export function getDebugInfo() {
 // Create a wrapper function for debugLog with debug information
 export function debugLog(...args: any[]) {
   const { errorLocation } = getDebugInfo();
-  console.log(`${errorLocation}`, ...args);
-}
+  console.log(`${errorLocation}`, ...args);}
+
+export const buildSearchCondition = (searchString: string, searchFields: string[]) => {
+  if (!searchString) return {};
+
+  return {
+    OR: searchFields.map(field => {
+      // Handle nested fields using dot notation
+      const fields = field.split('.');
+      if (fields.length > 1) {
+        // Handle nested relation
+        return {
+          [fields[0]]: {
+            some: {
+              [fields[1]]: {
+                contains: searchString
+              }
+            }
+          }
+        };
+      }
+      // Handle direct fields
+      return {
+        [field]: {
+          contains: searchString
+        }
+      };
+    })
+  };
+};
