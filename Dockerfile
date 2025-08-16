@@ -7,8 +7,9 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
-# Install dependencies including devDependencies for build stage
-RUN npm ci
+# Clear npm cache and install dependencies including devDependencies for build stage
+RUN npm cache clean --force && \
+    (npm ci --no-optional || npm ci --no-optional || npm install)
 
 # Build stage
 FROM base AS builder

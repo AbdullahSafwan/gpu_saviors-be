@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # GPU Saviors API Application
   gpu_saviors-be:

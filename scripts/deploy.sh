@@ -27,7 +27,7 @@ cd "$PROJECT_DIR"
 
 # Pull latest code
 log "Pulling latest code..."
-git pull origin main
+git pull origin docker
 
 # Stop existing containers
 log "Stopping existing containers..."
