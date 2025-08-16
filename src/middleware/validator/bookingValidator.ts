@@ -49,6 +49,7 @@ const createBookingValidator = [
     .isInt({ min: 0 })
     .withMessage("Item payable amount must be a positive integer"),
   body("booking_items.*.paidAmount").optional().isInt({ min: 0 }).withMessage("Item paid amount must be a positive integer"),
+  body("appointmentDate").optional().isISO8601().toDate().withMessage("Appointment date must be a valid date format"),
 ];
 
 const updateBookingValidator = [
