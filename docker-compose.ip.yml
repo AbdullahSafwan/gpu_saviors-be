@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   # GPU Saviors API Application
-  gpu-saviors-api:
+  gpu_saviors-be:
     build: 
       context: .
       dockerfile: Dockerfile
@@ -47,7 +47,7 @@ services:
       - ./nginx/nginx-ip.conf:/etc/nginx/nginx.conf:ro
       - ./logs/nginx:/var/log/nginx
     depends_on:
-      - gpu-saviors-api
+      - gpu_saviors-be
     networks:
       - gpu-saviors-network
     healthcheck:

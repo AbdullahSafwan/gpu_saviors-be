@@ -30,13 +30,13 @@ sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-
 sudo chmod +x /usr/local/bin/docker-compose
 
 # Create project directory
-sudo mkdir -p /opt/gpu-saviors-api
-sudo chown $USER:$USER /opt/gpu-saviors-api
+sudo mkdir -p /opt/gpu_saviors-be
+sudo chown $USER:$USER /opt/gpu_saviors-be
 
 # Clone your repository
 cd /opt
-git clone https://github.com/YOUR_USERNAME/gpu_saviors-be.git gpu-saviors-api
-cd gpu-saviors-api
+git clone https://github.com/YOUR_USERNAME/gpu_saviors-be.git gpu_saviors-be
+cd gpu_saviors-be
 ```
 
 ### 3. Database Setup
@@ -84,7 +84,7 @@ Deploy manually first to test:
 
 ```bash
 # Navigate to project directory
-cd /opt/gpu-saviors-api
+cd /opt/gpu_saviors-be
 
 # Deploy
 ./scripts/deploy.sh
@@ -100,7 +100,7 @@ For automated deployment, add these secrets to your GitHub repository (Settings 
 VPS_HOST=your.vps.ip.address
 VPS_USERNAME=your_username
 VPS_SSH_KEY=your_private_ssh_key_content
-VPS_PROJECT_PATH=/opt/gpu-saviors-api
+VPS_PROJECT_PATH=/opt/gpu_saviors-be
 ```
 
 Now when you push to `main` branch, it will automatically deploy to your VPS.
@@ -139,7 +139,7 @@ docker-compose -f docker-compose.ip.yml --env-file .env.production up -d
 curl http://localhost:8080/health
 
 # Check Docker logs
-docker-compose -f docker-compose.ip.yml logs gpu-saviors-api
+docker-compose -f docker-compose.ip.yml logs gpu_saviors-be
 
 # Check system resources
 docker stats

@@ -5,7 +5,7 @@
 
 set -e
 
-PROJECT_DIR="/opt/gpu-saviors-api"
+PROJECT_DIR="/opt/gpu_saviors-be"
 
 # Colors for output
 GREEN='\033[0;32m'
