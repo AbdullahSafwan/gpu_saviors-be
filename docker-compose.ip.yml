@@ -17,10 +17,8 @@ services:
       - JWT_ACCESS_KEY_SECRET=${JWT_ACCESS_SECRET}
       - JWT_REFRESH_KEY_SECRET=${JWT_REFRESH_SECRET}
       - CORS_ORIGIN=*
-      - EMAIL_HOST=${EMAIL_HOST}
-      - EMAIL_PORT=${EMAIL_PORT}
-      - EMAIL_USER=${EMAIL_USER}
-      - EMAIL_PASS=${EMAIL_PASS}
+      - EMAIL_USERNAME=${EMAIL_USERNAME}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
