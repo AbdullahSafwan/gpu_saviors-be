@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # GPU Saviors API Application
+  gpu-saviors-api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: gpu_saviors_api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      - DATABASE_URL=mysql://gpu_saviors_user:${DB_PASSWORD}@host.docker.internal:3306/gpu_saviors_db
+      - JWT_ACCESS_KEY_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_REFRESH_KEY_SECRET=${JWT_REFRESH_SECRET}
+      - CORS_ORIGIN=*
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - gpu-saviors-network
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "node", "-e", "const http = require('http'); const req = http.request({host: 'localhost', port: 8080, path: '/health'}, (res) => process.exit(res.statusCode === 200 ? 0 : 1)); req.on('error', () => process.exit(1)); req.end();"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+
+  # Nginx Reverse Proxy (HTTP only for IP access)
+  nginx:
+    image: nginx:alpine
+    container_name: gpu_saviors_nginx
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "8081:8081"  # Port for additional apps
+    volumes:
+      - ./nginx/nginx-ip.conf:/etc/nginx/nginx.conf:ro
+      - ./logs/nginx:/var/log/nginx
+    depends_on:
+      - gpu-saviors-api
+    networks:
+      - gpu-saviors-network
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: gpu_saviors_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - gpu-saviors-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+networks:
+  gpu-saviors-network:
+    driver: bridge
+    name: gpu_saviors_network
+
+volumes:
+  redis_data:
+    name: gpu_saviors_redis_data
