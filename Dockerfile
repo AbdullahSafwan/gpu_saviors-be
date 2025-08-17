@@ -12,8 +12,8 @@ ARG NODE_VERSION=22.16.0
 # Use node image for base image for all stages.
 FROM node:${NODE_VERSION}-alpine as base
 
-# Install wget for health checks
-RUN apk add --no-cache wget
+# Install wget for health checks and openssl for Prisma
+RUN apk add --no-cache wget openssl
 
 # Set working directory for all build stages.
 WORKDIR /opt/gpu_saviors-be
