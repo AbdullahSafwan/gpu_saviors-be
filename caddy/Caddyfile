@@ -50,22 +50,7 @@
         -X-Powered-By
     }
     
-    # Rate limiting
-    rate_limit {
-        zone static {
-            key {remote_host}
-            events 100
-            window 1m
-        }
-        
-        zone api {
-            key {remote_host}
-            events 60
-            window 1m
-        }
-    }
-    
-    # Health check endpoint (no rate limiting)
+    # Health check endpoint
     handle /health {
         reverse_proxy {
             to app:8080 app-replica:8080
@@ -77,10 +62,8 @@
         }
     }
     
-    # API routes with stricter rate limiting
+    # API routes
     handle /api/* {
-        rate_limit api
-        
         # CORS headers for API
         header {
             Access-Control-Allow-Origin "*"
@@ -120,8 +103,6 @@
     
     # Main application routes
     handle {
-        rate_limit static
-        
         reverse_proxy {
             to app:8080 app-replica:8080
             health_uri /health
