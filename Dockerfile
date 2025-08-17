@@ -57,9 +57,6 @@ FROM base as final
 # Use production node environment by default.
 ENV NODE_ENV production
 
-# Run the application as a non-root user.
-USER node
-
 # Copy package.json and prisma schema for runtime.
 COPY package.json .
 COPY prisma ./prisma
@@ -69,9 +66,17 @@ COPY prisma ./prisma
 COPY --from=deps /opt/gpu_saviors-be/node_modules ./node_modules
 COPY --from=build /opt/gpu_saviors-be/build ./build
 
+# Generate Prisma client in the final stage
+RUN npx prisma generate
+
+# Change ownership to node user
+RUN chown -R node:node /opt/gpu_saviors-be
+
+# Run the application as a non-root user.
+USER node
 
 # Expose the port that the application listens on.
 EXPOSE 8080
 
 # Run the application.
-CMD npm start
+CMD ["npm", "start"]
