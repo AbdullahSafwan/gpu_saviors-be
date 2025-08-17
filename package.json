@@ -7,7 +7,7 @@
     "dev": "npx nodemon",
     "build": "rimraf ./build && tsc",
     "start": "node build/src/index.js",
-    "start:prod": "NODE_ENV=production node build/index.js",
+    "start:prod": "NODE_ENV=production node build/src/index.js",
     "build:prod": "rimraf ./build && tsc",
     "migrate:prod": "prisma migrate deploy",
     "lint": "eslint . --ext .ts",
