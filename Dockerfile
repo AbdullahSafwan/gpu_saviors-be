@@ -16,7 +16,7 @@ FROM node:${NODE_VERSION}-alpine as base
 RUN apk add --no-cache wget
 
 # Set working directory for all build stages.
-WORKDIR /usr/src/app
+WORKDIR /opt/gpu_saviors-be
 
 
 ################################################################################
@@ -66,8 +66,8 @@ COPY prisma ./prisma
 
 # Copy the production dependencies from the deps stage and also
 # the built application from the build stage into the image.
-COPY --from=deps /usr/src/app/node_modules ./node_modules
-COPY --from=build /usr/src/app/build ./build
+COPY --from=deps /opt/gpu_saviors-be/node_modules ./node_modules
+COPY --from=build /opt/gpu_saviors-be/build ./build
 
 
 # Expose the port that the application listens on.
