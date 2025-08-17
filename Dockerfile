@@ -12,6 +12,9 @@ ARG NODE_VERSION=22.16.0
 # Use node image for base image for all stages.
 FROM node:${NODE_VERSION}-alpine as base
 
+# Install wget for health checks
+RUN apk add --no-cache wget
+
 # Set working directory for all build stages.
 WORKDIR /usr/src/app
 

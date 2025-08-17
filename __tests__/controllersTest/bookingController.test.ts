@@ -12,13 +12,8 @@ jest.mock("../../src/prisma", () => ({
 }));
 
 describe("bookingController", () => {
-  let sendMock: jest.Mock;
-  let statusMock: jest.Mock;
-
   beforeEach(() => {
-    // Create mock functions for response
-    sendMock = jest.fn();
-    statusMock = jest.fn().mockReturnValue({ send: sendMock });
+    // Setup for each test
   });
 
   afterEach(() => {
