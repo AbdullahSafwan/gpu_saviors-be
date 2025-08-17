@@ -334,7 +334,7 @@ docker-compose logs caddy | grep -i "upstream\|backend"
 
 ```bash
 # Backup logs
-docker-compose exec app tar -czf /tmp/logs-backup.tar.gz /usr/src/app/logs
+docker-compose exec app tar -czf /tmp/logs-backup.tar.gz /opt/gpu_saviors-be/logs
 docker cp gpu-saviors-api:/tmp/logs-backup.tar.gz ./backups/
 
 # Backup Caddy configuration

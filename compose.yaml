@@ -20,7 +20,7 @@ services:
       PORT: 8080
       FRONTEND_URL: ${FRONTEND_URL}
     volumes:
-      - app_logs:/usr/src/app/logs
+      - app_logs:/opt/gpu_saviors-be/logs
     networks:
       - app-network
     extra_hosts:
@@ -51,7 +51,7 @@ services:
       PORT: 8080
       FRONTEND_URL: ${FRONTEND_URL}
     volumes:
-      - app_logs_replica:/usr/src/app/logs
+      - app_logs_replica:/opt/gpu_saviors-be/logs
     networks:
       - app-network
     extra_hosts:
