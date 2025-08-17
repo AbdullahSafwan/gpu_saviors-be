@@ -72,7 +72,7 @@ describe("serviceController", () => {
     it("should return service details and a 200 status", async () => {
       const mockRequest = {
         params: { id: "1" },
-      } as unknown as Request;
+      } as Request<{ id: string }>;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
@@ -96,7 +96,7 @@ describe("serviceController", () => {
     it("should return a 400 status if no ID is provided", async () => {
       const mockRequest = {
         params: {},
-      } as Request;
+      } as Request<{ id: string }>;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
@@ -117,7 +117,7 @@ describe("serviceController", () => {
       const mockId = 1;
       const mockRequest = {
         params: { id: mockId.toString() },
-      } as unknown as Request;
+      } as Request<{ id: string }>;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
@@ -144,7 +144,7 @@ describe("serviceController", () => {
       const mockRequest = {
         body: mockUpdatedData,
         params: { id: "1" },
-      } as unknown as Request;
+      } as Request<{ id: string }, {}, any>;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
@@ -171,7 +171,7 @@ describe("serviceController", () => {
       const mockRequest = {
         body: mockUpdatedData,
         params: { id: "1" },
-      } as unknown as Request;
+      } as Request<{ id: string }, {}, any>;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
