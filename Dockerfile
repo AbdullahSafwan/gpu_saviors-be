@@ -66,6 +66,8 @@ COPY prisma ./prisma
 COPY --from=deps /opt/gpu_saviors-be/node_modules ./node_modules
 COPY --from=build /opt/gpu_saviors-be/build ./build
 
+RUN npx prisma migrate deploy
+
 # Generate Prisma client in the final stage
 RUN npx prisma generate
 
@@ -79,4 +81,4 @@ USER node
 EXPOSE 8080
 
 # Run the application.
-CMD ["npm", "run", "start:prod"]
+CMD ["npm", "start"]
