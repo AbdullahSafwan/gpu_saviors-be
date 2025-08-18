@@ -26,7 +26,6 @@
 # Configuration for VPS IP access on port 8080
 :{$PORT:8080} {
     # Disable TLS for HTTP access
-    tls off
     
     # Enable compression
     encode {
