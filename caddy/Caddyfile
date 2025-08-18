@@ -35,14 +35,16 @@
     
     # Security headers
     header {
-        # Basic security headers
+       # Basic security headers
         X-Content-Type-Options "nosniff"
         X-Frame-Options "SAMEORIGIN"
         X-XSS-Protection "1; mode=block"
         Referrer-Policy "strict-origin-when-cross-origin"
-        
+
         # Performance headers
-        Cache-Control "no-cache"
+        Cache-Control "no-cache, no-store, must-revalidate"
+        Pragma "no-cache"
+        Expires "0"
         
         # Remove server info
         -Server
