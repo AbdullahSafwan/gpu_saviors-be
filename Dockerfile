@@ -54,6 +54,9 @@ RUN npx prisma generate && npm run build
 # where the necessary files are copied from the build stage.
 FROM base as final
 
+# Accept DATABASE_URL as build argument
+ARG DATABASE_URL
+
 # Use production node environment by default.
 ENV NODE_ENV production
 
@@ -66,6 +69,7 @@ COPY prisma ./prisma
 COPY --from=deps /opt/gpu_saviors-be/node_modules ./node_modules
 COPY --from=build /opt/gpu_saviors-be/build ./build
 
+# Run database migrations
 RUN npx prisma migrate deploy
 
 # Generate Prisma client in the final stage
