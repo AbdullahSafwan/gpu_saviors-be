@@ -42,7 +42,7 @@
         Referrer-Policy "strict-origin-when-cross-origin"
         
         # Performance headers
-        Cache-Control "public, max-age=3600"
+        Cache-Control "no-cache"
         
         # Remove server info
         -Server
