@@ -97,6 +97,21 @@ jobs:
 
             docker compose up -d --no-build
 
+            # Wait for migration to complete
+            echo "Waiting for migration to complete..."
+            timeout 300 sh -c 'while [ "$(docker inspect -f "{{.State.Status}}" gpu-saviors-migration)" = "running" ]; do sleep 2; done'
+            
+            # Check if migration succeeded
+            MIGRATION_EXIT_CODE=$(docker inspect -f '{{.State.ExitCode}}' gpu-saviors-migration)
+            if [ "$MIGRATION_EXIT_CODE" != "0" ]; then
+              echo "Migration failed with exit code: $MIGRATION_EXIT_CODE"
+              echo "Migration logs:"
+              docker compose logs migration
+              exit 1
+            fi
+            
+            echo "Migration completed successfully!"
+
             echo "Waiting for health checks..."
             timeout 60 sh -c 'until docker inspect --format="{{.State.Health.Status}}" ${{ env.CONTAINER_NAME_1 }} | grep -q healthy; do sleep 2; done'
             timeout 60 sh -c 'until docker inspect --format="{{.State.Health.Status}}" ${{ env.CONTAINER_NAME_2 }} | grep -q healthy; do sleep 2; done'
