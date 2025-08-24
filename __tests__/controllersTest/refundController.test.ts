@@ -74,7 +74,7 @@ describe("refundController", () => {
     it("should return refund details and a 200 status", async () => {
       const mockRequest = {
         params: { id: "1" },
-      } as unknown as Request;
+      } as Request<{ id: string }>;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
@@ -98,7 +98,7 @@ describe("refundController", () => {
     it("should return a 400 status if no ID is provided", async () => {
       const mockRequest = {
         params: {},
-      } as Request;
+      } as Request<{ id: string }>;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
@@ -116,7 +116,7 @@ describe("refundController", () => {
     it("should return a 400 status if refund is not found", async () => {
       const mockRequest = {
         params: { id: "1" },
-      } as unknown as Request;
+      } as Request<{ id: string }>;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
@@ -145,7 +145,7 @@ describe("refundController", () => {
       const mockRequest = {
         body: { amount: 150 },
         params: { id: "1" },
-      } as unknown as Request;
+      } as Request<{ id: string }, {}, any>;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
@@ -172,7 +172,7 @@ describe("refundController", () => {
       const mockRequest = {
         body: { amount: 150 },
         params: { id: "1" },
-      } as unknown as Request;
+      } as Request<{ id: string }, {}, any>;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
