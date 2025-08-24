@@ -2,9 +2,9 @@ name: Deploy to VPS
 
 on:
   push:
-    branches: [ cicd ]
+    branches: [ main ]
   pull_request:
-    branches: [ cicd ]
+    branches: [ main ]
 
 env:
   IMAGE_NAME: gpu-saviors-be
@@ -46,7 +46,7 @@ jobs:
   build-and-deploy:
     needs: test_build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/cicd'
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout code
@@ -140,7 +140,7 @@ jobs:
   health-check:
     needs: build-and-deploy
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/cicd'
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Health Check
