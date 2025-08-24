@@ -11,7 +11,8 @@ services:
 
   app:
     depends_on:
-      - migration
+      migration:
+        condition: service_completed_successfully
     build:
       context: .
       dockerfile: Dockerfile
@@ -35,7 +36,8 @@ services:
 
   app-replica:
     depends_on:
-      - migration
+      migration:
+        condition: service_completed_successfully
     build:
       context: .
       dockerfile: Dockerfile
