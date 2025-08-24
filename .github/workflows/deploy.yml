@@ -40,9 +40,26 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Create .env file
+        run: |
+          cat << EOF > .env
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          NODE_ENV=production
+          JWT_ACCESS_KEY_SECRET=${{ secrets.JWT_ACCESS_KEY_SECRET }}
+          JWT_REFRESH_KEY_SECRET=${{ secrets.JWT_REFRESH_KEY_SECRET }}
+          CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
+          RATE_LIMIT_WINDOW_MS=${{ secrets.RATE_LIMIT_WINDOW_MS }}
+          RATE_LIMIT_MAX_REQUESTS=${{ secrets.RATE_LIMIT_MAX_REQUESTS }}
+          EMAIL_USERNAME=${{ secrets.EMAIL_USERNAME }}
+          EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
+          FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+          VPS_IP=${{ secrets.VPS_IP }}
+          EOF
+
       - name: Build Docker image
         run: |
           docker build \
+            --build-arg DATABASE_URL=${{ secrets.DATABASE_URL }} \
             -t ${{ env.IMAGE_NAME }}:latest \
             -t ${{ env.IMAGE_NAME }}:${{ github.sha }} \
             .
@@ -57,7 +74,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
-          source: "image.tar.gz,compose.yaml"
+          source: "image.tar.gz,compose.yaml,.env"
           target: "/opt/gpu_saviors-be"
 
       - name: Deploy to VPS
