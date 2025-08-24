@@ -84,8 +84,8 @@ jobs:
           username: ${{secrets.VPS_USER }}
           key: ${{secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
-          source: "image.tar.gz,docker-compose.yml"
-          target: "/opt/gpu_savior-be"
+          source: "image.tar.gz,compose.yaml"
+          target: "/opt/gpu_saviors-be"
           
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
