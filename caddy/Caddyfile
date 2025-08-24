@@ -1,0 +1,151 @@
+# GPU Saviors API - Caddy Configuration for VPS IP Access
+# Reverse proxy, load balancing, and self-signed SSL for IP access
+
+{
+    # Global options
+    admin localhost:2019
+    
+    # Skip ACME/Let's Encrypt for IP-based access
+    skip_install_trust
+    
+    # Enable local CA for self-signed certificates
+    local_certs
+    
+    # Logging
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 100mb
+            roll_keep 5
+            roll_keep_for 720h
+        }
+        format json
+        level INFO
+    }
+}
+
+# Configuration for VPS IP access on port 8080
+:{$PORT:8080} {
+    # Disable TLS for HTTP access
+    
+    # Enable compression
+    encode {
+        gzip 6
+        minimum_length 1024
+    }
+    
+    # Security headers
+    header {
+       # Basic security headers
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+
+        # Performance headers
+        Cache-Control "no-cache, no-store, must-revalidate"
+        Pragma "no-cache"
+        Expires "0"
+        
+        # Remove server info
+        -Server
+        -X-Powered-By
+    }
+    
+    # Health check endpoint
+    handle /health {
+        reverse_proxy {
+            to app:8080 app-replica:8080
+            health_uri /health
+            health_interval 30s
+            health_timeout 10s
+            health_status 200
+            lb_policy round_robin
+        }
+    }
+    
+    # API routes
+    handle /api/* {
+        # CORS headers for API
+        header {
+            Access-Control-Allow-Origin "*"
+            Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+            Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+            Access-Control-Allow-Credentials "true"
+            Access-Control-Max-Age "86400"
+        }
+        
+        # Handle OPTIONS requests (CORS preflight)
+        @options method OPTIONS
+        respond @options 204
+        
+        reverse_proxy {
+            to app:8080 app-replica:8080
+            health_uri /health
+            health_interval 30s
+            health_timeout 10s
+            health_status 200
+            lb_policy round_robin
+            lb_try_duration 5s
+            lb_try_interval 500ms
+            
+            # Failover configuration
+            fail_duration 30s
+            max_fails 3
+            unhealthy_latency 5s
+            
+            # Request headers
+            header_up Host {upstream_hostport}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-Port {server_port}
+        }
+    }
+    
+    # Main application routes
+    handle {
+        reverse_proxy {
+            to app:8080 app-replica:8080
+            health_uri /health
+            health_interval 30s
+            health_timeout 10s
+            health_status 200
+            lb_policy round_robin
+            lb_try_duration 5s
+            lb_try_interval 500ms
+            
+            # Failover configuration
+            fail_duration 30s
+            max_fails 3
+            unhealthy_latency 5s
+            
+            # Request headers
+            header_up Host {upstream_hostport}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-Port {server_port}
+        }
+    }
+    
+    # Custom error pages
+    handle_errors {
+        @5xx expression {http.error.status_code} >= 500
+        respond @5xx "Service temporarily unavailable" 503
+        
+        @4xx expression {http.error.status_code} >= 400 && {http.error.status_code} < 500
+        respond @4xx "Request error" {http.error.status_code}
+    }
+    
+    # Logging for this site
+    log {
+        output file /var/log/caddy/vps_access.log {
+            roll_size 100mb
+            roll_keep 5
+            roll_keep_for 720h
+        }
+        format json
+        level INFO
+    }
+}
+
+# HTTP redirect (port 80 to 8080)
+:80 {
+    redir https://{host}:8080{uri} permanent
+}
