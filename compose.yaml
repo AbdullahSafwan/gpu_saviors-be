@@ -11,11 +11,7 @@ services:
 
   app:
     depends_on:
-      migration:
-        condition: service_completed_successfully
-    build:
-      context: .
-      dockerfile: Dockerfile
+      - migration
     image: gpu-saviors-be:latest
     container_name: gpu-saviors-api
     restart: on-failure:3
@@ -36,11 +32,7 @@ services:
 
   app-replica:
     depends_on:
-      migration:
-        condition: service_completed_successfully
-    build:
-      context: .
-      dockerfile: Dockerfile
+      - migration
     image: gpu-saviors-be:latest
     container_name: gpu-saviors-api-replica
     restart: on-failure:3
