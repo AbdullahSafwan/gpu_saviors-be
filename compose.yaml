@@ -1,10 +1,23 @@
 services:
+  migration:
+    image: gpu-saviors-be:latest
+    container_name: gpu-saviors-migration
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+    command: ["npm", "run", "migrate:prod"]
+    networks:
+      - app-network
+    restart: "no"
+
   app:
+    depends_on:
+      - migration
     build:
       context: .
       dockerfile: Dockerfile
       args:
         DATABASE_URL: ${DATABASE_URL}
+    image: gpu-saviors-be:latest
     container_name: gpu-saviors-api
     restart: on-failure:3
     environment:
@@ -33,11 +46,14 @@ services:
       start_period: 40s
 
   app-replica:
+    depends_on:
+      - migration
     build:
       context: .
       dockerfile: Dockerfile
       args:
         DATABASE_URL: ${DATABASE_URL}
+    image: gpu-saviors-be:latest
     container_name: gpu-saviors-api-replica
     restart: on-failure:3
     environment:

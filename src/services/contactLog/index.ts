@@ -9,15 +9,15 @@ const createContactLog = async (data: CreateContactLogRequest) => {
     const { userId, bookingItemId, ...otherData } = data;
 
     // find bookingId using BookingItemId
-    const bookingId = (await bookingItemDao.getBookingIdByBookingItemId(prisma, data.bookingItemId)).bookingId;
+    const bookingId = (await bookingItemDao.getBookingIdByBookingItemId(prisma, bookingItemId)).bookingId;
 
     const contactLogData = {
       ...otherData,
       booking_item: {
-        connect: { id: data.bookingItemId },
+        connect: { id: bookingItemId },
       },
       user: {
-        connect: { id: data.userId },
+        connect: { id: userId },
       },
 
       booking: {
