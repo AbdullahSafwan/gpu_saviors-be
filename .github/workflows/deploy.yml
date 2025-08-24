@@ -95,23 +95,21 @@ jobs:
             # Keep last 3 images only
             docker images ${{ env.IMAGE_NAME }} --format "{{.ID}}" | tail -n +4 | xargs -r docker rmi || true
 
-            docker compose up -d --no-build
-
-            echo "Waiting for health checks..."
-            timeout 60 sh -c 'until docker inspect --format="{{.State.Health.Status}}" ${{ env.CONTAINER_NAME_1 }} | grep -q healthy; do sleep 2; done'
-            timeout 60 sh -c 'until docker inspect --format="{{.State.Health.Status}}" ${{ env.CONTAINER_NAME_2 }} | grep -q healthy; do sleep 2; done'
-
-            if [ "$(docker inspect -f '{{.State.Running}}' ${{ env.CONTAINER_NAME_1 }})" != "true" ]; then
-              echo "Container 1 failed to start properly"
-              docker compose logs --tail=100
+            # Run migration first
+            echo "Starting migration..."
+            docker compose run --rm migration
+            
+            if [ $? -ne 0 ]; then
+              echo "Migration failed!"
               exit 1
             fi
-
-            if [ "$(docker inspect -f '{{.State.Running}}' ${{ env.CONTAINER_NAME_2 }})" != "true" ]; then
-              echo "Container 2 failed to start properly"
-              docker compose logs --tail=100
-              exit 1
-            fi
+            
+            echo "Migration completed successfully!"
+            
+            # Start app services
+            docker compose up -d app app-replica caddy
+            
+            echo "Services started successfully!"
 
             echo "Deployment successful!"
 
@@ -126,6 +124,6 @@ jobs:
     steps:
       - name: Health Check
         run: |
-          sleep 10
+          sleep 25
           curl -f http://${{ secrets.VPS_IP }}:8080/health || exit 1
           echo "Health Check Passed!"
