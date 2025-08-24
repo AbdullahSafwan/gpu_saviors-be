@@ -6,7 +6,7 @@ services:
       args:
         DATABASE_URL: ${DATABASE_URL}
     container_name: gpu-saviors-api
-    restart: unless-stopped
+    restart: on-failure:3
     environment:
       NODE_ENV: production
       DATABASE_URL: ${DATABASE_URL}
@@ -39,7 +39,7 @@ services:
       args:
         DATABASE_URL: ${DATABASE_URL}
     container_name: gpu-saviors-api-replica
-    restart: unless-stopped
+    restart: on-failure:3
     environment:
       NODE_ENV: production
       DATABASE_URL: ${DATABASE_URL}
@@ -68,7 +68,7 @@ services:
   caddy:
     image: caddy:2.7-alpine
     container_name: gpu-saviors-caddy
-    restart: unless-stopped
+    restart: on-failure:3
     depends_on:
       - app
       - app-replica
