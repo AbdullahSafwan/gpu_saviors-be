@@ -2,8 +2,8 @@ services:
   migration:
     image: gpu-saviors-be:latest
     container_name: gpu-saviors-migration
-    environment:
-      DATABASE_URL: ${DATABASE_URL}
+    env_file:
+      - .env
     command: ["npm", "run", "migrate:prod"]
     networks:
       - app-network
@@ -11,27 +11,16 @@ services:
 
   app:
     depends_on:
-      - migration
+      migration:
+        condition: service_completed_successfully
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        DATABASE_URL: ${DATABASE_URL}
     image: gpu-saviors-be:latest
     container_name: gpu-saviors-api
     restart: on-failure:3
-    environment:
-      NODE_ENV: production
-      DATABASE_URL: ${DATABASE_URL}
-      JWT_ACCESS_KEY_SECRET: ${JWT_ACCESS_KEY_SECRET}
-      JWT_REFRESH_KEY_SECRET: ${JWT_REFRESH_KEY_SECRET}
-      CORS_ORIGIN: ${CORS_ORIGIN}
-      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-900000}
-      RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-100}
-      EMAIL_USERNAME: ${EMAIL_USERNAME}
-      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
-      PORT: 8080
-      FRONTEND_URL: ${FRONTEND_URL}
+    env_file:
+      - .env
     volumes:
       - app_logs:/opt/gpu_saviors-be/logs
     networks:
@@ -47,27 +36,16 @@ services:
 
   app-replica:
     depends_on:
-      - migration
+      migration:
+        condition: service_completed_successfully
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        DATABASE_URL: ${DATABASE_URL}
     image: gpu-saviors-be:latest
     container_name: gpu-saviors-api-replica
     restart: on-failure:3
-    environment:
-      NODE_ENV: production
-      DATABASE_URL: ${DATABASE_URL}
-      JWT_ACCESS_KEY_SECRET: ${JWT_ACCESS_KEY_SECRET}
-      JWT_REFRESH_KEY_SECRET: ${JWT_REFRESH_KEY_SECRET}
-      CORS_ORIGIN: ${CORS_ORIGIN}
-      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-900000}
-      RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-100}
-      EMAIL_USERNAME: ${EMAIL_USERNAME}
-      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
-      PORT: 8080
-      FRONTEND_URL: ${FRONTEND_URL}
+    env_file:
+      - .env
     volumes:
       - app_logs_replica:/opt/gpu_saviors-be/logs
     networks:
