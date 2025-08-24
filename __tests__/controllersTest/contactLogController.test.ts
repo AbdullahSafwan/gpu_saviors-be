@@ -87,7 +87,7 @@ describe("contactLogController", () => {
       };
       const mockRequest = {
         params: { id: "1" },
-      } as unknown as Request;
+      } as Request<{ id: string }>;
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
@@ -110,7 +110,7 @@ describe("contactLogController", () => {
     it("should return an error if the ID is missing", async () => {
       const mockRequest = {
         params: {},
-      } as Request;
+      } as Request<{ id: string }>;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
@@ -130,7 +130,7 @@ describe("contactLogController", () => {
       const mockId = 1;
       const mockRequest = {
         params: { id: mockId.toString() },
-      } as unknown as Request;
+      } as Request<{ id: string }>;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
@@ -158,7 +158,7 @@ describe("contactLogController", () => {
       const mockRequest = {
         body: mockUpdatedData,
         params: { id: "1" },
-      } as unknown as Request;
+      } as Request<{ id: string }, {}, any>;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),
@@ -190,7 +190,7 @@ describe("contactLogController", () => {
       const mockRequest = {
         body: mockUpdatedData,
         params: { id: "1" },
-      } as unknown as Request;
+      } as Request<{ id: string }, {}, any>;
 
       const mockResponse = {
         status: jest.fn().mockReturnThis(),

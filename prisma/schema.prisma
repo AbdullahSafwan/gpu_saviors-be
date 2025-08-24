@@ -79,7 +79,9 @@ model booking_item {
   id            Int                 @unique @default(autoincrement())
   code          String?             @unique
   name          String
+  serialNumber  String?
   type          booking_item_type
+  reportedIssue String?
   payableAmount Int
   paidAmount    Int?
   comments      String?

@@ -35,6 +35,7 @@ const createBookingValidator = [
   // Validate each booking_item in the array
   body("booking_items").isArray({ min: 1 }).withMessage("Booking items are required"),
   body("booking_items.*.name").notEmpty().withMessage("Item name is required"),
+  body("booking_items.*.serialNumber").optional().isString().withMessage("Serial number should be a valid string if provided"),
   body("booking_items.*.type")
     .notEmpty()
     .withMessage("type is required")
@@ -48,6 +49,7 @@ const createBookingValidator = [
     .isInt({ min: 0 })
     .withMessage("Item payable amount must be a positive integer"),
   body("booking_items.*.paidAmount").optional().isInt({ min: 0 }).withMessage("Item paid amount must be a positive integer"),
+  body("appointmentDate").optional().isISO8601().toDate().withMessage("Appointment date must be a valid date format"),
 ];
 
 const updateBookingValidator = [
@@ -93,6 +95,8 @@ const updateBookingValidator = [
   body("booking_items.*.payableAmount").optional().isInt({ min: 0 }).withMessage("Item payable amount must be a positive integer"),
 
   body("booking_items.*.paidAmount").optional().isInt({ min: 0 }).withMessage("Item paid amount must be a positive integer"),
+
+  body("booking_items.*.serialNumber").optional().isString().withMessage("Serial number should be a valid string if provided"),
 
   body("appointmentDate").optional().isISO8601().toDate().withMessage("Appointment date must be a valid date format"),
 ];
