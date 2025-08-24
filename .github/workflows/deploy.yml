@@ -1,0 +1,152 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [ cicd ]
+  pull_request:
+    branches: [ cicd ]
+
+env:
+  IMAGE_NAME: gpu-saviors-be
+  CONTAINER_NAME_1: gpu-saviors-api
+  CONTAINER_NAME_2: gpu-saviors-api-replica
+
+jobs:
+
+  test_build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Build application
+        run: npm run build
+        env:
+          VPS_IP: ${{ secrets.VPS_IP }}
+          PORT: ${{ secrets.PORT }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NODE_ENV: ${{ secrets.NODE_ENV }}
+          JWT_ACCESS_KEY_SECRET: ${{ secrets.JWT_ACCESS_KEY_SECRET }}
+          JWT_REFRESH_KEY_SECRET: ${{ secrets.JWT_REFRESH_KEY_SECRET }}
+          CORS_ORIGIN: ${{ secrets.CORS_ORIGIN }}
+          RATE_LIMIT_WINDOW_MS: ${{ secrets.RATE_LIMIT_WINDOW_MS }}
+          RATE_LIMIT_MAX: ${{ secrets.RATE_LIMIT_MAX }}
+          EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/cicd'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg VPS_IP=${{ secrets.VPS_IP }} \
+            --build-arg PORT=${{ secrets.PORT }} \
+            --build-arg DATABASE_URL=${{ secrets.DATABASE_URL }} \
+            --build-arg NODE_ENV=${{ secrets.NODE_ENV }} \
+            --build-arg JWT_ACCESS_KEY_SECRET=${{ secrets.JWT_ACCESS_KEY_SECRET }} \
+            --build-arg JWT_REFRESH_KEY_SECRET=${{ secrets.JWT_REFRESH_KEY_SECRET }} \
+            --build-arg CORS_ORIGIN=${{ secrets.CORS_ORIGIN }} \
+            --build-arg RATE_LIMIT_WINDOW_MS=${{ secrets.RATE_LIMIT_WINDOW_MS }} \
+            --build-arg RATE_LIMIT_MAX=${{ secrets.RATE_LIMIT_MAX }} \
+            --build-arg EMAIL_USERNAME=${{ secrets.EMAIL_USERNAME }} \
+            --build-arg EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }} \
+            --build-arg FRONTEND_URL=${{ secrets.FRONTEND_URL }} \
+            -t ${{ env.IMAGE_NAME }}:latest \
+            -t ${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            .
+
+      - name: Save Docker image
+        run: docker save ${{ env.IMAGE_NAME }}:latest | gzip > image.tar.gz
+
+      - name: Copy files to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }} 
+          username: ${{secrets.VPS_USER }}
+          key: ${{secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          source: "image.tar.gz,docker-compose.yml"
+          target: "/opt/gpu_savior-be"
+          
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{secrets.VPS_USER }}
+          key: ${{secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            set -e
+
+            # Navidate to deployment directory
+            cd /opt/gpu_saviors-be
+
+            # Load the new image
+            docker load < image.tar.gz
+
+            # Set environment variables
+            export 
+            
+            # Stop existing container if running
+            docker-compose down || true
+
+            # Remove old images (keep last 3)
+            docker images ${{ env.IMAGE_NAME }} --format "table {{.Tag}}" | tail -n +4 | xargs -r docker rmi ${{ env.IMAGE_NAME }}: || true
+
+            # Start new container
+            docker-compose up -d --no-build
+
+            # Wait for containers to be healthy
+            timeout 60 sh -c 'until docker inspect --format="{{.State.Health.Status}}" ${{ env.CONTAINER_NAME_1 }} | grep -q healthy; do sleep 2; done' || true
+            timeout 60 sh -c 'until docker inspect --format="{{.State.Health.Status}}" ${{ env.CONTAINER_NAME_2 }} | grep -q healthy; do sleep 2; done' || true
+
+            # Check if containers are running
+            if [ "$(docker inspect -f '{{.State.Running}}' ${{ env.CONTAINER_NAME_1 }})" != "true" ]; then
+              echo "Container 1 failed to start properly"
+              docker-compose logs
+              exit 1
+            fi
+            
+            if [ "$(docker inspect -f '{{.State.Running}}' ${{ env.CONTAINER_NAME_2 }})" != "true" ]; then
+              echo "Container 2 failed to start properly"
+              docker-compose logs
+              exit 1
+            fi
+
+            echo "Deployment successful!"
+
+            # Cleanup
+            rm -f image.tar.gz
+
+  health-check:
+    needs: build-and-deploy
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/cicd'
+
+    steps:
+      - name: Health Check
+        run: |
+          sleep 10
+          curl -f http://${{ secrets.VPS_IP}}:8080/health || exit 1
+          echo "Health Check Passed!"
