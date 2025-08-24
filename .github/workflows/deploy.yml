@@ -31,18 +31,7 @@ jobs:
       - name: Build application
         run: npm run build
         env:
-          VPS_IP: ${{ secrets.VPS_IP }}
-          PORT: ${{ secrets.PORT }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          NODE_ENV: ${{ secrets.NODE_ENV }}
-          JWT_ACCESS_KEY_SECRET: ${{ secrets.JWT_ACCESS_KEY_SECRET }}
-          JWT_REFRESH_KEY_SECRET: ${{ secrets.JWT_REFRESH_KEY_SECRET }}
-          CORS_ORIGIN: ${{ secrets.CORS_ORIGIN }}
-          RATE_LIMIT_WINDOW_MS: ${{ secrets.RATE_LIMIT_WINDOW_MS }}
-          RATE_LIMIT_MAX_REQUESTS: ${{ secrets.RATE_LIMIT_MAX_REQUESTS }}
-          EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
-          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+          NODE_ENV: production
   build-and-deploy:
     needs: test_build
     runs-on: ubuntu-latest
@@ -58,18 +47,6 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
-            --build-arg VPS_IP=${{ secrets.VPS_IP }} \
-            --build-arg PORT=${{ secrets.PORT }} \
-            --build-arg DATABASE_URL=${{ secrets.DATABASE_URL }} \
-            --build-arg NODE_ENV=${{ secrets.NODE_ENV }} \
-            --build-arg JWT_ACCESS_KEY_SECRET=${{ secrets.JWT_ACCESS_KEY_SECRET }} \
-            --build-arg JWT_REFRESH_KEY_SECRET=${{ secrets.JWT_REFRESH_KEY_SECRET }} \
-            --build-arg CORS_ORIGIN=${{ secrets.CORS_ORIGIN }} \
-            --build-arg RATE_LIMIT_WINDOW_MS=${{ secrets.RATE_LIMIT_WINDOW_MS }} \
-            --build-arg RATE_LIMIT_MAX_REQUESTS=${{ secrets.RATE_LIMIT_MAX_REQUESTS }} \
-            --build-arg EMAIL_USERNAME=${{ secrets.EMAIL_USERNAME }} \
-            --build-arg EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }} \
-            --build-arg FRONTEND_URL=${{ secrets.FRONTEND_URL }} \
             -t ${{ env.IMAGE_NAME }}:latest \
             -t ${{ env.IMAGE_NAME }}:${{ github.sha }} \
             .
@@ -102,33 +79,30 @@ jobs:
 
             # Load the new image
             docker load < image.tar.gz
-
-            # Set environment variables
-            export 
             
             # Stop existing container if running
             docker-compose down || true
 
             # Remove old images (keep last 3)
-            docker images ${{ env.IMAGE_NAME }} --format "table {{.Tag}}" | tail -n +4 | xargs -r docker rmi ${{ env.IMAGE_NAME }}: || true
+            docker images ${{ env.IMAGE_NAME }} --format "{{.ID}}" | tail -n +4 | xargs -r docker rmi || true
 
             # Start new container
             docker-compose up -d --no-build
 
             # Wait for containers to be healthy
-            timeout 60 sh -c 'until docker inspect --format="{{.State.Health.Status}}" ${{ env.CONTAINER_NAME_1 }} | grep -q healthy; do sleep 2; done' || true
-            timeout 60 sh -c 'until docker inspect --format="{{.State.Health.Status}}" ${{ env.CONTAINER_NAME_2 }} | grep -q healthy; do sleep 2; done' || true
+            timeout 60 sh -c 'until docker inspect --format="{{.State.Health.Status}}" ${{ env.CONTAINER_NAME_1 }} | grep -q healthy; do sleep 2; done'
+            timeout 60 sh -c 'until docker inspect --format="{{.State.Health.Status}}" ${{ env.CONTAINER_NAME_2 }} | grep -q healthy; do sleep 2; done'
 
             # Check if containers are running
             if [ "$(docker inspect -f '{{.State.Running}}' ${{ env.CONTAINER_NAME_1 }})" != "true" ]; then
               echo "Container 1 failed to start properly"
-              docker-compose logs
+              docker-compose logs --tail=100
               exit 1
             fi
             
             if [ "$(docker inspect -f '{{.State.Running}}' ${{ env.CONTAINER_NAME_2 }})" != "true" ]; then
               echo "Container 2 failed to start properly"
-              docker-compose logs
+              docker-compose logs --tail=100
               exit 1
             fi
 
