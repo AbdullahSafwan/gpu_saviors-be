@@ -39,7 +39,7 @@ jobs:
           JWT_REFRESH_KEY_SECRET: ${{ secrets.JWT_REFRESH_KEY_SECRET }}
           CORS_ORIGIN: ${{ secrets.CORS_ORIGIN }}
           RATE_LIMIT_WINDOW_MS: ${{ secrets.RATE_LIMIT_WINDOW_MS }}
-          RATE_LIMIT_MAX: ${{ secrets.RATE_LIMIT_MAX }}
+          RATE_LIMIT_MAX_REQUESTS: ${{ secrets.RATE_LIMIT_MAX_REQUESTS }}
           EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
@@ -66,7 +66,7 @@ jobs:
             --build-arg JWT_REFRESH_KEY_SECRET=${{ secrets.JWT_REFRESH_KEY_SECRET }} \
             --build-arg CORS_ORIGIN=${{ secrets.CORS_ORIGIN }} \
             --build-arg RATE_LIMIT_WINDOW_MS=${{ secrets.RATE_LIMIT_WINDOW_MS }} \
-            --build-arg RATE_LIMIT_MAX=${{ secrets.RATE_LIMIT_MAX }} \
+            --build-arg RATE_LIMIT_MAX_REQUESTS=${{ secrets.RATE_LIMIT_MAX_REQUESTS }} \
             --build-arg EMAIL_USERNAME=${{ secrets.EMAIL_USERNAME }} \
             --build-arg EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }} \
             --build-arg FRONTEND_URL=${{ secrets.FRONTEND_URL }} \
