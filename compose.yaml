@@ -39,7 +39,7 @@ services:
       dockerfile: Dockerfile
       args:
         DATABASE_URL: ${DATABASE_URL}
-    image: gpu-saviors-api-replica:latest
+    image: gpu-saviors-be:latest
     container_name: gpu-saviors-api-replica
     restart: on-failure:3
     environment:
