@@ -3,8 +3,6 @@ name: Deploy to VPS
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 env:
   IMAGE_NAME: gpu-saviors-be
@@ -27,11 +25,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-
       - name: Build application
-        run: npm run build
-        env:
-          NODE_ENV: production
+        run: NODE_ENV=production npm run build
+
   build-and-deploy:
     needs: test_build
     runs-on: ubuntu-latest
@@ -58,48 +54,42 @@ jobs:
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }} 
-          username: ${{secrets.VPS_USER }}
-          key: ${{secrets.VPS_SSH_KEY }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
           source: "image.tar.gz,compose.yaml"
           target: "/opt/gpu_saviors-be"
-          
+
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
-          username: ${{secrets.VPS_USER }}
-          key: ${{secrets.VPS_SSH_KEY }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
           script: |
             set -e
-
-            # Navidate to deployment directory
             cd /opt/gpu_saviors-be
 
-            # Load the new image
             docker load < image.tar.gz
-            
-            # Stop existing container if running
+
             docker-compose down || true
 
-            # Remove old images (keep last 3)
+            # Keep last 3 images only
             docker images ${{ env.IMAGE_NAME }} --format "{{.ID}}" | tail -n +4 | xargs -r docker rmi || true
 
-            # Start new container
             docker-compose up -d --no-build
 
-            # Wait for containers to be healthy
+            echo "Waiting for health checks..."
             timeout 60 sh -c 'until docker inspect --format="{{.State.Health.Status}}" ${{ env.CONTAINER_NAME_1 }} | grep -q healthy; do sleep 2; done'
             timeout 60 sh -c 'until docker inspect --format="{{.State.Health.Status}}" ${{ env.CONTAINER_NAME_2 }} | grep -q healthy; do sleep 2; done'
 
-            # Check if containers are running
             if [ "$(docker inspect -f '{{.State.Running}}' ${{ env.CONTAINER_NAME_1 }})" != "true" ]; then
               echo "Container 1 failed to start properly"
               docker-compose logs --tail=100
               exit 1
             fi
-            
+
             if [ "$(docker inspect -f '{{.State.Running}}' ${{ env.CONTAINER_NAME_2 }})" != "true" ]; then
               echo "Container 2 failed to start properly"
               docker-compose logs --tail=100
@@ -120,5 +110,5 @@ jobs:
       - name: Health Check
         run: |
           sleep 10
-          curl -f http://${{ secrets.VPS_IP}}:8080/health || exit 1
+          curl -f http://${{ secrets.VPS_IP }}:8080/health || exit 1
           echo "Health Check Passed!"
