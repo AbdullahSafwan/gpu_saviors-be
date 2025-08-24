@@ -12,13 +12,8 @@ jest.mock("../../src/prisma", () => ({
 }));
 
 describe("bookingController", () => {
-  let sendMock: jest.Mock;
-  let statusMock: jest.Mock;
-
   beforeEach(() => {
-    // Create mock functions for response
-    sendMock = jest.fn();
-    statusMock = jest.fn().mockReturnValue({ send: sendMock });
+    // Setup for each test
   });
 
   afterEach(() => {
@@ -182,6 +177,7 @@ describe("bookingController", () => {
           sortBy: "id",
           orderBy: "desc",
           status: "DRAFT",
+          searchString: undefined,
         },
       } as unknown as Request;
 
@@ -192,7 +188,7 @@ describe("bookingController", () => {
 
       await bookingController.listBookings(req, res);
 
-      expect(bookingService.listBookings).toHaveBeenCalledWith(1, 11, "id", "desc", "DRAFT");
+      expect(bookingService.listBookings).toHaveBeenCalledWith(1, 11, "id", "desc", "DRAFT", undefined);
       expect(sendSuccessSpy).toHaveBeenCalledWith(res, 200, "Successfully fetched bookings list", mockPaginationResult);
 
       sendSuccessSpy.mockRestore(); // Restore the spy after test
@@ -219,6 +215,7 @@ describe("bookingController", () => {
           sortBy: "id",
           orderBy: "desc",
           status: "DRAFT",
+          searchString: undefined,
         },
       } as unknown as Request;
 
@@ -229,7 +226,7 @@ describe("bookingController", () => {
 
       await bookingController.listBookings(req, res);
 
-      expect(bookingService.listBookings).toHaveBeenCalledWith(1, 11, "id", "desc", "DRAFT");
+      expect(bookingService.listBookings).toHaveBeenCalledWith(1, 11, "id", "desc", "DRAFT", undefined);
       expect(sendErrorSpy).toHaveBeenCalledWith(res, 400, "Error fetching bookings list", mockError);
 
       sendErrorSpy.mockRestore(); // Restore the spy after test

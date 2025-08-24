@@ -1,5 +1,5 @@
 import { booking_status, Prisma, PrismaClient } from "@prisma/client";
-import { debugLog } from "../services/helper";
+import { debugLog, buildSearchCondition } from "../services/helper";
 
 const createBooking = async (prisma: PrismaClient, data: Prisma.bookingCreateInput) => {
   try {
@@ -37,16 +37,25 @@ const listBookings = async (
   pageSize: number,
   _sort: string | null,
   _orderBy: string | null,
-  status: booking_status | undefined
+  status: booking_status | undefined,
+  searchString?: string,
+  searchFields?: string[]
 ) => {
   try {
     const sort = (_sort ?? "id").toString(); // Determine the field to sort by, default to "id" if not provided
     const order = _orderBy; // Determine the sorting order, default is Descending order
     const orderBy = { [sort]: order }; // Construct the orderBy object for querying based on the sort and order
 
+    const where = {
+      AND: [
+        status ? { status } : {},
+        searchString && searchFields ? buildSearchCondition(searchString, searchFields) : {}
+      ]
+    };
+
     const result = await prisma.booking.findMany({
       orderBy,
-      where: { status }, // default sort by first Draft, pending and so on
+      where,
 
       // Offset pagination
 
@@ -105,13 +114,41 @@ const updateBooking = async (prisma: PrismaClient, id: number, data: Prisma.book
   }
 };
 
-const fetchingBookingsByFilter = async (prisma: PrismaClient, status: booking_status) => {
+const fetchingBookingsByFilter = async (
+  prisma: PrismaClient,
+  status: booking_status,
+  searchString?: string,
+  searchFields?: string[]
+) => {
   try {
+    const where = {
+      AND: [
+        { status },
+        searchString && searchFields ? buildSearchCondition(searchString, searchFields) : {}
+      ]
+    };
+
     const data = await prisma.booking.findMany({
-      where: { status },
+      where,
       take: 3,
+      select: {
+        id: true,
+        clientName: true,
+        code: true,
+        isActive: true,
+        status: true,
+        appointmentDate: true,
+        booking_items: {
+          select: {
+            id: true,
+            serialNumber: true,
+            name: true,
+            status: true,
+          },
+        },
+      },
     });
-    const count = await prisma.booking.count({ where: { status } });
+    const count = await prisma.booking.count({ where });
     const result = { data, count };
     return result;
   } catch (error) {

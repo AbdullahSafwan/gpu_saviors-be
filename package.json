@@ -6,7 +6,12 @@
     "test": "jest",
     "dev": "npx nodemon",
     "build": "rimraf ./build && tsc",
-    "start": "npm run build && node build/index.js"
+    "start": "node build/src/index.js",
+    "start:prod": "NODE_ENV=production node build/src/index.js",
+    "build:prod": "rm -rf ./build && tsc",
+    "migrate:prod": "prisma migrate deploy",
+    "lint": "eslint . --ext .ts",
+    "prestart:prod": "npm run migrate:prod"
   },
   "keywords": [],
   "author": "",
@@ -21,9 +26,9 @@
     "@types/mongoose": "^5.11.96",
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.5.5",
+    "@types/nodemailer": "^6.4.17",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.7",
-    "@types/nodemailer": "^6.4.17",
     "eslint": "^9.10.0",
     "eslint-plugin-security": "^3.0.1",
     "globals": "^15.9.0",
@@ -38,15 +43,21 @@
   },
   "dependencies": {
     "@prisma/client": "^5.19.1",
+    "@types/cors": "^2.8.19",
     "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
+    "express-rate-limit": "^8.0.1",
     "express-validator": "^7.2.0",
+    "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.6.2",
     "morgan": "^1.10.0",
+    "nodemailer": "^6.9.16",
+    "rimraf": "^6.0.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
-    "nodemailer": "^6.9.16"
+    "typescript": "^5.6.3"
   }
 }

@@ -5,6 +5,7 @@ export interface BookingItem {
   type: booking_item_type;
   payableAmount: number;
   paidAmount?: number;
+  reportedIssue?: string;
 }
 
 export interface CreateBookingRequest {
@@ -36,6 +37,7 @@ export interface ListBookingsRequest {
   sortBy?: string;
   orderBy?: string;
   status?: booking_status;
+  searchString?: string;
 }
 
 export interface UpdateBookingItem {
@@ -44,6 +46,7 @@ export interface UpdateBookingItem {
   type?: booking_item_type;
   payableAmount?: number;
   paidAmount?: number;
+  reportedIssue?: string;
 }
 
 export interface CreateBookingItem {
@@ -51,4 +54,8 @@ export interface CreateBookingItem {
   type: booking_item_type;
   payableAmount: number;
   paidAmount?: number;
+}
+
+export interface DashboardRequest {
+  searchString?: string;
 }

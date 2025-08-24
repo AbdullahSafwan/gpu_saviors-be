@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { debugLog } from "../services/helper";
 import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
-import { CreateBookingRequest, ListBookingsRequest, UpdateBookingRequest } from "../types/bookingTypes";
+import { CreateBookingRequest, DashboardRequest, ListBookingsRequest, UpdateBookingRequest } from "../types/bookingTypes";
 import { bookingService } from "../services/booking";
 import { booking_status } from "@prisma/client";
 
@@ -38,8 +38,9 @@ const listBookings = async (req: Request<unknown, unknown, unknown, ListBookings
     const sort = req.query.sortBy ? req.query.sortBy.toString() : null;
     const orderBy = req.query.orderBy ? req.query.orderBy.toString() : "desc";
     const status = req.query.status ? (req.query.status.toString() as booking_status) : undefined;
+    const searchString = req.query.searchString;
 
-    const result = await bookingService.listBookings(page, pageSize, sort, orderBy, status);
+    const result = await bookingService.listBookings(page, pageSize, sort, orderBy, status, searchString);
     sendSuccessResponse(res, 200, "Successfully fetched bookings list", result);
   } catch (error) {
     debugLog(error);
@@ -59,11 +60,11 @@ const updateBooking = async (req: Request<{ id: string }, {}, UpdateBookingReque
   }
 };
 
-const dashboard = async (req: Request, res: Response) => {
+const dashboard = async (req: Request<unknown, unknown, unknown, DashboardRequest>, res: Response) => {
   try {
-    console.log(req);
-    const result = await bookingService.dashboard();
-    sendSuccessResponse(res, 200, "Successfully updated booking", result);
+    const searchString = req.query.searchString;
+    const result = await bookingService.dashboard(searchString);
+    sendSuccessResponse(res, 200, "Successfully fetched dashboard data", result);
   } catch (error) {
     debugLog(error);
     sendErrorResponse(res, 400, "Error fetching dashboard", error);
