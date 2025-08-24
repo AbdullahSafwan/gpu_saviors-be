@@ -10,8 +10,7 @@
     "start:prod": "NODE_ENV=production node build/src/index.js",
     "build:prod": "rm -rf ./build && tsc",
     "migrate:prod": "prisma migrate deploy",
-    "lint": "eslint . --ext .ts",
-    "prestart:prod": "npm run migrate:prod"
+    "lint": "eslint . --ext .ts"
   },
   "keywords": [],
   "author": "",
