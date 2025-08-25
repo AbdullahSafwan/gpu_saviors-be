@@ -1,4 +1,6 @@
-import { booking_item_type, booking_status } from "@prisma/client";
+import { booking_item_type, booking_status, payment_method, payment_status } from "@prisma/client";
+import { CreateContactLogRequest, UpdateContactLogRequest } from "./contactLogTypes";
+import { CreateDeliveryRequest, UpdateDeliveryRequest } from "./deliveryTypes";
 
 export interface BookingItem {
   name: string;
@@ -28,6 +30,9 @@ export interface UpdateBookingRequest {
   whatsappNumber?: string;
   paidAmount?: number;
   booking_items?: (UpdateBookingItem | CreateBookingItem)[];
+  contact_log?: (UpdateContactLogRequest | CreateContactLogRequest)[];
+  delivery?: (CreateDeliveryRequest | UpdateDeliveryRequest)[];
+  booking_payment?: (UpdateBookingPayment | CreateBookingPayment)[];
   status?: booking_status;
 }
 
@@ -58,4 +63,23 @@ export interface CreateBookingItem {
 
 export interface DashboardRequest {
   searchString?: string;
+}
+
+export interface CreateBookingPayment {
+  payableAmount?: number;
+  paidAmount?: number;
+  status: payment_status;
+  paymentMethod: payment_method;
+  recipientName: string;
+  transactionId: string;
+}
+
+export interface UpdateBookingPayment {
+  id: number;
+  payableAmount?: number;
+  paidAmount?: number;
+  status?: payment_status;
+  paymentMethod?: payment_method;
+  recipientName?: string;
+  transactionId?: string;
 }
