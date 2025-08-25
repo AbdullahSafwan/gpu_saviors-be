@@ -22,6 +22,7 @@ export interface GetDeliveryDetailsRequest {
 
 // Interface for updating a delivery
 export interface UpdateDeliveryRequest {
+  id?: number;
   bookingId?: number;
   status?: delivery_status;
   address?: string;
