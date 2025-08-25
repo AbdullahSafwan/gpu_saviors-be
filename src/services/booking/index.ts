@@ -1,5 +1,7 @@
 import { booking_status, Prisma } from "@prisma/client";
-import { CreateBookingItem, CreateBookingRequest, UpdateBookingItem, UpdateBookingRequest } from "../../types/bookingTypes";
+import { CreateBookingItem, CreateBookingRequest, UpdateBookingItem, UpdateBookingRequest, CreateBookingPayment, UpdateBookingPayment } from "../../types/bookingTypes";
+import { CreateContactLogRequest, UpdateContactLogRequest } from "../../types/contactLogTypes";
+import { CreateDeliveryRequest, UpdateDeliveryRequest } from "../../types/deliveryTypes";
 import { bookingDao } from "../../dao/booking";
 import prisma from "../../prisma";
 import { debugLog } from "../helper";
@@ -111,12 +113,23 @@ const updateBooking = async (id: number, data: UpdateBookingRequest) => {
     if (data.status && !validateStatusTransition(record.status, data.status)) {
       throw new Error("Invalid status transition");
     }
-    const { booking_items, ...otherData } = data;
-    // Separate items based on the presence of `id`
-    // if id is present, then the item is to be updated, if not then it is to be created
+    const { booking_items, contact_log, delivery, booking_payment, ...otherData } = data;
+    
+    // Separate booking items based on the presence of `id`
     const itemsToUpdate = booking_items?.filter((item): item is UpdateBookingItem => "id" in item && !!item.id) || [];
-
     const itemsToCreate = booking_items?.filter((item): item is CreateBookingItem => !("id" in item)) || [];
+
+    // Separate contact logs based on the presence of `id`
+    const contactLogsToUpdate = contact_log?.filter((item): item is UpdateContactLogRequest & { id: number } => "id" in item && !!item.id) || [];
+    const contactLogsToCreate = contact_log?.filter((item): item is CreateContactLogRequest => !("id" in item)) || [];
+
+    // Separate deliveries based on the presence of `id`
+    const deliveriesToUpdate = delivery?.filter((item): item is UpdateDeliveryRequest & { id: number } => "id" in item && !!item.id) || [];
+    const deliveriesToCreate = delivery?.filter((item): item is CreateDeliveryRequest => !("id" in item)) || [];
+
+    // Separate booking payments based on the presence of `id`
+    const paymentsToUpdate = booking_payment?.filter((item): item is UpdateBookingPayment => "id" in item && !!item.id) || [];
+    const paymentsToCreate = booking_payment?.filter((item): item is CreateBookingPayment => !("id" in item)) || [];
 
     const updateData: Prisma.bookingUpdateInput = {
       ...otherData,
@@ -129,6 +142,45 @@ const updateBooking = async (id: number, data: UpdateBookingRequest) => {
           ...(itemsToCreate.length > 0 && {
             createMany: {
               data: itemsToCreate,
+            },
+          }),
+        },
+      }),
+      ...(contact_log && {
+        contact_log: {
+          updateMany: contactLogsToUpdate.map(({ id, ...data }) => ({
+            where: { id },
+            data,
+          })),
+          ...(contactLogsToCreate.length > 0 && {
+            createMany: {
+              data: contactLogsToCreate.map(item => ({ ...item, bookingId: id })),
+            },
+          }),
+        },
+      }),
+      ...(delivery && {
+        delivery: {
+          updateMany: deliveriesToUpdate.map(({ id, ...data }) => ({
+            where: { id },
+            data,
+          })),
+          ...(deliveriesToCreate.length > 0 && {
+            createMany: {
+              data: deliveriesToCreate,
+            },
+          }),
+        },
+      }),
+      ...(booking_payment && {
+        booking_payments: {
+          updateMany: paymentsToUpdate.map(({ id, ...data }) => ({
+            where: { id },
+            data,
+          })),
+          ...(paymentsToCreate.length > 0 && {
+            createMany: {
+              data: paymentsToCreate.map(item => ({ ...item, bookingId: id })),
             },
           }),
         },
