@@ -15,6 +15,7 @@ export interface GetContactLogDetailsRequest {
 }
 
 export interface UpdateContactLogRequest {
+    id?: number;
     bookingItemId?: number;
     userId?: number;
     // bookingId?: number;
