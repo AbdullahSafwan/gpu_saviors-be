@@ -111,7 +111,7 @@ const updateBooking = async (id: number, data: UpdateBookingRequest) => {
     }
     //validating status transition, status can only be changed against allowed records
     if (data.status && !validateStatusTransition(record.status, data.status)) {
-      throw new Error("Invalid status transition");
+      throw new Error("Invalid status transition, allowed transitions are: DRAFT -> IN_REVIEW -> CONFIRMED -> PENDING_DELIVERY -> IN_QUEUE -> IN_PROGRESS -> RESOLVED -> PENDING_PAYMENT -> PENDING_DELIVERY -> OUTBOUND_DELIVERY -> CONFIRMED -> COMPLETED");
     }
     const { booking_items, contact_log, delivery, booking_payment, ...otherData } = data;
     
