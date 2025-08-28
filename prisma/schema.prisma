@@ -154,8 +154,8 @@ model booking_payment {
   modifiedAt    DateTime       @default(now())
   isActive      Boolean        @default(true)
   paymentMethod payment_method
-  recipientName String
-  transactionId String
+  recipientName String?
+  transactionId String?
   refund        refund[]
   bookingItem   booking_item[]
 }
@@ -200,8 +200,8 @@ enum payment_method {
 }
 
 enum payment_status {
-  ENABLED
-  DISABLED
+  PENDING
+  PAID
 }
 
 enum contact_method {
