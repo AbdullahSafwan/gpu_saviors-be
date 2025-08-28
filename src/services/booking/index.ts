@@ -1,4 +1,4 @@
-import { booking_status, Prisma } from "@prisma/client";
+import { booking_status, payment_method, payment_status, Prisma } from "@prisma/client";
 import { CreateBookingItem, CreateBookingRequest, UpdateBookingItem, UpdateBookingRequest, CreateBookingPayment, UpdateBookingPayment } from "../../types/bookingTypes";
 import { CreateContactLogRequest, UpdateContactLogRequest } from "../../types/contactLogTypes";
 import { CreateDeliveryRequest, UpdateDeliveryRequest } from "../../types/deliveryTypes";
@@ -18,6 +18,13 @@ const createBooking = async (data: CreateBookingRequest) => {
       booking_items: {
         create: data.booking_items,
       },
+      booking_payments:{
+        create: {
+          payableAmount: data.payableAmount,
+          status: payment_status.PENDING,
+          paymentMethod: payment_method.CASH,
+        }
+      }
     };
 
     const result = await bookingDao.createBooking(prisma, bookingData);
