@@ -5,7 +5,7 @@ import { CreateDeliveryRequest, UpdateDeliveryRequest } from "../../types/delive
 import { bookingDao } from "../../dao/booking";
 import prisma from "../../prisma";
 import { debugLog } from "../helper";
-import { validateStatusTransition } from "./helper";
+// import { validateStatusTransition } from "./helper";
 
 const createBooking = async (data: CreateBookingRequest) => {
   try {
@@ -117,9 +117,9 @@ const updateBooking = async (id: number, data: UpdateBookingRequest) => {
       throw new Error(`Booking not found against id: ${id}`);
     }
     //validating status transition, status can only be changed against allowed records
-    if (data.status && !validateStatusTransition(record.status, data.status)) {
-      throw new Error("Invalid status transition, allowed transitions are: DRAFT -> IN_REVIEW -> CONFIRMED -> PENDING_DELIVERY -> IN_QUEUE -> IN_PROGRESS -> RESOLVED -> PENDING_PAYMENT -> PENDING_DELIVERY -> OUTBOUND_DELIVERY -> CONFIRMED -> COMPLETED");
-    }
+    // if (data.status && !validateStatusTransition(record.status, data.status)) {
+    //   throw new Error("Invalid status transition, allowed transitions are: DRAFT -> IN_REVIEW -> CONFIRMED -> PENDING_DELIVERY -> IN_QUEUE -> IN_PROGRESS -> RESOLVED -> PENDING_PAYMENT -> PENDING_DELIVERY -> OUTBOUND_DELIVERY -> CONFIRMED -> COMPLETED");
+    // }
     const { booking_items, contact_log, delivery, booking_payment, ...otherData } = data;
     
     // Separate booking items based on the presence of `id`
