@@ -13,6 +13,7 @@ export interface CreateDeliveryRequest {
   secondaryPhoneNumber?: string;
   deliveryDate: Date;
   isActive?: boolean; // Optional, defaults to true in the model
+  createdBy?: number; // Will be set by system
 }
 
 // Interface for getting delivery details (by ID)
@@ -34,4 +35,5 @@ export interface UpdateDeliveryRequest {
   secondaryPhoneNumber?: string;
   deliveryDate?: Date;
   isActive?: boolean;
+  modifiedBy?: number; // Will be set by system
 }

@@ -3,12 +3,14 @@ import { CreateDeliveryRequest, UpdateDeliveryRequest } from "../types/deliveryT
 import { debugLog } from "../services/helper";
 import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
 import { deliveryService } from "../services/delivery";
+import { AuthenticatedRequest } from "../middleware/auth";
 
-const createDelivery = async (req: Request<{}, {}, CreateDeliveryRequest>, res: Response) => {
+const createDelivery = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const data = req.body;
+    const data = req.body as CreateDeliveryRequest;
+    const userId = req.user.userId;
 
-    const result = await deliveryService.createDelivery(data);
+    const result = await deliveryService.createDelivery(data, userId);
     sendSuccessResponse(res, 200, "Successfully created delivery", result);
   } catch (error) {
     debugLog(error);
@@ -30,11 +32,12 @@ const getDeliveryDetails = async (req: Request<{ id: string }>, res: Response) =
   }
 };
 
-const updateDelivery = async (req: Request<{ id: string }, {}, UpdateDeliveryRequest>, res: Response) => {
+const updateDelivery = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const data = req.body;
+    const data = req.body as UpdateDeliveryRequest;
     const id = +req.params.id;
-    const result = await deliveryService.updateDelivery(id, data);
+    const userId = req.user.userId;
+    const result = await deliveryService.updateDelivery(id, data, userId);
     sendSuccessResponse(res, 200, "Successfully updated delivery", result);
   } catch (error) {
     debugLog(error);

@@ -3,13 +3,14 @@ import { debugLog } from "../helper";
 import { CreateDeliveryRequest, UpdateDeliveryRequest } from "../../types/deliveryTypes";
 import { deliveryDao } from "../../dao/delivery";
 
-const createDelivery = async (data: CreateDeliveryRequest) => {
+const createDelivery = async (data: CreateDeliveryRequest, createdBy?: number) => {
   try {
     const { bookingId, ...rest } = data; // Destructure to exclude `bookingId`
 
     // Construct deliveryData, converting `bookingId` to a nested connect object
     const deliveryData = {
       ...rest,
+      ...(createdBy && { createdBy }),
       booking: { connect: { id: bookingId } },
     };
 
@@ -35,13 +36,17 @@ const getDelivery = async (id: number) => {
   }
 };
 
-const updateDelivery = async (id: number, data: UpdateDeliveryRequest) => {
+const updateDelivery = async (id: number, data: UpdateDeliveryRequest, modifiedBy?: number) => {
   try {
     const record = await deliveryDao.getDelivery(prisma, id);
     if (!record) {
       throw new Error(`delivery not found against id: ${id}`);
     }
-    const result = await deliveryDao.updateDelivery(prisma, id, data);
+    const deliveryData = {
+      ...data,
+      ...(modifiedBy && { modifiedBy }),
+    };
+    const result = await deliveryDao.updateDelivery(prisma, id, deliveryData);
     return result;
   } catch (error) {
     debugLog(error);
