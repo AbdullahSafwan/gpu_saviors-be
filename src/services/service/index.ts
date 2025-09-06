@@ -3,14 +3,15 @@ import prisma from "../../prisma";
 import { debugLog } from "../helper";
 import { CreateServiceRequest, UpdateServiceRequest } from "../../types/serviceTypes";
 
-const createService = async (data: CreateServiceRequest, createdBy?: number) => {
+const createService = async (data: CreateServiceRequest, createdBy: number) => {
   try {
     const { bookingItemId, ...rest } = data; // Destructure to exclude `bookingitemId`
 
     // Construct serviceData , converting `bookingitemId` to a nested connect object
     const serviceData = {
       ...rest,
-      ...(createdBy && { createdBy }),
+      createdByUser: { connect: { id: createdBy } },
+      modifiedByUser: { connect: { id: createdBy } },
       booking_item: { connect: { id: bookingItemId } },
     };
     const result = await serviceDao.createService(prisma, serviceData);
@@ -34,7 +35,7 @@ const getService = async (id: number) => {
   }
 };
 
-const updateService = async (id: number, data: UpdateServiceRequest, modifiedBy?: number) => {
+const updateService = async (id: number, data: UpdateServiceRequest, modifiedBy: number) => {
   try {
     const record = await serviceDao.getService(prisma, id);
     if (!record) {
@@ -42,7 +43,7 @@ const updateService = async (id: number, data: UpdateServiceRequest, modifiedBy?
     }
     const serviceData = {
       ...data,
-      ...(modifiedBy && { modifiedBy }),
+      modifiedByUser: { connect: { id: modifiedBy } },
     };
     const result = await serviceDao.updateService(prisma, id, serviceData);
     return result;
