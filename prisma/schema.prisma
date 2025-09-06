@@ -81,8 +81,8 @@ model booking {
   modifiedAt       DateTime          @default(now()) @updatedAt
   isActive         Boolean           @default(true)
   appointmentDate  DateTime?
-  createdBy        Int              @default(1)
-  modifiedBy       Int              @default(1)
+  createdBy        Int
+  modifiedBy       Int
   booking_items    booking_item[]
   delivery         delivery[]
   contact_log      contact_log[]
@@ -106,8 +106,8 @@ model booking_item {
   modifiedAt     DateTime            @default(now()) @updatedAt
   isActive       Boolean             @default(true)
   isRepaired     Boolean             @default(false)
-  createdBy      Int      @default(1)
-  modifiedBy     Int      @default(1)
+  createdBy      Int
+  modifiedBy     Int
   booking        booking             @relation(fields: [bookingId], references: [id])
   bookingId      Int
   payment        booking_payment?    @relation(fields: [paymentId], references: [id])
@@ -134,8 +134,8 @@ model delivery {
   secondaryPhoneNumber String?
   deliveryDate         DateTime
   isActive             Boolean         @default(true)
-  createdBy            Int             @default(1)
-  modifiedBy           Int             @default(1)
+  createdBy            Int
+  modifiedBy           Int
   createdByUser        user            @relation("DeliveryCreatedBy", fields: [createdBy], references: [id])
   modifiedByUser       user            @relation("DeliveryModifiedBy", fields: [modifiedBy], references: [id])
 }
@@ -149,8 +149,8 @@ model service {
   createdAt      DateTime       @default(now())
   modifiedAt     DateTime       @default(now()) @updatedAt
   isActive       Boolean        @default(true)
-  createdBy      Int      @default(1)
-  modifiedBy     Int      @default(1)
+  createdBy      Int
+  modifiedBy     Int
   createdByUser  user           @relation("ServiceCreatedBy", fields: [createdBy], references: [id])
   modifiedByUser user           @relation("ServiceModifiedBy", fields: [modifiedBy], references: [id])
 }
@@ -184,8 +184,8 @@ model booking_payment {
   paymentMethod  payment_method
   recipientName  String?
   transactionId  String?
-  createdBy      Int      @default(1)
-  modifiedBy     Int      @default(1)
+  createdBy      Int
+  modifiedBy     Int
   refund         refund[]
   bookingItem    booking_item[]
   createdByUser  user           @relation("BookingPaymentCreatedBy", fields: [createdBy], references: [id])
