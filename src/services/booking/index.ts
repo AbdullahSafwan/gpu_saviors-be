@@ -7,7 +7,7 @@ import prisma from "../../prisma";
 import { debugLog } from "../helper";
 // import { validateStatusTransition } from "./helper";
 
-const createBooking = async (data: CreateBookingRequest) => {
+const createBooking = async (data: CreateBookingRequest, createdBy?: number) => {
   try {
     data.payableAmount = data.booking_items.reduce((total: number, item) => total + item.payableAmount, 0);
 
@@ -15,14 +15,19 @@ const createBooking = async (data: CreateBookingRequest) => {
     data.code = new Date().getTime().toString(36).toUpperCase();
     const bookingData = {
       ...data,
+      ...(createdBy && { createdBy }),
       booking_items: {
-        create: data.booking_items,
+        create: data.booking_items.map(item => ({
+          ...item,
+          ...(createdBy && { createdBy })
+        })),
       },
       booking_payments:{
         create: {
           payableAmount: data.payableAmount,
           status: payment_status.PENDING,
           paymentMethod: payment_method.CASH,
+          ...(createdBy && { createdBy })
         }
       }
     };
@@ -110,7 +115,7 @@ const listBookings = async (
   }
 };
 
-const updateBooking = async (id: number, data: UpdateBookingRequest) => {
+const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy?: number) => {
   try {
     const record = await bookingDao.getBooking(prisma, id);
     if (!record) {
@@ -140,15 +145,22 @@ const updateBooking = async (id: number, data: UpdateBookingRequest) => {
 
     const updateData: Prisma.bookingUpdateInput = {
       ...otherData,
+      ...(modifiedBy && { modifiedBy }),
       ...(booking_items && {
         booking_items: {
           updateMany: itemsToUpdate.map(({ id, ...data }) => ({
             where: { id },
-            data,
+            data: {
+              ...data,
+              ...(modifiedBy && { modifiedBy })
+            },
           })),
           ...(itemsToCreate.length > 0 && {
             createMany: {
-              data: itemsToCreate,
+              data: itemsToCreate.map(item => ({
+                ...item,
+                ...(modifiedBy && { createdBy: modifiedBy })
+              })),
             },
           }),
         },
@@ -170,11 +182,17 @@ const updateBooking = async (id: number, data: UpdateBookingRequest) => {
         delivery: {
           updateMany: deliveriesToUpdate.map(({ id, ...data }) => ({
             where: { id },
-            data,
+            data: {
+              ...data,
+              ...(modifiedBy && { modifiedBy })
+            },
           })),
           ...(deliveriesToCreate.length > 0 && {
             createMany: {
-              data: deliveriesToCreate,
+              data: deliveriesToCreate.map(item => ({
+                ...item,
+                ...(modifiedBy && { createdBy: modifiedBy })
+              })),
             },
           }),
         },
@@ -183,11 +201,18 @@ const updateBooking = async (id: number, data: UpdateBookingRequest) => {
         booking_payments: {
           updateMany: paymentsToUpdate.map(({ id, ...data }) => ({
             where: { id },
-            data,
+            data: {
+              ...data,
+              ...(modifiedBy && { modifiedBy })
+            },
           })),
           ...(paymentsToCreate.length > 0 && {
             createMany: {
-              data: paymentsToCreate.map(item => ({ ...item, bookingId: id })),
+              data: paymentsToCreate.map(item => ({
+                ...item,
+                bookingId: id,
+                ...(modifiedBy && { createdBy: modifiedBy })
+              })),
             },
           }),
         },

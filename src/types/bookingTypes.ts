@@ -18,6 +18,7 @@ export interface CreateBookingRequest {
   code?: string;
   paidAmount?: number;
   booking_items: BookingItem[];
+  createdBy?: number; // Will be set by system
 }
 
 export interface GetBookingDetailsRequest {
@@ -34,6 +35,7 @@ export interface UpdateBookingRequest {
   delivery?: (CreateDeliveryRequest | UpdateDeliveryRequest)[];
   booking_payment?: (UpdateBookingPayment | CreateBookingPayment)[];
   status?: booking_status;
+  modifiedBy?: number; // Will be set by system
 }
 
 export interface ListBookingsRequest {
@@ -52,6 +54,7 @@ export interface UpdateBookingItem {
   payableAmount?: number;
   paidAmount?: number;
   reportedIssue?: string;
+  modifiedBy?: number; // Will be set by system
 }
 
 export interface CreateBookingItem {
@@ -59,6 +62,7 @@ export interface CreateBookingItem {
   type: booking_item_type;
   payableAmount: number;
   paidAmount?: number;
+  createdBy?: number; // Will be set by system
 }
 
 export interface DashboardRequest {
@@ -72,6 +76,7 @@ export interface CreateBookingPayment {
   paymentMethod: payment_method;
   recipientName: string;
   transactionId: string;
+  createdBy?: number; // Will be set by system
 }
 
 export interface UpdateBookingPayment {
@@ -82,4 +87,5 @@ export interface UpdateBookingPayment {
   paymentMethod?: payment_method;
   recipientName?: string;
   transactionId?: string;
+  modifiedBy?: number; // Will be set by system
 }

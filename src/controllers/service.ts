@@ -3,10 +3,12 @@ import { debugLog } from "../services/helper";
 import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
 import { serviceService } from "../services/service";
 import { CreateServiceRequest, UpdateServiceRequest } from "../types/serviceTypes";
-const createService = async (req: Request<{},{}, CreateServiceRequest>, res: Response) => {
+import { AuthenticatedRequest } from "../middleware/auth";
+const createService = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const data = req.body;
-    const result = await serviceService.createService(data);
+    const data = req.body as CreateServiceRequest;
+    const userId = req.user.userId;
+    const result = await serviceService.createService(data, userId);
     sendSuccessResponse(res, 200, "Successfully created service", result);
   } catch (error) {
     debugLog(error);
@@ -31,11 +33,12 @@ const getServiceDetails = async (req: Request<{ id: string }>, res: Response) =>
   }
 };
 
-const updateService = async (req: Request<{id: string},{}, UpdateServiceRequest>, res: Response) => {
+const updateService = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const data = req.body;
+    const data = req.body as UpdateServiceRequest;
     const id = +req.params.id;
-    const result = await serviceService.updateService(id, data);
+    const userId = req.user.userId;
+    const result = await serviceService.updateService(id, data, userId);
     sendSuccessResponse(res, 200, "Successfully updating service", result);
   } catch (error) {
     debugLog(error);
