@@ -7,8 +7,13 @@ import { sendErrorResponse } from "../services/responseHelper";
 
 const accessKeySecret = process.env.JWT_ACCESS_KEY_SECRET!;
 
-interface CustomRequest extends Request {
-  user: string | jwt.JwtPayload | undefined;
+interface CustomJwtPayload extends jwt.JwtPayload {
+  email: string;
+  userId: number;
+}
+
+export interface AuthenticatedRequest extends Request {
+  user: CustomJwtPayload;
 }
 export const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -22,7 +27,7 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
       if (err) {
         return sendErrorResponse(res, 401, "Forbidden", err.message);
       }
-      (req as CustomRequest).user = user;
+      (req as AuthenticatedRequest).user = user as CustomJwtPayload;
       next();
     });
   } catch (error) {

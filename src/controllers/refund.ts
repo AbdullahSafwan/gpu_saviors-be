@@ -3,11 +3,13 @@ import { debugLog } from "../services/helper";
 import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
 import { refundService } from "../services/refund";
 import { CreateRefundRequest,UpdateRefundRequest } from "../types/refundTypes";
+import { AuthenticatedRequest } from "../middleware/auth";
 
-const createRefund = async (req: Request<{},{},CreateRefundRequest>, res: Response) => {
+const createRefund = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const data = req.body;
-    const result = await refundService.createRefund(data);
+    const data = req.body as CreateRefundRequest;
+    const userId = req.user.userId;
+    const result = await refundService.createRefund(data, userId);
     sendSuccessResponse(res, 200, "Successfully created refund", result);
   } catch (error) {
     debugLog(error);
@@ -29,11 +31,12 @@ const getRefundDetails = async (req: Request<{id: string},{},{}> , res: Response
   }
 };
 
-const updateRefund = async (req: Request<{id: string},{}, UpdateRefundRequest>, res: Response) => {
+const updateRefund = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const data = req.body;
+    const data = req.body as UpdateRefundRequest;
     const id = +req.params.id;
-    const result = await refundService.updateRefund(id, data);
+    const userId = req.user.userId;
+    const result = await refundService.updateRefund(id, data, userId);
     sendSuccessResponse(res, 200, "Successfully updated refund", result);
   } catch (error) {
     debugLog(error);
