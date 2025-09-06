@@ -29,8 +29,8 @@ app.use(limiter);
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 
 // Body parser with size limits
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
 // Health check endpoint for load balancer
 app.get("/health", (_req, res) => {
