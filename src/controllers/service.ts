@@ -3,8 +3,7 @@ import { debugLog } from "../services/helper";
 import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
 import { serviceService } from "../services/service";
 import { CreateServiceRequest, UpdateServiceRequest } from "../types/serviceTypes";
-import { AuthenticatedRequest } from "../middleware/auth";
-const createService = async (req: AuthenticatedRequest, res: Response) => {
+const createService = async (req: Request, res: Response) => {
   try {
     const data = req.body as CreateServiceRequest;
     const userId = req.user.userId;
@@ -33,7 +32,7 @@ const getServiceDetails = async (req: Request<{ id: string }>, res: Response) =>
   }
 };
 
-const updateService = async (req: AuthenticatedRequest, res: Response) => {
+const updateService = async (req: Request, res: Response) => {
   try {
     const data = req.body as UpdateServiceRequest;
     const id = +req.params.id;
