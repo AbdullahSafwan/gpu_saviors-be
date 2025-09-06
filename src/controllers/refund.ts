@@ -3,9 +3,7 @@ import { debugLog } from "../services/helper";
 import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
 import { refundService } from "../services/refund";
 import { CreateRefundRequest,UpdateRefundRequest } from "../types/refundTypes";
-import { AuthenticatedRequest } from "../middleware/auth";
-
-const createRefund = async (req: AuthenticatedRequest, res: Response) => {
+const createRefund = async (req: Request, res: Response) => {
   try {
     const data = req.body as CreateRefundRequest;
     const userId = req.user.userId;
@@ -31,7 +29,7 @@ const getRefundDetails = async (req: Request<{id: string},{},{}> , res: Response
   }
 };
 
-const updateRefund = async (req: AuthenticatedRequest, res: Response) => {
+const updateRefund = async (req: Request, res: Response) => {
   try {
     const data = req.body as UpdateRefundRequest;
     const id = +req.params.id;

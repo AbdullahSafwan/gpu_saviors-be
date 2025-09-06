@@ -3,9 +3,7 @@ import { CreateUserRequest, UpdateUserRequest } from "../types/userTypes";
 import { debugLog } from "../services/helper";
 import { sendErrorResponse, sendSuccessResponse } from "../services/responseHelper";
 import { userService } from "../services/user";
-import { AuthenticatedRequest } from "../middleware/auth";
-
-const createUser = async (req: AuthenticatedRequest, res: Response) => {
+const createUser = async (req: Request, res: Response) => {
   try {
     const data = req.body as CreateUserRequest;
     const userId = req.user.userId;
@@ -31,7 +29,7 @@ const getUserDetails = async (req: Request<{ id: string }>, res: Response) => {
   }
 };
 
-const updateUser = async (req: AuthenticatedRequest, res: Response) => {
+const updateUser = async (req: Request, res: Response) => {
   try {
     const data = req.body as UpdateUserRequest;
     const id = +req.params.id;
