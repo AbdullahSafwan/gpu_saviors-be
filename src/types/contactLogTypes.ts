@@ -3,7 +3,7 @@ import { contact_method } from "@prisma/client";
 export interface CreateContactLogRequest {
     bookingItemId: number ;
     userId: number;
-    // bookingId: number;
+    bookingId: number; // Required in schema
     contactedAt: Date;
     status: contact_method;
     notes: string;
@@ -18,7 +18,7 @@ export interface UpdateContactLogRequest {
     id?: number;
     bookingItemId?: number;
     userId?: number;
-    // bookingId?: number;
+    bookingId?: number;
     contactedAt?: Date;
     status?: contact_method;
     notes?: string;
