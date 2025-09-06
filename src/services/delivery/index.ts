@@ -3,14 +3,15 @@ import { debugLog } from "../helper";
 import { CreateDeliveryRequest, UpdateDeliveryRequest } from "../../types/deliveryTypes";
 import { deliveryDao } from "../../dao/delivery";
 
-const createDelivery = async (data: CreateDeliveryRequest, createdBy?: number) => {
+const createDelivery = async (data: CreateDeliveryRequest, createdBy: number) => {
   try {
     const { bookingId, ...rest } = data; // Destructure to exclude `bookingId`
 
     // Construct deliveryData, converting `bookingId` to a nested connect object
     const deliveryData = {
       ...rest,
-      ...(createdBy && { createdBy }),
+      createdByUser: { connect: { id: createdBy } },
+      modifiedByUser: { connect: { id: createdBy } },
       booking: { connect: { id: bookingId } },
     };
 
@@ -36,7 +37,7 @@ const getDelivery = async (id: number) => {
   }
 };
 
-const updateDelivery = async (id: number, data: UpdateDeliveryRequest, modifiedBy?: number) => {
+const updateDelivery = async (id: number, data: UpdateDeliveryRequest, modifiedBy: number) => {
   try {
     const record = await deliveryDao.getDelivery(prisma, id);
     if (!record) {
@@ -44,7 +45,7 @@ const updateDelivery = async (id: number, data: UpdateDeliveryRequest, modifiedB
     }
     const deliveryData = {
       ...data,
-      ...(modifiedBy && { modifiedBy }),
+      modifiedByUser: { connect: { id: modifiedBy } },
     };
     const result = await deliveryDao.updateDelivery(prisma, id, deliveryData);
     return result;

@@ -7,7 +7,7 @@ import prisma from "../../prisma";
 import { debugLog } from "../helper";
 // import { validateStatusTransition } from "./helper";
 
-const createBooking = async (data: CreateBookingRequest, createdBy?: number) => {
+const createBooking = async (data: CreateBookingRequest, createdBy: number) => {
   try {
     data.payableAmount = data.booking_items.reduce((total: number, item) => total + item.payableAmount, 0);
 
@@ -15,11 +15,13 @@ const createBooking = async (data: CreateBookingRequest, createdBy?: number) => 
     data.code = new Date().getTime().toString(36).toUpperCase();
     const bookingData = {
       ...data,
-      ...(createdBy && { createdBy }),
+      createdByUser: { connect: { id: createdBy } },
+      modifiedByUser: { connect: { id: createdBy } },
       booking_items: {
         create: data.booking_items.map(item => ({
           ...item,
-          ...(createdBy && { createdBy })
+          createdByUser: { connect: { id: createdBy } },
+          modifiedByUser: { connect: { id: createdBy } }
         })),
       },
       booking_payments:{
@@ -27,7 +29,8 @@ const createBooking = async (data: CreateBookingRequest, createdBy?: number) => 
           payableAmount: data.payableAmount,
           status: payment_status.PENDING,
           paymentMethod: payment_method.CASH,
-          ...(createdBy && { createdBy })
+          createdByUser: { connect: { id: createdBy } },
+          modifiedByUser: { connect: { id: createdBy } }
         }
       }
     };
@@ -115,7 +118,7 @@ const listBookings = async (
   }
 };
 
-const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy?: number) => {
+const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy: number) => {
   try {
     const record = await bookingDao.getBooking(prisma, id);
     if (!record) {
@@ -145,21 +148,22 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy?
 
     const updateData: Prisma.bookingUpdateInput = {
       ...otherData,
-      ...(modifiedBy && { modifiedBy }),
+      modifiedByUser: { connect: { id: modifiedBy } },
       ...(booking_items && {
         booking_items: {
           updateMany: itemsToUpdate.map(({ id, ...data }) => ({
             where: { id },
             data: {
               ...data,
-              ...(modifiedBy && { modifiedBy })
+              modifiedBy
             },
           })),
           ...(itemsToCreate.length > 0 && {
             createMany: {
               data: itemsToCreate.map(item => ({
                 ...item,
-                ...(modifiedBy && { createdBy: modifiedBy })
+                createdBy: modifiedBy,
+                modifiedBy: modifiedBy
               })),
             },
           }),
@@ -184,14 +188,15 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy?
             where: { id },
             data: {
               ...data,
-              ...(modifiedBy && { modifiedBy })
+              modifiedBy
             },
           })),
           ...(deliveriesToCreate.length > 0 && {
             createMany: {
               data: deliveriesToCreate.map(item => ({
                 ...item,
-                ...(modifiedBy && { createdBy: modifiedBy })
+                createdBy: modifiedBy,
+                modifiedBy: modifiedBy
               })),
             },
           }),
@@ -203,7 +208,7 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy?
             where: { id },
             data: {
               ...data,
-              ...(modifiedBy && { modifiedBy })
+              modifiedBy
             },
           })),
           ...(paymentsToCreate.length > 0 && {
@@ -211,7 +216,8 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy?
               data: paymentsToCreate.map(item => ({
                 ...item,
                 bookingId: id,
-                ...(modifiedBy && { createdBy: modifiedBy })
+                createdBy: modifiedBy,
+                modifiedBy: modifiedBy
               })),
             },
           }),
