@@ -176,7 +176,6 @@ const resetPassword = async (data: ResetPasswordRequest) => {
   }
 
   // Hash the new password
-  const bcrypt = require("bcrypt");
   const hashedPassword = await bcrypt.hash(newPassword, 10);
 
   await userDao.updateUser(prisma, storedToken.user.id, {
