@@ -5,6 +5,7 @@ export interface CreateServiceRequest {
     status : service_status;
     remarks: string;
     isActive: boolean;
+    createdBy?: number; // Will be set by system
 }
 
 export interface GetServiceRequestDetails {
@@ -16,4 +17,5 @@ export interface UpdateServiceRequest {
     status?: service_status;
     remarks?: string;
     isActive?: boolean;
+    modifiedBy?: number; // Will be set by system
 }

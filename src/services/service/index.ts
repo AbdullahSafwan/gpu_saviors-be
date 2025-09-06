@@ -3,13 +3,14 @@ import prisma from "../../prisma";
 import { debugLog } from "../helper";
 import { CreateServiceRequest, UpdateServiceRequest } from "../../types/serviceTypes";
 
-const createService = async (data: CreateServiceRequest) => {
+const createService = async (data: CreateServiceRequest, createdBy?: number) => {
   try {
     const { bookingItemId, ...rest } = data; // Destructure to exclude `bookingitemId`
 
     // Construct serviceData , converting `bookingitemId` to a nested connect object
     const serviceData = {
       ...rest,
+      ...(createdBy && { createdBy }),
       booking_item: { connect: { id: bookingItemId } },
     };
     const result = await serviceDao.createService(prisma, serviceData);
@@ -33,13 +34,17 @@ const getService = async (id: number) => {
   }
 };
 
-const updateService = async (id: number, data: UpdateServiceRequest) => {
+const updateService = async (id: number, data: UpdateServiceRequest, modifiedBy?: number) => {
   try {
     const record = await serviceDao.getService(prisma, id);
     if (!record) {
       throw new Error(`service not found against id: ${id}`);
     }
-    const result = await serviceDao.updateService(prisma, id, data);
+    const serviceData = {
+      ...data,
+      ...(modifiedBy && { modifiedBy }),
+    };
+    const result = await serviceDao.updateService(prisma, id, serviceData);
     return result;
   } catch (error) {
     debugLog(error);
