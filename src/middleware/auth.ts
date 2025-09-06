@@ -15,7 +15,17 @@ interface CustomJwtPayload extends jwt.JwtPayload {
 export interface AuthenticatedRequest extends Request {
   user: CustomJwtPayload;
 }
-export const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
+
+// Add declaration merging to extend Express Request
+declare global {
+  namespace Express {
+    interface Request {
+      user: CustomJwtPayload;
+    }
+  }
+}
+
+export const verifyToken = (req: Request, res: Response, next: NextFunction) => {
   try {
     const token = req.header("Authorization")?.split(" ")[1];
 
@@ -23,11 +33,18 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
       return res.sendStatus(401);
     }
 
-    jwt.verify(token, accessKeySecret, (err, user) => {
+    jwt.verify(token, accessKeySecret, (err, decoded) => {
       if (err) {
         return sendErrorResponse(res, 401, "Forbidden", err.message);
       }
-      (req as AuthenticatedRequest).user = user as CustomJwtPayload;
+      
+      // Validate that decoded token has required fields
+      const user = decoded as CustomJwtPayload;
+      if (!user || !user.email || !user.userId) {
+        return res.status(401).json({ message: "Invalid token payload" });
+      }
+      
+      req.user = user;
       next();
     });
   } catch (error) {
