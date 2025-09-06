@@ -3,9 +3,7 @@ import { CreateDeliveryRequest, UpdateDeliveryRequest } from "../types/deliveryT
 import { debugLog } from "../services/helper";
 import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
 import { deliveryService } from "../services/delivery";
-import { AuthenticatedRequest } from "../middleware/auth";
-
-const createDelivery = async (req: AuthenticatedRequest, res: Response) => {
+const createDelivery = async (req: Request, res: Response) => {
   try {
     const data = req.body as CreateDeliveryRequest;
     const userId = req.user.userId;
@@ -32,7 +30,7 @@ const getDeliveryDetails = async (req: Request<{ id: string }>, res: Response) =
   }
 };
 
-const updateDelivery = async (req: AuthenticatedRequest, res: Response) => {
+const updateDelivery = async (req: Request, res: Response) => {
   try {
     const data = req.body as UpdateDeliveryRequest;
     const id = +req.params.id;

@@ -4,9 +4,7 @@ import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelp
 import { CreateBookingRequest, DashboardRequest, ListBookingsRequest, UpdateBookingRequest } from "../types/bookingTypes";
 import { bookingService } from "../services/booking";
 import { booking_status } from "@prisma/client";
-import { AuthenticatedRequest } from "../middleware/auth";
-
-const createBooking = async (req: AuthenticatedRequest, res: Response) => {
+const createBooking = async (req: Request, res: Response) => {
   try {
     const data = req.body as CreateBookingRequest;
     const userId = req.user.userId;
@@ -50,7 +48,7 @@ const listBookings = async (req: Request<unknown, unknown, unknown, ListBookings
   }
 };
 
-const updateBooking = async (req: AuthenticatedRequest, res: Response) => {
+const updateBooking = async (req: Request, res: Response) => {
   try {
     const id = +req.params.id;
     const data = req.body as UpdateBookingRequest;
