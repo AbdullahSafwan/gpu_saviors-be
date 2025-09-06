@@ -54,6 +54,7 @@ jobs:
           EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
           FRONTEND_URL=${{ secrets.FRONTEND_URL }}
           VPS_IP=${{ secrets.VPS_IP }}
+          PORT=${{ secrets.PORT }}
           EOF
 
       - name: Build Docker image
