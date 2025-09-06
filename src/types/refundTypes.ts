@@ -4,6 +4,7 @@ export interface CreateRefundRequest {
     remarks?: string;
     amount: number;
     isActive: boolean;
+    createdBy: number; // Required in schema
 }
 
 export interface GetRefundDetailsRequest {
@@ -16,4 +17,5 @@ export interface UpdateRefundRequest {
     remarks?: string;
     amount?: number;
     isActive?: boolean;
+    modifiedBy?: number; // Will be set by system
 }

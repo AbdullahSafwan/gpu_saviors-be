@@ -3,11 +3,13 @@ import { CreateUserRequest, UpdateUserRequest } from "../types/userTypes";
 import { debugLog } from "../services/helper";
 import { sendErrorResponse, sendSuccessResponse } from "../services/responseHelper";
 import { userService } from "../services/user";
+import { AuthenticatedRequest } from "../middleware/auth";
 
-const createUser = async (req: Request<{}, {}, CreateUserRequest>, res: Response) => {
+const createUser = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const data = req.body;
-    const result = await userService.createUser(data);
+    const data = req.body as CreateUserRequest;
+    const userId = req.user.userId;
+    const result = await userService.createUser(data, userId);
     sendSuccessResponse(res, 200, "Successfully created user", result);
   } catch (error) {
     debugLog(error);
@@ -29,11 +31,12 @@ const getUserDetails = async (req: Request<{ id: string }>, res: Response) => {
   }
 };
 
-const updateUser = async (req: Request<{ id: string }, {}, UpdateUserRequest>, res: Response) => {
+const updateUser = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const data = req.body;
+    const data = req.body as UpdateUserRequest;
     const id = +req.params.id;
-    const result = await userService.updateUser(id, data);
+    const userId = req.user.userId;
+    const result = await userService.updateUser(id, data, userId);
     sendSuccessResponse(res, 200, "Successfully updated user", result);
   } catch (error) {
     debugLog(error);

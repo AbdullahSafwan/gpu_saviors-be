@@ -8,20 +8,32 @@ datasource db {
 }
 
 model user {
-  id                       Int                       @unique @default(autoincrement())
-  firstName                String
-  lastName                 String
-  phoneNumber              String
-  email                    String                    @unique
-  password                 String
-  isVerified               Boolean                   @default(false)
-  status                   user_status               @default(ENABLED)
-  createdAt                DateTime                  @default(now())
-  modifiedAt               DateTime                  @default(now()) @updatedAt
-  contact_logs             contact_log[]
-  user_role                user_role[]
-  user_sessions            user_session[]
-  user_verification_tokens user_verification_token[]
+  id                        Int                       @unique @default(autoincrement())
+  firstName                 String
+  lastName                  String
+  phoneNumber               String
+  email                     String                    @unique
+  password                  String
+  isVerified                Boolean                   @default(false)
+  status                    user_status               @default(ENABLED)
+  createdAt                 DateTime                  @default(now())
+  modifiedAt                DateTime                  @default(now()) @updatedAt
+  contact_logs              contact_log[]
+  user_role                 user_role[]
+  user_sessions             user_session[]
+  user_verification_tokens  user_verification_token[]
+  created_bookings          booking[]                 @relation("BookingCreatedBy")
+  modified_bookings         booking[]                 @relation("BookingModifiedBy")
+  created_booking_items     booking_item[]            @relation("BookingItemCreatedBy")
+  modified_booking_items    booking_item[]            @relation("BookingItemModifiedBy")
+  created_deliveries        delivery[]                @relation("DeliveryCreatedBy")
+  modified_deliveries       delivery[]                @relation("DeliveryModifiedBy")
+  created_services          service[]                 @relation("ServiceCreatedBy")
+  modified_services         service[]                 @relation("ServiceModifiedBy")
+  created_booking_payments  booking_payment[]         @relation("BookingPaymentCreatedBy")
+  modified_booking_payments booking_payment[]         @relation("BookingPaymentModifiedBy")
+  created_refunds           refund[]                  @relation("RefundCreatedBy")
+  modified_refunds          refund[]                  @relation("RefundModifiedBy")
 }
 
 model user_session {
@@ -50,10 +62,10 @@ enum token_type {
 }
 
 model system_configuration {
-  id       Int     @unique @default(autoincrement())
-  key      String  @unique
-  value    String
-  isActive Boolean @default(true)
+  id             Int      @unique @default(autoincrement())
+  key            String   @unique
+  value          String
+  isActive       Boolean  @default(true)
 }
 
 model booking {
@@ -66,36 +78,44 @@ model booking {
   payableAmount    Int?
   paidAmount       Int?
   createdAt        DateTime          @default(now())
-  modifiedAt       DateTime          @default(now())
+  modifiedAt       DateTime          @default(now()) @updatedAt
   isActive         Boolean           @default(true)
   appointmentDate  DateTime?
+  createdBy        Int              @default(1)
+  modifiedBy       Int              @default(1)
   booking_items    booking_item[]
   delivery         delivery[]
   contact_log      contact_log[]
   booking_payments booking_payment[]
+  createdByUser    user              @relation("BookingCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser   user              @relation("BookingModifiedBy", fields: [modifiedBy], references: [id])
 }
 
 model booking_item {
-  id            Int                 @unique @default(autoincrement())
-  code          String?             @unique
-  name          String
-  serialNumber  String?
-  type          booking_item_type
-  reportedIssue String?
-  payableAmount Int
-  paidAmount    Int?
-  comments      String?
-  status        booking_item_status @default(DRAFT)
-  createdAt     DateTime            @default(now())
-  modifiedAt    DateTime            @default(now())
-  isActive      Boolean             @default(true)
-  isRepaired    Boolean             @default(false)
-  booking       booking             @relation(fields: [bookingId], references: [id])
-  bookingId     Int
-  payment       booking_payment?    @relation(fields: [paymentId], references: [id])
-  paymentId     Int?
-  service       service[]
-  contact_log   contact_log[]
+  id             Int                 @unique @default(autoincrement())
+  code           String?             @unique
+  name           String
+  serialNumber   String?
+  type           booking_item_type
+  reportedIssue  String?
+  payableAmount  Int
+  paidAmount     Int?
+  comments       String?
+  status         booking_item_status @default(DRAFT)
+  createdAt      DateTime            @default(now())
+  modifiedAt     DateTime            @default(now()) @updatedAt
+  isActive       Boolean             @default(true)
+  isRepaired     Boolean             @default(false)
+  createdBy      Int      @default(1)
+  modifiedBy     Int      @default(1)
+  booking        booking             @relation(fields: [bookingId], references: [id])
+  bookingId      Int
+  payment        booking_payment?    @relation(fields: [paymentId], references: [id])
+  paymentId      Int?
+  service        service[]
+  contact_log    contact_log[]
+  createdByUser  user                @relation("BookingItemCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser user                @relation("BookingItemModifiedBy", fields: [modifiedBy], references: [id])
 }
 
 model delivery {
@@ -109,22 +129,30 @@ model delivery {
   type                 courier_type
   phoneNumber          String
   createdAt            DateTime        @default(now())
-  modifiedAt           DateTime        @default(now())
+  modifiedAt           DateTime        @default(now()) @updatedAt
   landmark             String?
   secondaryPhoneNumber String?
   deliveryDate         DateTime
   isActive             Boolean         @default(true)
+  createdBy            Int             @default(1)
+  modifiedBy           Int             @default(1)
+  createdByUser        user            @relation("DeliveryCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser       user            @relation("DeliveryModifiedBy", fields: [modifiedBy], references: [id])
 }
 
 model service {
-  id            Int            @unique @default(autoincrement())
-  booking_item  booking_item   @relation(fields: [bookingItemId], references: [id])
-  bookingItemId Int
-  status        service_status
-  remarks       String
-  createdAt     DateTime       @default(now())
-  modifiedAt    DateTime       @default(now())
-  isActive      Boolean        @default(true)
+  id             Int            @unique @default(autoincrement())
+  booking_item   booking_item   @relation(fields: [bookingItemId], references: [id])
+  bookingItemId  Int
+  status         service_status
+  remarks        String
+  createdAt      DateTime       @default(now())
+  modifiedAt     DateTime       @default(now()) @updatedAt
+  isActive       Boolean        @default(true)
+  createdBy      Int      @default(1)
+  modifiedBy     Int      @default(1)
+  createdByUser  user           @relation("ServiceCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser user           @relation("ServiceModifiedBy", fields: [modifiedBy], references: [id])
 }
 
 model contact_log {
@@ -139,25 +167,29 @@ model contact_log {
   status        contact_method
   notes         String
   createdAt     DateTime       @default(now())
-  modifiedAt    DateTime       @default(now())
+  modifiedAt    DateTime       @default(now()) @updatedAt
   isActive      Boolean        @default(true)
 }
 
 model booking_payment {
-  id            Int            @unique @default(autoincrement())
-  booking       booking        @relation(fields: [bookingId], references: [id])
-  bookingId     Int
-  status        payment_status
-  payableAmount Int?
-  paidAmount    Int?
-  createdAt     DateTime       @default(now())
-  modifiedAt    DateTime       @default(now())
-  isActive      Boolean        @default(true)
-  paymentMethod payment_method
-  recipientName String?
-  transactionId String?
-  refund        refund[]
-  bookingItem   booking_item[]
+  id             Int            @unique @default(autoincrement())
+  booking        booking        @relation(fields: [bookingId], references: [id])
+  bookingId      Int
+  status         payment_status
+  payableAmount  Int?
+  paidAmount     Int?
+  createdAt      DateTime       @default(now())
+  modifiedAt     DateTime       @default(now()) @updatedAt
+  isActive       Boolean        @default(true)
+  paymentMethod  payment_method
+  recipientName  String?
+  transactionId  String?
+  createdBy      Int      @default(1)
+  modifiedBy     Int      @default(1)
+  refund         refund[]
+  bookingItem    booking_item[]
+  createdByUser  user           @relation("BookingPaymentCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser user           @relation("BookingPaymentModifiedBy", fields: [modifiedBy], references: [id])
 }
 
 model refund {
@@ -167,9 +199,13 @@ model refund {
   refundDate      DateTime
   remarks         String?
   createdAt       DateTime        @default(now())
-  modifiedAt      DateTime        @default(now())
+  modifiedAt      DateTime        @default(now()) @updatedAt
   amount          Int
   isActive        Boolean         @default(true)
+  createdBy       Int
+  modifiedBy      Int
+  createdByUser   user            @relation("RefundCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser  user            @relation("RefundModifiedBy", fields: [modifiedBy], references: [id])
 }
 
 model system_role {
