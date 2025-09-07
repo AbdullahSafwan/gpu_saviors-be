@@ -62,10 +62,10 @@ enum token_type {
 }
 
 model system_configuration {
-  id             Int      @unique @default(autoincrement())
-  key            String   @unique
-  value          String
-  isActive       Boolean  @default(true)
+  id       Int     @unique @default(autoincrement())
+  key      String  @unique
+  value    String
+  isActive Boolean @default(true)
 }
 
 model booking {
@@ -108,12 +108,13 @@ model booking_item {
   isRepaired     Boolean             @default(false)
   createdBy      Int
   modifiedBy     Int
-  booking        booking             @relation(fields: [bookingId], references: [id])
   bookingId      Int
-  payment        booking_payment?    @relation(fields: [paymentId], references: [id])
   paymentId      Int?
+  vendor         String?
   service        service[]
   contact_log    contact_log[]
+  payment        booking_payment?    @relation(fields: [paymentId], references: [id])
+  booking        booking             @relation(fields: [bookingId], references: [id])
   createdByUser  user                @relation("BookingItemCreatedBy", fields: [createdBy], references: [id])
   modifiedByUser user                @relation("BookingItemModifiedBy", fields: [modifiedBy], references: [id])
 }
