@@ -33,7 +33,7 @@ export interface UpdateBookingRequest {
   booking_items?: (UpdateBookingItem | CreateBookingItem)[];
   contact_log?: (UpdateContactLogRequest | CreateContactLogRequest)[];
   delivery?: (CreateDeliveryRequest | UpdateDeliveryRequest)[];
-  booking_payment?: (UpdateBookingPayment | CreateBookingPayment)[];
+  booking_payments?: (UpdateBookingPayment | CreateBookingPayment)[];
   status?: booking_status;
   modifiedBy?: number; // Will be set by system
 }
