@@ -233,7 +233,7 @@ enum user_status {
 enum payment_method {
   CASH
   WALLET
-  BT
+  BANK_TRANSFER
 }
 
 enum payment_status {
