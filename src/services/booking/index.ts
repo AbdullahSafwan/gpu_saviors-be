@@ -128,7 +128,7 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
     // if (data.status && !validateStatusTransition(record.status, data.status)) {
     //   throw new Error("Invalid status transition, allowed transitions are: DRAFT -> IN_REVIEW -> CONFIRMED -> PENDING_DELIVERY -> IN_QUEUE -> IN_PROGRESS -> RESOLVED -> PENDING_PAYMENT -> PENDING_DELIVERY -> OUTBOUND_DELIVERY -> CONFIRMED -> COMPLETED");
     // }
-    const { booking_items, contact_log, delivery, booking_payment, ...otherData } = data;
+    const { booking_items, contact_log, delivery, booking_payments, ...otherData } = data;
     
     // Separate booking items based on the presence of `id`
     const itemsToUpdate = booking_items?.filter((item): item is UpdateBookingItem => "id" in item && !!item.id) || [];
@@ -143,8 +143,8 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
     const deliveriesToCreate = delivery?.filter((item): item is CreateDeliveryRequest => !("id" in item)) || [];
 
     // Separate booking payments based on the presence of `id`
-    const paymentsToUpdate = booking_payment?.filter((item): item is UpdateBookingPayment => "id" in item && !!item.id) || [];
-    const paymentsToCreate = booking_payment?.filter((item): item is CreateBookingPayment => !("id" in item)) || [];
+    const paymentsToUpdate = booking_payments?.filter((item): item is UpdateBookingPayment => "id" in item && !!item.id) || [];
+    const paymentsToCreate = booking_payments?.filter((item): item is CreateBookingPayment => !("id" in item)) || [];
 
     const updateData: Prisma.bookingUpdateInput = {
       ...otherData,
@@ -202,7 +202,7 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
           }),
         },
       }),
-      ...(booking_payment && {
+      ...(booking_payments && {
         booking_payments: {
           updateMany: paymentsToUpdate.map(({ id, ...data }) => ({
             where: { id },
@@ -215,7 +215,6 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
             createMany: {
               data: paymentsToCreate.map(item => ({
                 ...item,
-                bookingId: id,
                 createdBy: modifiedBy,
                 modifiedBy: modifiedBy
               })),
