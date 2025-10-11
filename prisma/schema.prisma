@@ -83,6 +83,7 @@ model booking {
   appointmentDate  DateTime?
   createdBy        Int
   modifiedBy       Int
+  clientType       client_type       @default(INDIVIDUAL)
   booking_items    booking_item[]
   delivery         delivery[]
   contact_log      contact_log[]
@@ -303,4 +304,9 @@ enum booking_item_type {
 enum courier_type {
   INBOUND
   OUTBOUND
+}
+
+enum client_type {
+  CORPORATE
+  INDIVIDUAL
 }
