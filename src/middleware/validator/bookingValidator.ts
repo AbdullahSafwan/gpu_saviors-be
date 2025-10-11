@@ -1,11 +1,13 @@
 import { body, query } from "express-validator";
-import { booking_status, booking_item_type } from "@prisma/client";
+import { booking_status, booking_item_type, client_type } from "@prisma/client";
 import { formatWhatsAppNumber } from "./helper";
+import { bookingDao } from "../../dao/booking";
+import prisma from "../../prisma";
 
 const createBookingValidator = [
   // Validate booking fields
   body("paidAmount").optional().isInt({ min: 0 }).withMessage("Paid amount must be a positive integer"),
-
+  body("clientType").optional().isIn(Object.values(client_type)).withMessage("Invalid client type"),
   body("clientName").notEmpty().withMessage("name is required").bail().isString().withMessage("name should be valid string"),
 
   body("phoneNumber")
@@ -55,7 +57,7 @@ const createBookingValidator = [
 const updateBookingValidator = [
   // Validate booking fields
   body("status").optional().isIn(Object.values(booking_status)).withMessage("Invalid booking status"),
-
+  body("clientType").optional().isIn(Object.values(client_type)).withMessage("Invalid client type"),
   body("paidAmount").optional().isInt({ min: 0 }).withMessage("Paid amount must be a positive integer"),
 
   body("phoneNumber")
@@ -109,4 +111,18 @@ const listBookingsValidator = [
   query("status").optional().isString().isIn(Object.values(booking_status)).withMessage("Invalid booking status"),
 ];
 
-export const bookingValidator = { createBookingValidator, updateBookingValidator, listBookingsValidator };
+const removeBookingValidator = [
+  query("id").notEmpty().withMessage("Booking ID is required").isInt({ min: 1 }).withMessage("Booking ID must be a positive integer").toInt(),
+  query("id").custom((value) => {
+    if (isNaN(value) || value <= 0) {
+      throw new Error("Invalid booking ID");
+    }
+    const isPresent = bookingDao.getBooking(prisma, value);
+    if (!isPresent) {
+      throw new Error("Booking not found");
+    }
+    return true;
+  })
+];
+
+export const bookingValidator = { createBookingValidator, updateBookingValidator, listBookingsValidator, removeBookingValidator };
