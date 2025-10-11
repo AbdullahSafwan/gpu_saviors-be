@@ -34,6 +34,10 @@ model user {
   modified_booking_payments booking_payment[]         @relation("BookingPaymentModifiedBy")
   created_refunds           refund[]                  @relation("RefundCreatedBy")
   modified_refunds          refund[]                  @relation("RefundModifiedBy")
+  created_warranties        warranty[]                @relation("WarrantyCreatedBy")
+  modified_warranties       warranty[]                @relation("WarrantyModifiedBy")
+  created_warranty_claims   warranty_claim[]          @relation("WarrantyClaimCreatedBy")
+  modified_warranty_claims  warranty_claim[]          @relation("WarrantyClaimModifiedBy")
 }
 
 model user_session {
@@ -69,26 +73,30 @@ model system_configuration {
 }
 
 model booking {
-  id               Int               @unique @default(autoincrement())
-  clientName       String
-  phoneNumber      String
-  whatsappNumber   String
-  status           booking_status    @default(DRAFT)
-  code             String?           @unique
-  payableAmount    Int?
-  paidAmount       Int?
-  createdAt        DateTime          @default(now())
-  modifiedAt       DateTime          @default(now()) @updatedAt
-  isActive         Boolean           @default(true)
-  appointmentDate  DateTime?
-  createdBy        Int
-  modifiedBy       Int
-  booking_items    booking_item[]
-  delivery         delivery[]
-  contact_log      contact_log[]
-  booking_payments booking_payment[]
-  createdByUser    user              @relation("BookingCreatedBy", fields: [createdBy], references: [id])
-  modifiedByUser   user              @relation("BookingModifiedBy", fields: [modifiedBy], references: [id])
+  id                    Int               @unique @default(autoincrement())
+  clientName            String
+  phoneNumber           String
+  whatsappNumber        String
+  status                booking_status    @default(DRAFT)
+  code                  String?           @unique
+  payableAmount         Int?
+  paidAmount            Int?
+  createdAt             DateTime          @default(now())
+  modifiedAt            DateTime          @default(now()) @updatedAt
+  isActive              Boolean           @default(true)
+  isWarrantyClaim       Boolean           @default(false)
+  appointmentDate       DateTime?
+  createdBy             Int
+  modifiedBy            Int
+  clientType            client_type       @default(INDIVIDUAL)
+  booking_items         booking_item[]
+  delivery              delivery[]
+  contact_log           contact_log[]
+  booking_payments      booking_payment[]
+  warrantyClaims        warranty_claim[]  @relation("WarrantyClaimBooking")
+  originalBookingClaims warranty_claim[]  @relation("OriginalBookingClaims")
+  createdByUser         user              @relation("BookingCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser        user              @relation("BookingModifiedBy", fields: [modifiedBy], references: [id])
 }
 
 model booking_item {
@@ -113,6 +121,7 @@ model booking_item {
   vendor         String?
   service        service[]
   contact_log    contact_log[]
+  warranty       warranty?
   payment        booking_payment?    @relation(fields: [paymentId], references: [id])
   booking        booking             @relation(fields: [bookingId], references: [id])
   createdByUser  user                @relation("BookingItemCreatedBy", fields: [createdBy], references: [id])
@@ -303,4 +312,57 @@ enum booking_item_type {
 enum courier_type {
   INBOUND
   OUTBOUND
+}
+
+enum client_type {
+  CORPORATE
+  INDIVIDUAL
+}
+
+model warranty {
+  id                 Int                   @unique @default(autoincrement())
+  bookingItemId      Int                   @unique
+  bookingItem        booking_item          @relation(fields: [bookingItemId], references: [id])
+  warrantyStartDate  DateTime
+  warrantyEndDate    DateTime
+  warrantyDays       Int                   @default(15)
+  isActive           Boolean               @default(true)
+  createdAt          DateTime              @default(now())
+  modifiedAt         DateTime              @default(now()) @updatedAt
+  createdBy          Int
+  modifiedBy         Int
+  createdByUser      user                  @relation("WarrantyCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser     user                  @relation("WarrantyModifiedBy", fields: [modifiedBy], references: [id])
+  warrantyClaimItems warranty_claim_item[]
+}
+
+model warranty_claim {
+  id                 Int                   @unique @default(autoincrement())
+  originalBookingId  Int
+  originalBooking    booking               @relation("OriginalBookingClaims", fields: [originalBookingId], references: [id])
+  claimBookingId     Int
+  claimBooking       booking               @relation("WarrantyClaimBooking", fields: [claimBookingId], references: [id])
+  claimNumber        String                @unique
+  claimDate          DateTime              @default(now())
+  remarks            String?
+  isActive           Boolean               @default(true)
+  createdAt          DateTime              @default(now())
+  modifiedAt         DateTime              @default(now()) @updatedAt
+  createdBy          Int
+  modifiedBy         Int
+  createdByUser      user                  @relation("WarrantyClaimCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser     user                  @relation("WarrantyClaimModifiedBy", fields: [modifiedBy], references: [id])
+  warrantyClaimItems warranty_claim_item[]
+}
+
+model warranty_claim_item {
+  id              Int            @unique @default(autoincrement())
+  warrantyClaimId Int
+  warrantyClaim   warranty_claim @relation(fields: [warrantyClaimId], references: [id])
+  warrantyId      Int
+  warranty        warranty       @relation(fields: [warrantyId], references: [id])
+  reportedIssue   String
+  remarks         String?
+  createdAt       DateTime       @default(now())
+  modifiedAt      DateTime       @default(now()) @updatedAt
 }
