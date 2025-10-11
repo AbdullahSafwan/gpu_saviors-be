@@ -1,5 +1,5 @@
 import { body, query } from "express-validator";
-import { booking_status, booking_item_type } from "@prisma/client";
+import { booking_status, booking_item_type, client_type } from "@prisma/client";
 import { formatWhatsAppNumber } from "./helper";
 import { bookingDao } from "../../dao/booking";
 import prisma from "../../prisma";
@@ -7,7 +7,7 @@ import prisma from "../../prisma";
 const createBookingValidator = [
   // Validate booking fields
   body("paidAmount").optional().isInt({ min: 0 }).withMessage("Paid amount must be a positive integer"),
-
+  body("clientType").optional().isIn(Object.values(client_type)).withMessage("Invalid client type"),
   body("clientName").notEmpty().withMessage("name is required").bail().isString().withMessage("name should be valid string"),
 
   body("phoneNumber")
@@ -57,7 +57,7 @@ const createBookingValidator = [
 const updateBookingValidator = [
   // Validate booking fields
   body("status").optional().isIn(Object.values(booking_status)).withMessage("Invalid booking status"),
-
+  body("clientType").optional().isIn(Object.values(client_type)).withMessage("Invalid client type"),
   body("paidAmount").optional().isInt({ min: 0 }).withMessage("Paid amount must be a positive integer"),
 
   body("phoneNumber")
