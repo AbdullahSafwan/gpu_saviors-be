@@ -17,6 +17,8 @@ import { serviceValidator } from "./middleware/validator/serviceValidator";
 import { authController } from "./controllers/auth";
 import { verifyToken } from "./middleware/auth";
 import { authValidator } from "./middleware/validator/authValidator";
+import { warrantyClaimController } from "./controllers/warrantyClaim";
+import { warrantyClaimValidator } from "./middleware/validator/warrantyClaimValidator";
 
 const router = express.Router();
 
@@ -69,5 +71,10 @@ router.patch(
 router.post("/contactLog", verifyToken, contactLogValidator.createContactLogValidator, throwValidationResult, contactLogController.createContactLog);
 router.get("/contactLog/:id", verifyToken, contactLogController.getContactLogDetails);
 router.patch("/contactLog/:id", verifyToken, contactLogValidator.updateContactLogValidator, throwValidationResult, contactLogController.updateContactLog);
+
+router.post("/warrantyClaim", verifyToken, warrantyClaimValidator.createWarrantyClaimValidator, throwValidationResult, warrantyClaimController.createWarrantyClaim);
+router.get("/warrantyClaim/", verifyToken, warrantyClaimValidator.listWarrantyClaimsValidator, throwValidationResult, warrantyClaimController.listWarrantyClaims);
+router.get("/warrantyClaim/:id", verifyToken, warrantyClaimValidator.getWarrantyClaimByIdValidator, throwValidationResult, warrantyClaimController.getWarrantyClaimById);
+router.get("/warrantyClaim/claim/:claimNumber", verifyToken, warrantyClaimValidator.getWarrantyClaimByClaimNumberValidator, throwValidationResult, warrantyClaimController.getWarrantyClaimByClaimNumber);
 
 export default router;
