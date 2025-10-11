@@ -1,10 +1,11 @@
-import { booking_status, payment_method, payment_status, Prisma } from "@prisma/client";
+import { booking_status, payment_method, payment_status, Prisma, booking_item_status } from "@prisma/client";
 import { CreateBookingItem, CreateBookingRequest, UpdateBookingItem, UpdateBookingRequest, CreateBookingPayment, UpdateBookingPayment } from "../../types/bookingTypes";
 import { CreateContactLogRequest, UpdateContactLogRequest } from "../../types/contactLogTypes";
 import { CreateDeliveryRequest, UpdateDeliveryRequest } from "../../types/deliveryTypes";
 import { bookingDao } from "../../dao/booking";
 import prisma from "../../prisma";
 import { debugLog } from "../helper";
+import { warrantyService } from "../warranty";
 // import { validateStatusTransition } from "./helper";
 
 const createBooking = async (data: CreateBookingRequest, createdBy: number) => {
@@ -225,6 +226,35 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
     };
 
     const result = await bookingDao.updateBooking(prisma, id, updateData);
+
+    // Auto-create warranties for booking items that are marked as COMPLETED
+    if (itemsToUpdate.length > 0) {
+      for (const item of itemsToUpdate) {
+        // Check if status changed to COMPLETED
+        if (item.status === booking_item_status.COMPLETED && item.id) {
+          try {
+            // Check if warranty already exists
+            const existingWarranty = await warrantyService.getWarrantyByBookingItem(prisma, item.id);
+
+            if (!existingWarranty) {
+              // Create warranty for this booking item
+              await warrantyService.createWarranty(
+                prisma,
+                {
+                  bookingItemId: item.id,
+                  warrantyDays: 15, // Default 15 days warranty
+                },
+                modifiedBy
+              );
+            }
+          } catch (error) {
+            // Log error but don't fail the entire booking update
+            debugLog(`Failed to create warranty for booking item ${item.id}: ${error}`);
+          }
+        }
+      }
+    }
+
     return result;
   } catch (error) {
     debugLog(error);
