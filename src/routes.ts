@@ -27,6 +27,7 @@ router.patch("/user/:id", verifyToken, userValidator.updateUserValidator, throwV
 router.post("/booking/", verifyToken, bookingValidator.createBookingValidator, throwValidationResult, bookingController.createBooking);
 router.get("/booking/", verifyToken, bookingValidator.listBookingsValidator, throwValidationResult, bookingController.listBookings);
 router.patch("/booking/:id", verifyToken, bookingValidator.updateBookingValidator, throwValidationResult, bookingController.updateBooking);
+router.delete("/booking/:id", verifyToken, bookingValidator.removeBookingValidator, bookingController.removeBooking);
 router.get("/dashboard/", verifyToken, bookingController.dashboard);
 router.get("/booking/:id", verifyToken, bookingController.getBookingDetails);
 
