@@ -72,4 +72,21 @@ const dashboard = async (req: Request<unknown, unknown, unknown, DashboardReques
     sendErrorResponse(res, 400, "Error fetching dashboard", error);
   }
 };
-export const bookingController = { createBooking, getBookingDetails, updateBooking, listBookings, dashboard };
+
+const removeBooking = async (req: Request, res: Response) => {
+  try {
+    const id = +req.params.id;
+    if (typeof id !== "number" || isNaN(id) || id <= 0) {
+      throw new Error("Invalid booking ID");
+    }
+    const data = {isActive: false} as UpdateBookingRequest;
+    const userId = req.user.userId;
+    
+    const result = await bookingService.updateBooking(id, data, userId);
+    sendSuccessResponse(res, 200, "Successfully removed booking", result);
+  } catch (error) {
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error removing booking", error);
+  }
+};
+export const bookingController = { createBooking, getBookingDetails, updateBooking, listBookings, dashboard, removeBooking };
