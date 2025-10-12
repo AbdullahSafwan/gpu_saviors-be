@@ -25,6 +25,21 @@ const getSystemConfiguration = async (prisma: PrismaClient, id: number) => {
   }
 };
 
+const getSystemConfigurationByKey = async (prisma: PrismaClient, key: string) => {
+  try {
+    const result = await prisma.system_configuration.findUnique({
+      where: { key },
+    });
+    if (!result) {
+      throw new Error(`System configuration with key ${key} not found`);
+    }
+    return result;
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+}
+
 const updateSystemConfiguration = async (prisma: PrismaClient, id: number, data: Prisma.system_configurationUpdateInput) => {
   try {
     const result = await prisma.system_configuration.update({
@@ -38,4 +53,4 @@ const updateSystemConfiguration = async (prisma: PrismaClient, id: number, data:
   }
 };
 
-export const systemConfigurationDao = { createSystemConfiguration, getSystemConfiguration, updateSystemConfiguration };
+export const systemConfigurationDao = { createSystemConfiguration, getSystemConfiguration, updateSystemConfiguration, getSystemConfigurationByKey };
