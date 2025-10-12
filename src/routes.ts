@@ -19,6 +19,7 @@ import { warrantyClaimController } from "./controllers/warrantyClaim";
 import { warrantyClaimValidator } from "./middleware/validator/warrantyClaimValidator";
 import { ledgerEntryController } from "./controllers/ledgerEntry";
 import { ledgerEntryValidator } from "./middleware/validator/ledgerEntryValidator";
+import { locationController } from "./controllers/location";
 
 const router = express.Router();
 
@@ -73,4 +74,6 @@ router.get("/ledger-entry/:id", verifyToken, ledgerEntryController.getLedgerEntr
 router.patch("/ledger-entry/:id", verifyToken, ledgerEntryValidator.updateLedgerEntryValidator, throwValidationResult, ledgerEntryController.updateLedgerEntry);
 router.delete("/ledger-entry/:id", verifyToken, ledgerEntryController.deleteLedgerEntry);
 
+
+router.get("/locations", verifyToken, locationController.fetchActiveLocations);
 export default router;
