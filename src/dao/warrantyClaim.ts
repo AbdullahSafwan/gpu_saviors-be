@@ -143,8 +143,16 @@ const listWarrantyClaims = async (
   }
 };
 
+const validateWarrantyClaimExists = async (prisma: PrismaClient, id: number) => {
+  const claim = await prisma.warranty_claim.findUnique({
+    where: { id },
+  });
+  return !!claim;
+}
+
 export const warrantyClaimDao = {
   getWarrantyClaim,
   getWarrantyClaimByClaimNumber,
   listWarrantyClaims,
+  validateWarrantyClaimExists,
 };
