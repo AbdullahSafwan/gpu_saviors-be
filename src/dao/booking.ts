@@ -42,9 +42,9 @@ const listBookings = async (
   searchFields?: string[]
 ) => {
   try {
-    const sort = (_sort ?? "id").toString(); // Determine the field to sort by, default to "id" if not provided
-    const order = _orderBy; // Determine the sorting order, default is Descending order
-    const orderBy = { [sort]: order }; // Construct the orderBy object for querying based on the sort and order
+    const sort = (_sort ?? "id").toString();
+    const order = _orderBy;
+    const orderBy = { [sort]: order };
 
     const where = {
       AND: [
@@ -84,9 +84,9 @@ const listBookings = async (
     const totalPages = Math.ceil(totalBookings / pageSize);
 
     return {
-      bookings: result, // The current page of bookings
-      totalPages, // Total number of pages
-      totalBookings, // Total number of bookings
+      bookings: result,
+      totalPages,
+      totalBookings,
       // orderBy,
     };
   } catch (error) {
@@ -157,4 +157,23 @@ const fetchingBookingsByFilter = async (
   }
 };
 
-export const bookingDao = { createBooking, getBooking, updateBooking, listBookings, fetchingBookingsByFilter };
+const updateManyBookings = async (prisma: PrismaClient, where: Prisma.bookingWhereInput, data: Prisma.bookingUpdateInput) => {
+  try {
+    const result = await prisma.booking.updateMany({
+      where,
+      data,
+    });
+    return result;
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+
+const validateBookingExists = async (prisma: PrismaClient, id: number) => {
+  const booking = await prisma.booking.findUnique({
+    where: { id },
+  });
+  return !!booking;
+}
+export const bookingDao = { createBooking, getBooking, updateBooking, listBookings, fetchingBookingsByFilter, updateManyBookings, validateBookingExists};
