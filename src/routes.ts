@@ -2,8 +2,6 @@ import express from "express";
 import { userController } from "./controllers/user";
 import { userValidator } from "./middleware/validator/userValidator";
 import { throwValidationResult } from "./services/helper";
-import { systemConfigurationController } from "./controllers/systemConfiguration";
-import { systemConfigurationValidator } from "./middleware/validator/systemConfigurationValidation";
 import { serviceController } from "./controllers/service";
 import { deliveryController } from "./controllers/delivery";
 import { refundController } from "./controllers/refund";
@@ -54,19 +52,6 @@ router.post("/refund/", verifyToken, refundValidator.createRefundValidator, thro
 router.get("/refund/:id", verifyToken, refundController.getRefundDetails);
 router.patch("/refund/:id", verifyToken, refundValidator.updateRefundValidator, throwValidationResult, refundController.updateRefund);
 
-router.post(
-  "/systemConfiguration/", verifyToken,
-  systemConfigurationValidator.createSystemConfigurationValidator,
-  throwValidationResult,
-  systemConfigurationController.createSystemConfiguration
-);
-router.get("/systemConfiguration/:id", verifyToken, systemConfigurationController.getSystemConfigurationDetails);
-router.patch(
-  "/systemConfiguration/:id", verifyToken,
-  systemConfigurationValidator.updateSystemConfigurationValidator,
-  throwValidationResult,
-  systemConfigurationController.updateSystemConfiguration
-);
 
 router.post("/contactLog", verifyToken, contactLogValidator.createContactLogValidator, throwValidationResult, contactLogController.createContactLog);
 router.get("/contactLog/:id", verifyToken, contactLogController.getContactLogDetails);

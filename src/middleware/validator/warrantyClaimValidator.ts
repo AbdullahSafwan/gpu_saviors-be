@@ -1,4 +1,7 @@
 import { body, query, param } from "express-validator";
+import { bookingDao } from "../../dao/booking";
+import prisma from "../../prisma";
+import { warrantyClaimDao } from "../../dao/warrantyClaim";
 
 const createWarrantyClaimValidator = [
   // Validate bookingId
@@ -7,7 +10,14 @@ const createWarrantyClaimValidator = [
     .withMessage("Booking ID is required")
     .bail()
     .isInt({ min: 1 })
-    .withMessage("Booking ID must be a valid positive integer"),
+    .withMessage("Booking ID must be a valid positive integer")
+    .custom(async (value) => {
+      const res = await bookingDao.validateBookingExists(prisma, parseInt(value))
+      if (!res) {
+        return Promise.reject("Booking not found");
+      }
+      return true;
+    }),
 
   // Validate claimedItems array
   body("claimedItems")
@@ -60,7 +70,14 @@ const getWarrantyClaimByIdValidator = [
     .bail()
     .isInt({ min: 1 })
     .withMessage("Warranty claim ID must be a valid positive integer")
-    .toInt(),
+    .toInt()
+    .custom(async (value) => {
+      const claim = await warrantyClaimDao.validateWarrantyClaimExists(prisma, parseInt(value));
+      if (!claim) {
+        return Promise.reject("Warranty claim not found");
+      }
+      return true;
+    }),
 ];
 
 const getWarrantyClaimByClaimNumberValidator = [
