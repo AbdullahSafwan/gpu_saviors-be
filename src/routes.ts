@@ -17,6 +17,8 @@ import { verifyToken } from "./middleware/auth";
 import { authValidator } from "./middleware/validator/authValidator";
 import { warrantyClaimController } from "./controllers/warrantyClaim";
 import { warrantyClaimValidator } from "./middleware/validator/warrantyClaimValidator";
+import { ledgerEntryController } from "./controllers/ledgerEntry";
+import { ledgerEntryValidator } from "./middleware/validator/ledgerEntryValidator";
 
 const router = express.Router();
 
@@ -61,5 +63,14 @@ router.post("/warrantyClaim", verifyToken, warrantyClaimValidator.createWarranty
 router.get("/warrantyClaim/", verifyToken, warrantyClaimValidator.listWarrantyClaimsValidator, throwValidationResult, warrantyClaimController.listWarrantyClaims);
 router.get("/warrantyClaim/:id", verifyToken, warrantyClaimValidator.getWarrantyClaimByIdValidator, throwValidationResult, warrantyClaimController.getWarrantyClaimById);
 router.get("/warrantyClaim/claim/:claimNumber", verifyToken, warrantyClaimValidator.getWarrantyClaimByClaimNumberValidator, throwValidationResult, warrantyClaimController.getWarrantyClaimByClaimNumber);
+
+router.post("/ledger-entry/", verifyToken, ledgerEntryValidator.createLedgerEntryValidator, throwValidationResult, ledgerEntryController.createLedgerEntry);
+router.get("/ledger-entry/", verifyToken, ledgerEntryValidator.listLedgerEntriesValidator, throwValidationResult, ledgerEntryController.listLedgerEntries);
+router.get("/ledger-entry/report", verifyToken, ledgerEntryValidator.generateReportValidator, throwValidationResult, ledgerEntryController.generateReport);
+router.get("/ledger-entry/daily-summary", verifyToken, ledgerEntryValidator.dailySummaryValidator, throwValidationResult, ledgerEntryController.getDailySummary);
+router.get("/ledger-entry/monthly-summary", verifyToken, ledgerEntryValidator.monthlySummaryValidator, throwValidationResult, ledgerEntryController.getMonthlySummary);
+router.get("/ledger-entry/:id", verifyToken, ledgerEntryController.getLedgerEntryDetails);
+router.patch("/ledger-entry/:id", verifyToken, ledgerEntryValidator.updateLedgerEntryValidator, throwValidationResult, ledgerEntryController.updateLedgerEntry);
+router.delete("/ledger-entry/:id", verifyToken, ledgerEntryController.deleteLedgerEntry);
 
 export default router;
