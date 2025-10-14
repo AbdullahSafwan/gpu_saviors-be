@@ -8,6 +8,10 @@ import { sendErrorResponse } from "./services/responseHelper";
 
 const app = express();
 
+// Trust proxy - IMPORTANT for cloud deployments behind reverse proxy/load balancer
+// This allows Express to trust the X-Forwarded-* headers
+app.set('trust proxy', true);
+
 // Security headers
 app.use(helmet());
 
@@ -52,7 +56,14 @@ const authLimiter = rateLimit({
 
 // Apply strict limiter to auth routes
 app.use("/auth/login", authLimiter);
-app.use("/forgot-password", authLimiter);
+
+// Debug middleware - logs client IPs (remove after confirming it works)
+if (process.env.NODE_ENV === "development") {
+  app.use((req, _res, next) => {
+    console.log(`[DEBUG] Client IP: ${req.ip}, X-Forwarded-For: ${req.headers['x-forwarded-for']}`);
+    next();
+  });
+}
 
 // HTTP request logger middleware
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
