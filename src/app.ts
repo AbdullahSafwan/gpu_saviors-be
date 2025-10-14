@@ -18,12 +18,43 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Cache-Control"]
 }));
 
-// Rate limiting
+// Rate limiting - General API limiter
 const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || "900000"), // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || "100") // limit each IP to 100 requests per windowMs
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || "900000"),
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || "300"),
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    console.warn(`[RATE LIMIT] IP ${req.ip} exceeded rate limit - ${req.method} ${req.path}`);
+    res.status(429).json({
+      error: "Too many requests",
+      message: "You have exceeded the rate limit. Please try again later.",
+    });
+  },
+  skip: (req) => {
+    // Skip rate limiting for health check
+    return req.path === "/health";
+  }
 });
 app.use(limiter);
+
+// Strict rate limiter for authentication endpoints
+const authLimiter = rateLimit({
+  windowMs: parseInt(process.env.AUTH_RATE_LIMIT_WINDOW_MS || "900000"),
+  max: parseInt(process.env.AUTH_RATE_LIMIT_MAX_REQUESTS || "10"),
+  skipSuccessfulRequests: true,
+  handler: (req, res) => {
+    console.error(`[AUTH RATE LIMIT] IP ${req.ip} exceeded auth rate limit - ${req.method} ${req.path}`);
+    res.status(429).json({
+      error: "Too many authentication attempts",
+      message: "Too many failed login attempts. Please try again later.",
+    });
+  }
+});
+
+// Apply strict limiter to auth routes
+app.use("/login", authLimiter);
+app.use("/forgot-password", authLimiter);
 
 // HTTP request logger middleware
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));

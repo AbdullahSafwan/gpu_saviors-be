@@ -50,6 +50,8 @@ jobs:
           CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
           RATE_LIMIT_WINDOW_MS=${{ secrets.RATE_LIMIT_WINDOW_MS }}
           RATE_LIMIT_MAX_REQUESTS=${{ secrets.RATE_LIMIT_MAX_REQUESTS }}
+          AUTH_RATE_LIMIT_WINDOW_MS=${{secrets.AUTH_RATE_LIMIT_WINDOW_MS}}
+          AUTH_RATE_LIMIT_MAX_REQUESTS=${{secrets.AUTH_RATE_LIMIT_MAX_REQUESTS}}
           EMAIL_USERNAME=${{ secrets.EMAIL_USERNAME }}
           EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
           FRONTEND_URL=${{ secrets.FRONTEND_URL }}
