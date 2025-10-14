@@ -34,14 +34,14 @@ router.delete("/booking/:id", verifyToken, bookingValidator.removeBookingValidat
 router.get("/dashboard/", verifyToken, bookingController.dashboard);
 router.get("/booking/:id", verifyToken, bookingController.getBookingDetails);
 
-router.post("/auth/signup", authValidator.signUpValidator, throwValidationResult, authController.signUp);
+// router.post("/auth/signup", authValidator.signUpValidator, throwValidationResult, authController.signUp);
 router.post("/auth/login", authValidator.logInValidator, throwValidationResult, authController.logIn);
 router.post("/auth/refresh", authController.refreshToken);
 router.delete("/auth/logout", authController.logOut);
-router.post("/auth/sendverificationemail", authController.sendVerificationMail);
-router.post("/auth/verifyemail", authController.verifyEmail);
-router.post("/auth/forgotpassword", authController.forgotPassword);
-router.post("/auth/resetpassword", authValidator.resetPasswordValidator, throwValidationResult, authController.resetPassword);
+// router.post("/auth/sendverificationemail", authController.sendVerificationMail);
+// router.post("/auth/verifyemail", authController.verifyEmail);
+// router.post("/auth/forgotpassword", authController.forgotPassword);
+// router.post("/auth/resetpassword", authValidator.resetPasswordValidator, throwValidationResult, authController.resetPassword);
 
 router.post("/service/", verifyToken, serviceValidator.createServiceValidator, throwValidationResult, serviceController.createService);
 router.get("/service/:id", verifyToken, serviceController.getServiceDetails);
