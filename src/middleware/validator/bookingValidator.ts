@@ -1,8 +1,9 @@
 import { body, query } from "express-validator";
-import { booking_status, booking_item_type, client_type } from "@prisma/client";
+import { booking_status, booking_item_type, client_type, courier_type } from "@prisma/client";
 import { formatWhatsAppNumber } from "./helper";
 import { bookingDao } from "../../dao/booking";
 import prisma from "../../prisma";
+import { deliveryDao } from "../../dao/delivery";
 
 const createBookingValidator = [
   // Validate booking fields
@@ -100,6 +101,54 @@ const updateBookingValidator = [
 
   body("booking_items.*.serialNumber").optional().isString().withMessage("Serial number should be a valid string if provided"),
 
+  body("delivery").optional().isArray().withMessage("Delivery must be an array if provided"),
+
+  body("delivery.*.id").optional().isInt().withMessage("Delivery id must be a valid integer")
+    .custom(async (value) => {
+      if (isNaN(parseInt(value))) {
+        throw new Error("Location ID must be a valid integer");
+      }
+      const result = await deliveryDao.checkDeliveryExists(prisma, value);
+      if (!result) {
+        throw new Error(`Location with id ${value} does not exist`);
+      }
+      return true;
+    }),
+
+  body("delivery.*.address").if(body("delivery.*.id").not().exists()).notEmpty().withMessage("address is required"),
+
+  body("delivery.*.courier").if(body("delivery.*.id").not().exists()).notEmpty().isString().withMessage("Courier name is required"),
+
+  body("delivery.*.type")
+    .if(body("delivery.*.id").not().exists())
+    .notEmpty()
+    .withMessage("courier type is required")
+    .bail()
+    .isIn(Object.values(courier_type)),
+
+  body("delivery.*.phoneNumber")
+    .if(body("delivery.*.id").not().exists())
+    .notEmpty()
+    .trim()
+    .withMessage("Phone number is required")
+    .bail()
+    .isString()
+    .withMessage("Phone number should be a valid string"),
+
+  body("delivery.*.postalCode")
+    .if(body("delivery.*.id").not().exists())
+    .notEmpty()
+    .withMessage("Postal code is required")
+    .bail()
+    .isInt()
+    .withMessage("Postal code must be a valid integer"),
+  
+  body("delivery.*.landmark").optional().isString(),
+
+  body("delivery.*.deliveryDate")
+    .if(body("delivery.*.id").not().exists())
+    .notEmpty().withMessage("DateTime is required").isISO8601().toDate(),
+  
   body("appointmentDate").optional().isISO8601().toDate().withMessage("Appointment date must be a valid date format"),
 ];
 
