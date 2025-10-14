@@ -4,6 +4,7 @@ import router from "./routes";
 import morgan from "morgan";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import { sendErrorResponse } from "./services/responseHelper";
 
 const app = express();
 
@@ -45,15 +46,12 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: true,
   handler: (req, res) => {
     console.error(`[AUTH RATE LIMIT] IP ${req.ip} exceeded auth rate limit - ${req.method} ${req.path}`);
-    res.status(429).json({
-      error: "Too many authentication attempts",
-      message: "Too many failed login attempts. Please try again later.",
-    });
+    sendErrorResponse(res, 429, "Too many authentication attempts. Please try again later")
   }
 });
 
 // Apply strict limiter to auth routes
-app.use("/login", authLimiter);
+app.use("/auth/login", authLimiter);
 app.use("/forgot-password", authLimiter);
 
 // HTTP request logger middleware
