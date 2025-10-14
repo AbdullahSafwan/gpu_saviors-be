@@ -39,4 +39,18 @@ const updateDelivery = async (prisma: PrismaClient, id: number, data: Prisma.del
   }
 };
 
-export const deliveryDao = { createDelivery, getDelivery, updateDelivery };
+const checkDeliveryExists = async (prisma: PrismaClient, id: number) => {
+  try {
+    const delivery = await prisma.delivery.findUnique({
+      where: { id },
+    });
+    if (!delivery) {
+      throw new Error("Delivery not found");
+    }
+    return true;
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+export const deliveryDao = { createDelivery, getDelivery, updateDelivery, checkDeliveryExists };
