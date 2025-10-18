@@ -39,8 +39,9 @@ const listBookings = async (req: Request<unknown, unknown, unknown, ListBookings
     const orderBy = req.query.orderBy ? req.query.orderBy.toString() : "desc";
     const status = req.query.status ? (req.query.status.toString() as booking_status) : undefined;
     const searchString = req.query.searchString;
+    const isActive = req.query.isActive === undefined ? undefined : req.query.isActive === true;
 
-    const result = await bookingService.listBookings(page, pageSize, sort, orderBy, status, searchString);
+    const result = await bookingService.listBookings(page, pageSize, sort, orderBy, status, searchString, isActive);
     sendSuccessResponse(res, 200, "Successfully fetched bookings list", result);
   } catch (error) {
     debugLog(error);
