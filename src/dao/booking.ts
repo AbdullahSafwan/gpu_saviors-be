@@ -70,6 +70,7 @@ const listBookings = async (
         whatsappNumber: true,
         id: true,
         status: true,
+        isActive: true,
         booking_items: {
           select: {
             name: true,
