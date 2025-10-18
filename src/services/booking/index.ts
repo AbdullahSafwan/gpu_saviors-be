@@ -85,7 +85,8 @@ const listBookings = async (
   sortBy: string | null,
   orderBy: string | null,
   status: booking_status | undefined,
-  searchString?: string
+  searchString?: string,
+  isActive?: boolean | undefined,
 ) => {
   try {
     // Define searchable fields here in the service layer
@@ -106,7 +107,8 @@ const listBookings = async (
       orderBy,
       status,
       searchString,
-      searchFields
+      searchFields,
+      isActive
     );
     
     if (!result) {

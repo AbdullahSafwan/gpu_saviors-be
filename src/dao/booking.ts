@@ -39,7 +39,8 @@ const listBookings = async (
   _orderBy: string | null,
   status: booking_status | undefined,
   searchString?: string,
-  searchFields?: string[]
+  searchFields?: string[],
+  isActive?: boolean | undefined,
 ) => {
   try {
     const sort = (_sort ?? "id").toString();
@@ -49,7 +50,8 @@ const listBookings = async (
     const where = {
       AND: [
         status ? { status } : {},
-        searchString && searchFields ? buildSearchCondition(searchString, searchFields) : {}
+        searchString && searchFields ? buildSearchCondition(searchString, searchFields) : {},
+        { isActive }
       ]
     };
 

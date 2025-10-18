@@ -158,6 +158,7 @@ const listBookingsValidator = [
   query("sortBy").optional().isString().isIn(["id", "clientName", "status", "appointmentDate", "createdAt"]).withMessage("Invalid value."),
   query("orderBy").optional().isIn(["asc", "desc"]).withMessage("OrderBy must be 'asc' or 'desc'.").default("desc"),
   query("status").optional().isString().isIn(Object.values(booking_status)).withMessage("Invalid booking status"),
+  query("isActive").optional().isBoolean().withMessage("isActive must be a boolean value").toBoolean(),
 ];
 
 const removeBookingValidator = [
