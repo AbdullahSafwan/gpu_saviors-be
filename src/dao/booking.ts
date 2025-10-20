@@ -73,6 +73,7 @@ const listBookings = async (
         id: true,
         status: true,
         isActive: true,
+        clientType: true,
         booking_items: {
           select: {
             name: true,
@@ -81,7 +82,7 @@ const listBookings = async (
       },
     });
     // Total bookings
-    const totalBookings = await prisma.booking.count();
+    const totalBookings = await prisma.booking.count({where});
 
     // Total number of booking pages
     const totalPages = Math.ceil(totalBookings / pageSize);
