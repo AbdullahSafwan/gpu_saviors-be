@@ -1,7 +1,7 @@
 import { booking_status, Prisma, PrismaClient } from "@prisma/client";
 import { debugLog, buildSearchCondition } from "../services/helper";
 
-const createBooking = async (prisma: PrismaClient, data: Prisma.bookingCreateInput) => {
+const createBooking = async (prisma: PrismaClient | Prisma.TransactionClient, data: Prisma.bookingCreateInput) => {
   try {
     const result = await prisma.booking.create({
       data,
@@ -13,7 +13,7 @@ const createBooking = async (prisma: PrismaClient, data: Prisma.bookingCreateInp
   }
 };
 
-const getBooking = async (prisma: PrismaClient, id: number) => {
+const getBooking = async (prisma: PrismaClient | Prisma.TransactionClient, id: number) => {
   try {
     const result = await prisma.booking.findUnique({
       where: { id },
@@ -32,7 +32,7 @@ const getBooking = async (prisma: PrismaClient, id: number) => {
 };
 
 const listBookings = async (
-  prisma: PrismaClient,
+  prisma: PrismaClient | Prisma.TransactionClient,
   page: number,
   pageSize: number,
   _sort: string | null,
@@ -74,6 +74,8 @@ const listBookings = async (
         status: true,
         isActive: true,
         clientType: true,
+        referralSource: true,
+        referralSourceNotes: true,
         booking_items: {
           select: {
             name: true,
@@ -99,7 +101,7 @@ const listBookings = async (
   }
 };
 
-const updateBooking = async (prisma: PrismaClient, id: number, data: Prisma.bookingUpdateInput) => {
+const updateBooking = async (prisma: PrismaClient | Prisma.TransactionClient, id: number, data: Prisma.bookingUpdateInput) => {
   try {
     const result = await prisma.booking.update({
       where: { id },
@@ -119,7 +121,7 @@ const updateBooking = async (prisma: PrismaClient, id: number, data: Prisma.book
 };
 
 const fetchingBookingsByFilter = async (
-  prisma: PrismaClient,
+  prisma: PrismaClient | Prisma.TransactionClient,
   status: booking_status,
   searchString?: string,
   searchFields?: string[]
@@ -161,7 +163,7 @@ const fetchingBookingsByFilter = async (
   }
 };
 
-const updateManyBookings = async (prisma: PrismaClient, where: Prisma.bookingWhereInput, data: Prisma.bookingUpdateInput) => {
+const updateManyBookings = async (prisma: PrismaClient | Prisma.TransactionClient, where: Prisma.bookingWhereInput, data: Prisma.bookingUpdateInput) => {
   try {
     const result = await prisma.booking.updateMany({
       where,
@@ -174,7 +176,7 @@ const updateManyBookings = async (prisma: PrismaClient, where: Prisma.bookingWhe
   }
 };
 
-const validateBookingExists = async (prisma: PrismaClient, id: number) => {
+const validateBookingExists = async (prisma: PrismaClient | Prisma.TransactionClient, id: number) => {
   const booking = await prisma.booking.findUnique({
     where: { id },
   });

@@ -1,7 +1,7 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { debugLog } from "../services/helper";
 
-const createWarranty = async (prisma: PrismaClient, data: Prisma.warrantyCreateInput) => {
+const createWarranty = async (prisma: PrismaClient | Prisma.TransactionClient, data: Prisma.warrantyCreateInput) => {
   try {
     const result = await prisma.warranty.create({
       data,
@@ -13,7 +13,7 @@ const createWarranty = async (prisma: PrismaClient, data: Prisma.warrantyCreateI
   }
 };
 
-const getWarrantyByBookingItem = async (prisma: PrismaClient, bookingItemId: number) => {
+const getWarrantyByBookingItem = async (prisma: PrismaClient | Prisma.TransactionClient, bookingItemId: number) => {
   try {
     const result = await prisma.warranty.findUnique({
       where: { bookingItemId },

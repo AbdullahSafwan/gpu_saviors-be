@@ -1,19 +1,46 @@
 import { booking_status } from "@prisma/client";
 
-const allowedTransitions: Record<string, string[]> = {
-  DRAFT: [booking_status.IN_REVIEW],
-  IN_REVIEW: [booking_status.CONFIRMED],
-  CONFIRMED: [booking_status.PENDING_DELIVERY],
-  PENDING_DELIVERY: [booking_status.IN_QUEUE],
-  IN_QUEUE: [booking_status.IN_PROGRESS],
-  IN_PROGRESS: [booking_status.RESOLVED, booking_status.REJECTED],
-  RESOLVED: [booking_status.PENDING_PAYMENT],
-  PENDING_PAYMENT: [booking_status.PENDING_DELIVERY],
-  REJECTED: [booking_status.PENDING_DELIVERY],
-  OUTBOUND_DELIVERY: [booking_status.CONFIRMED],
-  COMPLETED: [],
+// Workflow order: DRAFT -> CONFIRMED -> IN_PROGRESS -> COMPLETED
+const workflowOrder: string[] = [
+  booking_status.DRAFT,
+  booking_status.CONFIRMED,
+  booking_status.IN_PROGRESS,
+  booking_status.COMPLETED,
+];
+
+// Forward transitions allowed from each status
+const forwardTransitions: Record<string, string[]> = {
+  [booking_status.DRAFT]: [booking_status.CONFIRMED],
+  [booking_status.CONFIRMED]: [booking_status.IN_PROGRESS],
+  [booking_status.IN_PROGRESS]: [booking_status.COMPLETED],
 };
 
 export const validateStatusTransition = (currentStatus: string, newStatus: string): boolean => {
-  return allowedTransitions[currentStatus]?.includes(newStatus);
+  // 1 same status pass
+  if (currentStatus === newStatus) return true;
+
+  // 2 cant change from terminal state
+  if (
+    currentStatus === booking_status.COMPLETED ||
+    currentStatus === booking_status.CANCELLED ||
+    currentStatus === booking_status.EXPIRED
+  ) {
+    return false;
+  }
+
+  // 3 can always cancel or expire (unless already in terminal state)
+  if (newStatus === booking_status.CANCELLED || newStatus === booking_status.EXPIRED) {
+    return true;
+  }
+
+  // 4.if forward transition then check if valid
+  if (forwardTransitions[currentStatus]?.includes(newStatus)) {
+    return true;
+  }
+
+  // 5. for backward transition check if valid
+  const currentIndex = workflowOrder.indexOf(currentStatus);
+  const newIndex = workflowOrder.indexOf(newStatus);
+
+  return currentIndex !== -1 && newIndex !== -1 && newIndex < currentIndex;
 };

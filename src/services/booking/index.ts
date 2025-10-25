@@ -1,4 +1,4 @@
-import { booking_status, payment_method, payment_status, Prisma, booking_item_status } from "@prisma/client";
+import { booking_status, Prisma, booking_item_status } from "@prisma/client";
 import { CreateBookingItem, CreateBookingRequest, UpdateBookingItem, UpdateBookingRequest, CreateBookingPayment, UpdateBookingPayment } from "../../types/bookingTypes";
 import { CreateContactLogRequest, UpdateContactLogRequest } from "../../types/contactLogTypes";
 import { CreateDeliveryRequest, UpdateDeliveryRequest } from "../../types/deliveryTypes";
@@ -6,7 +6,8 @@ import { bookingDao } from "../../dao/booking";
 import prisma from "../../prisma";
 import { debugLog } from "../helper";
 import { warrantyService } from "../warranty";
-// import { validateStatusTransition } from "./helper";
+import { validateStatusTransition } from "./helper";
+import { generateReceipt, generateInvoice } from "./pdfHelper";
 
 const createBooking = async (data: CreateBookingRequest, createdBy: number) => {
   try {
@@ -25,15 +26,6 @@ const createBooking = async (data: CreateBookingRequest, createdBy: number) => {
           modifiedByUser: { connect: { id: createdBy } }
         })),
       },
-      booking_payments:{
-        create: {
-          payableAmount: data.payableAmount,
-          status: payment_status.PENDING,
-          paymentMethod: payment_method.CASH,
-          createdByUser: { connect: { id: createdBy } },
-          modifiedByUser: { connect: { id: createdBy } }
-        }
-      }
     };
 
     const result = await bookingDao.createBooking(prisma, bookingData);
@@ -123,139 +115,170 @@ const listBookings = async (
 
 const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy: number) => {
   try {
-    const record = await bookingDao.getBooking(prisma, id);
-    if (!record) {
-      throw new Error(`Booking not found against id: ${id}`);
-    }
-    //validating status transition, status can only be changed against allowed records
-    // if (data.status && !validateStatusTransition(record.status, data.status)) {
-    //   throw new Error("Invalid status transition, allowed transitions are: DRAFT -> IN_REVIEW -> CONFIRMED -> PENDING_DELIVERY -> IN_QUEUE -> IN_PROGRESS -> RESOLVED -> PENDING_PAYMENT -> PENDING_DELIVERY -> OUTBOUND_DELIVERY -> CONFIRMED -> COMPLETED");
-    // }
-    const { booking_items, contact_log, delivery, booking_payments, ...otherData } = data;
-    
-    // Separate booking items based on the presence of `id`
-    const itemsToUpdate = booking_items?.filter((item): item is UpdateBookingItem => "id" in item && !!item.id) || [];
-    const itemsToCreate = booking_items?.filter((item): item is CreateBookingItem => !("id" in item)) || [];
+    // Wrap everything in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      const record = await bookingDao.getBooking(tx, id);
+      if (!record) {
+        throw new Error(`Booking not found against id: ${id}`);
+      }
+      // validating status transition, status can only be changed against allowed records
+      if (data.status && !validateStatusTransition(record.status, data.status)) {
+        throw new Error("Invalid status transition. Allowed workflow: DRAFT -> CONFIRMED -> IN_PROGRESS -> COMPLETED / CANCELLED. You can move backward to any previous status or use CANCELLED/EXPIRED at any time.");
+      }
+      const { booking_items, contact_log, delivery, booking_payments, ...otherData } = data;
 
-    // Separate contact logs based on the presence of `id`
-    const contactLogsToUpdate = contact_log?.filter((item): item is UpdateContactLogRequest & { id: number } => "id" in item && !!item.id) || [];
-    const contactLogsToCreate = contact_log?.filter((item): item is CreateContactLogRequest => !("id" in item)) || [];
+      // Separate booking items based on the presence of `id`
+      const itemsToUpdate = booking_items?.filter((item): item is UpdateBookingItem => "id" in item && !!item.id) || [];
+      const itemsToCreate = booking_items?.filter((item): item is CreateBookingItem => !("id" in item)) || [];
 
-    // Separate deliveries based on the presence of `id`
-    const deliveriesToUpdate = delivery?.filter((item): item is UpdateDeliveryRequest & { id: number } => "id" in item && !!item.id) || [];
-    const deliveriesToCreate = delivery?.filter((item): item is CreateDeliveryRequest => !("id" in item)) || [];
+      // Separate contact logs based on the presence of `id`
+      const contactLogsToUpdate = contact_log?.filter((item): item is UpdateContactLogRequest & { id: number } => "id" in item && !!item.id) || [];
+      const contactLogsToCreate = contact_log?.filter((item): item is CreateContactLogRequest => !("id" in item)) || [];
 
-    // Separate booking payments based on the presence of `id`
-    const paymentsToUpdate = booking_payments?.filter((item): item is UpdateBookingPayment => "id" in item && !!item.id) || [];
-    const paymentsToCreate = booking_payments?.filter((item): item is CreateBookingPayment => !("id" in item)) || [];
+      // Separate deliveries based on the presence of `id`
+      const deliveriesToUpdate = delivery?.filter((item): item is UpdateDeliveryRequest & { id: number } => "id" in item && !!item.id) || [];
+      const deliveriesToCreate = delivery?.filter((item): item is CreateDeliveryRequest => !("id" in item)) || [];
 
-    const updateData: Prisma.bookingUpdateInput = {
-      ...otherData,
-      modifiedByUser: { connect: { id: modifiedBy } },
-      ...(booking_items && {
-        booking_items: {
-          updateMany: itemsToUpdate.map(({ id, ...data }) => ({
-            where: { id },
-            data: {
-              ...data,
-              modifiedBy
-            },
-          })),
-          ...(itemsToCreate.length > 0 && {
-            createMany: {
-              data: itemsToCreate.map(item => ({
-                ...item,
-                createdBy: modifiedBy,
-                modifiedBy: modifiedBy
-              })),
-            },
-          }),
-        },
-      }),
-      ...(contact_log && {
-        contact_log: {
-          updateMany: contactLogsToUpdate.map(({ id, ...data }) => ({
-            where: { id },
-            data,
-          })),
-          ...(contactLogsToCreate.length > 0 && {
-            createMany: {
-              data: contactLogsToCreate.map(item => ({ ...item, bookingId: id })),
-            },
-          }),
-        },
-      }),
-      ...(delivery && {
-        delivery: {
-          updateMany: deliveriesToUpdate.map(({ id, ...data }) => ({
-            where: { id },
-            data: {
-              ...data,
-              modifiedBy
-            },
-          })),
-          ...(deliveriesToCreate.length > 0 && {
-            createMany: {
-              data: deliveriesToCreate.map(item => ({
-                ...item,
-                createdBy: modifiedBy,
-                modifiedBy: modifiedBy
-              })),
-            },
-          }),
-        },
-      }),
-      ...(booking_payments && {
-        booking_payments: {
-          updateMany: paymentsToUpdate.map(({ id, ...data }) => ({
-            where: { id },
-            data: {
-              ...data,
-              modifiedBy
-            },
-          })),
-          ...(paymentsToCreate.length > 0 && {
-            createMany: {
-              data: paymentsToCreate.map(item => ({
-                ...item,
-                createdBy: modifiedBy,
-                modifiedBy: modifiedBy
-              })),
-            },
-          }),
-        },
-      }),
-    };
+      // Separate booking payments based on the presence of `id`
+      const paymentsToUpdate = booking_payments?.filter((item): item is UpdateBookingPayment => "id" in item && !!item.id) || [];
+      const paymentsToCreate = booking_payments?.filter((item): item is CreateBookingPayment => !("id" in item)) || [];
 
-    const result = await bookingDao.updateBooking(prisma, id, updateData);
+      // Recalculate payableAmount if booking items were added or updated
+      let calculatedPayableAmount: number | undefined;
+      if (booking_items && booking_items.length > 0) {
+        // Calculate new total by combining existing items with updates and new items
+        const existingItems = record.booking_items;
 
-    // Auto-create warranties for booking items that are marked as COMPLETED
-    if (itemsToUpdate.length > 0) {
-      for (const item of itemsToUpdate) {
-        // Check if status changed to COMPLETED
-        if (item.status === booking_item_status.COMPLETED && item.id) {
-          try {
+        // Create a map of updated amounts
+        const updatedAmountsMap = new Map(
+          itemsToUpdate
+            .filter(item => item.payableAmount !== undefined)
+            .map(item => [item.id, item.payableAmount!])
+        );
+
+        // Calculate total from existing items (with updates applied)
+        let totalPayableAmount = existingItems.reduce((total, item) => {
+          const updatedAmount = updatedAmountsMap.get(item.id);
+          return total + (updatedAmount !== undefined ? updatedAmount : item.payableAmount);
+        }, 0);
+
+        // Add amounts from newly created items
+        totalPayableAmount += itemsToCreate.reduce(
+          (total, item) => total + item.payableAmount,
+          0
+        );
+
+        calculatedPayableAmount = totalPayableAmount;
+      }
+
+      const updateData: Prisma.bookingUpdateInput = {
+        ...otherData,
+        modifiedByUser: { connect: { id: modifiedBy } },
+        ...(calculatedPayableAmount !== undefined && { payableAmount: calculatedPayableAmount }),
+        ...(booking_items && {
+          booking_items: {
+            updateMany: itemsToUpdate.map(({ id, ...data }) => ({
+              where: { id },
+              data: {
+                ...data,
+                modifiedBy
+              },
+            })),
+            ...(itemsToCreate.length > 0 && {
+              createMany: {
+                data: itemsToCreate.map(item => ({
+                  ...item,
+                  createdBy: modifiedBy,
+                  modifiedBy: modifiedBy
+                })),
+              },
+            }),
+          },
+        }),
+        ...(contact_log && {
+          contact_log: {
+            updateMany: contactLogsToUpdate.map(({ id, ...data }) => ({
+              where: { id },
+              data,
+            })),
+            ...(contactLogsToCreate.length > 0 && {
+              createMany: {
+                data: contactLogsToCreate.map(item => ({ ...item, bookingId: id })),
+              },
+            }),
+          },
+        }),
+        ...(delivery && {
+          delivery: {
+            updateMany: deliveriesToUpdate.map(({ id, ...data }) => ({
+              where: { id },
+              data: {
+                ...data,
+                modifiedBy
+              },
+            })),
+            ...(deliveriesToCreate.length > 0 && {
+              createMany: {
+                data: deliveriesToCreate.map(item => ({
+                  ...item,
+                  createdBy: modifiedBy,
+                  modifiedBy: modifiedBy
+                })),
+              },
+            }),
+          },
+        }),
+        ...(booking_payments && {
+          booking_payments: {
+            updateMany: paymentsToUpdate.map(({ id, ...data }) => ({
+              where: { id },
+              data: {
+                ...data,
+                modifiedBy
+              },
+            })),
+            ...(paymentsToCreate.length > 0 && {
+              createMany: {
+                data: paymentsToCreate.map(item => ({
+                  ...item,
+                  createdBy: modifiedBy,
+                  modifiedBy: modifiedBy
+                })),
+              },
+            }),
+          },
+        }),
+      };
+
+      await bookingDao.updateBooking(tx, id, updateData);
+
+      // Auto-create warranties for booking items that are marked as COMPLETED
+      if (itemsToUpdate.length > 0) {
+        for (const item of itemsToUpdate) {
+          if (item.status === booking_item_status.COMPLETED && item.id) {
             // Check if warranty already exists
-            const existingWarranty = await warrantyService.getWarrantyByBookingItem(prisma, item.id);
+            const existingWarranty = await warrantyService.getWarrantyByBookingItem(tx, item.id);
 
             if (!existingWarranty) {
-              // Create warranty for this booking item
               await warrantyService.createWarranty(
-                prisma,
+                tx,
                 {
                   bookingItemId: item.id,
-                  warrantyDays: 15, // Default 15 days warranty
+                  warrantyDays: 32,
                 },
                 modifiedBy
               );
             }
-          } catch (error) {
-            // Log error but don't fail the entire booking update
-            debugLog(`Failed to create warranty for booking item ${item.id}: ${error}`);
           }
         }
       }
-    }
+
+      const finalBooking = await bookingDao.getBooking(tx, id);
+      if (!finalBooking) {
+        throw new Error(`Booking not found after update with id: ${id}`);
+      }
+      return finalBooking;
+    });
 
     return result;
   } catch (error) {
@@ -287,4 +310,27 @@ const dashboard = async (searchString?: string) => {
   }
 };
 
-export const bookingService = { updateBooking, createBooking, getBooking, listBookings, dashboard };
+const generateDocument = async (id: number, documentType: "receipt" | "invoice", format: "pdf" = "pdf"): Promise<Buffer> => {
+  try {
+    const booking = await bookingDao.getBooking(prisma, id);
+
+    if (!booking) {
+      throw new Error(`Booking not found with id: ${id}`);
+    }
+
+    if (format !== "pdf") {
+      throw new Error(`Unsupported format: ${format}. Currently only 'pdf' is supported.`);
+    }
+
+    if (documentType === "receipt") {
+      return await generateReceipt(booking);
+    } else {
+      return await generateInvoice(booking);
+    }
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+
+export const bookingService = { updateBooking, createBooking, getBooking, listBookings, dashboard, generateDocument };
