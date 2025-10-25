@@ -7,6 +7,7 @@ import prisma from "../../prisma";
 import { debugLog } from "../helper";
 import { warrantyService } from "../warranty";
 import { validateStatusTransition } from "./helper";
+import { generateReceipt, generateInvoice } from "./pdfHelper";
 
 const createBooking = async (data: CreateBookingRequest, createdBy: number) => {
   try {
@@ -309,4 +310,27 @@ const dashboard = async (searchString?: string) => {
   }
 };
 
-export const bookingService = { updateBooking, createBooking, getBooking, listBookings, dashboard };
+const generateDocument = async (id: number, documentType: "receipt" | "invoice", format: "pdf" = "pdf"): Promise<Buffer> => {
+  try {
+    const booking = await bookingDao.getBooking(prisma, id);
+
+    if (!booking) {
+      throw new Error(`Booking not found with id: ${id}`);
+    }
+
+    if (format !== "pdf") {
+      throw new Error(`Unsupported format: ${format}. Currently only 'pdf' is supported.`);
+    }
+
+    if (documentType === "receipt") {
+      return await generateReceipt(booking);
+    } else {
+      return await generateInvoice(booking);
+    }
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+
+export const bookingService = { updateBooking, createBooking, getBooking, listBookings, dashboard, generateDocument };

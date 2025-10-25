@@ -179,4 +179,16 @@ const removeBookingValidator = [
   })
 ];
 
-export const bookingValidator = { createBookingValidator, updateBookingValidator, listBookingsValidator, removeBookingValidator };
+const generateDocumentValidator = [
+  query("type")
+    .notEmpty()
+    .withMessage("Document type is required")
+    .isIn(["receipt", "invoice"])
+    .withMessage("Document type must be either 'receipt' or 'invoice'"),
+  query("format")
+    .optional()
+    .isIn(["pdf"])
+    .withMessage("Format must be 'pdf' (currently only PDF is supported)"),
+];
+
+export const bookingValidator = { createBookingValidator, updateBookingValidator, listBookingsValidator, removeBookingValidator, generateDocumentValidator };
