@@ -1,10 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { warrantyDao } from "../../dao/warranty";
 import { CreateWarrantyRequest, WarrantyEligibilityResponse } from "../../types/warrantyTypes";
 import { debugLog } from "../helper";
 
 const createWarranty = async (
-  prisma: PrismaClient,
+  prisma: PrismaClient | Prisma.TransactionClient,
   data: CreateWarrantyRequest,
   userId: number
 ) => {
@@ -37,7 +37,7 @@ const createWarranty = async (
   }
 };
 
-const getWarrantyByBookingItem = async (prisma: PrismaClient, bookingItemId: number) => {
+const getWarrantyByBookingItem = async (prisma: PrismaClient | Prisma.TransactionClient, bookingItemId: number) => {
   try {
     const warranty = await warrantyDao.getWarrantyByBookingItem(prisma, bookingItemId);
     return warranty;
@@ -48,7 +48,7 @@ const getWarrantyByBookingItem = async (prisma: PrismaClient, bookingItemId: num
 };
 
 const checkWarrantyEligibility = async (
-  prisma: PrismaClient,
+  prisma: PrismaClient | Prisma.TransactionClient,
   bookingItemId: number
 ): Promise<WarrantyEligibilityResponse> => {
   try {
