@@ -70,11 +70,11 @@ enum token_type {
 }
 
 model system_configuration {
-  id       Int     @unique @default(autoincrement())
-  key      String  @unique
-  value    String  @db.Text
+  id          Int     @unique @default(autoincrement())
+  key         String  @unique
+  value       String  @db.Text
   description String?
-  isActive Boolean @default(true)
+  isActive    Boolean @default(true)
 }
 
 model booking {
