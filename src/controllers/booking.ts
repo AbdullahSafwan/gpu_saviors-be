@@ -82,7 +82,7 @@ const removeBooking = async (req: Request, res: Response) => {
     }
     const data = {isActive: false} as UpdateBookingRequest;
     const userId = req.user.userId;
-    
+
     const result = await bookingService.updateBooking(id, data, userId);
     sendSuccessResponse(res, 200, "Successfully removed booking", result);
   } catch (error) {
@@ -90,4 +90,38 @@ const removeBooking = async (req: Request, res: Response) => {
     sendErrorResponse(res, 400, "Error removing booking", error);
   }
 };
-export const bookingController = { createBooking, getBookingDetails, updateBooking, listBookings, dashboard, removeBooking };
+
+const generateDocument = async (req: Request<{ id: string }, {}, {}, { type: string; format?: string }>, res: Response) => {
+  try {
+    const id = +req.params.id;
+    const documentType = req.query.type as "receipt" | "invoice";
+    const format = (req.query.format as "pdf" | undefined) || "pdf";
+
+    if (typeof id !== "number" || isNaN(id) || id <= 0) {
+      throw new Error("Invalid booking ID");
+    }
+
+    if (!documentType || (documentType !== "receipt" && documentType !== "invoice")) {
+      throw new Error("Invalid document type. Must be 'receipt' or 'invoice'");
+    }
+
+    const documentBuffer = await bookingService.generateDocument(id, documentType, format);
+
+    const contentTypes: Record<string, string> = {
+      pdf: "application/pdf",
+    };
+
+    const fileExtensions: Record<string, string> = {
+      pdf: "pdf",
+    };
+
+    res.setHeader("Content-Type", contentTypes[format] || "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${documentType}-${id}.${fileExtensions[format] || "pdf"}"`);
+    res.send(documentBuffer);
+  } catch (error) {
+    debugLog(error);
+    sendErrorResponse(res, 400, `Error generating ${req.query.type || "document"}`, error);
+  }
+};
+
+export const bookingController = { createBooking, getBookingDetails, updateBooking, listBookings, dashboard, removeBooking, generateDocument };
