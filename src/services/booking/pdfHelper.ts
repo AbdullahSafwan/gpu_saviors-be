@@ -64,36 +64,53 @@ const generateFooter = async (doc: PDFKit.PDFDocument): Promise<void> => {
     const termsY = doc.y;
 
     doc
-      .fontSize(10)
+      .fontSize(9)
       .font("Helvetica-Bold")
       .fillColor("#000")
-      .text("WARRANTY TERMS & CONDITIONS", 50, termsY);
+      .text("Warranty Terms & Conditions", 50, termsY);
 
     doc
       .fontSize(8)
       .font("Helvetica")
-      .fillColor("#333")
-      .text(warrantyTerms, 50, termsY + 15, { width: 500, align: "justify" })
+      .fillColor("#666")
+      .text(warrantyTerms, 50, termsY + 15, { width: 495, align: "justify" })
       .fillColor("#000");
   }
 
-  // Footer
-  const footerY = warrantyTerms ? doc.y + 20 : 750;
+  // Footer - Clean and minimal
+  doc.moveDown(3);
+  const footerY = doc.y;
+
+  // Separator line before footer
+  doc.moveTo(50, footerY).lineTo(545, footerY).strokeColor("#E5E5E5").lineWidth(1).stroke();
+
+  doc.moveDown(1);
+  const textY = doc.y;
+
   doc
     .fontSize(8)
     .font("Helvetica")
     .fillColor("#666")
-    .text("Thank you for your business!", 50, footerY, { align: "center" })
-    .text("GPU Saviors - Professional GPU Repair Services", 50, footerY + 15, { align: "center" });
+    .text("Thank you for choosing GPU Saviors!", 50, textY, { align: "center", width: 495 });
 
   // Contact information
   if (customerSupportPhone) {
-    doc.text(`Customer Support: ${customerSupportPhone}`, 50, footerY + 30, { align: "center" });
+    doc
+      .fontSize(8)
+      .text(`Customer Support: ${customerSupportPhone}`, 50, textY + 15, { align: "center", width: 495 });
   }
 
+  // Review request with Facebook link
   doc
-    .text("Visit us: https://www.facebook.com/gpusaviors", 50, customerSupportPhone ? footerY + 45 : footerY + 30, { align: "center" })
-    .fillColor("#000");
+    .fontSize(8)
+    .fillColor("#666")
+    .text("We’d love to hear from you! Share your experience with us on Facebook.", 50, customerSupportPhone ? textY + 30 : textY + 15, { align: "center", width: 495 })
+    .fontSize(8)
+    .fillColor("#000")
+    .font("Helvetica-Bold")
+    .text("https://www.facebook.com/gpusaviors", 50, customerSupportPhone ? textY + 43 : textY + 28, { align: "center", width: 495, link: "https://www.facebook.com/gpusaviors" })
+    .fillColor("#000")
+    .font("Helvetica");
 };
 
 /**
@@ -121,85 +138,154 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
       });
       doc.on("error", reject);
 
-      // Logo path
-      const logoPath = path.join(__dirname, "../../../public/assets/logos/logo.png");
+      // Logo path (use process.cwd() for correct path in both dev and production)
+      const logoPath = path.join(process.cwd(), "public/assets/logos/logo.png");
       const hasLogo = fs.existsSync(logoPath);
 
-      // Header with logo
+      // Simple header - Stripe style
       if (hasLogo) {
-        doc.image(logoPath, 50, 45, { width: 100 });
+        doc.image(logoPath, 50, 45, { width: 60 });
       }
 
       doc
         .fontSize(20)
-        .text("GPU SAVIORS", hasLogo ? 160 : 50, 50, { align: hasLogo ? "left" : "center" })
+        .font("Helvetica-Bold")
+        .fillColor("#000")
+        .text("GPU SAVIORS", hasLogo ? 125 : 50, 50, { align: hasLogo ? "left" : "center" })
+        .fontSize(9)
+        .font("Helvetica")
+        .fillColor("#666")
+        .text("Professional GPU Repair Services", hasLogo ? 125 : 50, 72, { align: hasLogo ? "left" : "center" });
+
+      // Receipt label on the right
+      doc
+        .fontSize(14)
+        .font("Helvetica")
+        .fillColor("#000")
+        .text("Receipt", 450, 55, { width: 95, align: "right" })
+        .fillColor("#000");
+
+      // Thin separator line
+      doc.moveDown(1.5);
+      const lineY = doc.y;
+      doc.moveTo(50, lineY).lineTo(545, lineY).strokeColor("#E5E5E5").lineWidth(1).stroke();
+
+      doc.moveDown(1.5);
+
+      // Booking Code - Simple box
+      const bookingCode = bookingData.code || bookingData.id.toString();
+      const codeBoxY = doc.y;
+
+      // Light background box
+      doc.rect(50, codeBoxY, 495, 45).fill("#F7F7F7");
+
+      // Booking code text
+      doc
         .fontSize(10)
-        .text("Booking Receipt", hasLogo ? 160 : 50, 75, { align: hasLogo ? "left" : "center" });
+        .font("Helvetica")
+        .fillColor("#666")
+        .text("BOOKING CODE", 60, codeBoxY + 8)
+        .fontSize(14)
+        .fillColor("#000")
+        .font("Helvetica-Bold")
+        .text(bookingCode, 60, codeBoxY + 22);
+
+      // Important notice - subtle
+      doc
+        .fontSize(8)
+        .font("Helvetica")
+        .fillColor("#666")
+        .text("Save this code for tracking and support", 300, codeBoxY + 25)
+        .fillColor("#000");
+
+      doc.moveDown(3);
+
+      // Receipt Information - Simple two column
+      const infoY = doc.y;
+      doc
+        .fontSize(9)
+        .fillColor("#666")
+        .text("Date", 50, infoY)
+        .fillColor("#000")
+        .font("Helvetica")
+        .text(new Date(bookingData.createdAt).toLocaleDateString(), 50, infoY + 12);
+
+      doc
+        .fontSize(9)
+        .fillColor("#666")
+        .text("Status", 300, infoY)
+        .fillColor("#000")
+        .font("Helvetica")
+        .text(bookingData.status, 300, infoY + 12);
 
       doc.moveDown(2);
-      const topY = doc.y;
 
+      // Customer Information - Clean layout
       doc
-        .fontSize(12)
-        .font("Helvetica-Bold")
-        .text("RECEIPT", 50, topY)
-        .font("Helvetica")
-        .fontSize(10);
-
-      doc.moveDown(0.5);
-
-      // Receipt Information
-      doc
-        .text(`Receipt No: ${bookingData.code || bookingData.id}`, 50)
-        .text(`Date: ${new Date(bookingData.createdAt).toLocaleDateString()}`)
-        .text(`Status: ${bookingData.status}`);
-
-      doc.moveDown(1);
-
-      // Customer Information
-      doc
-        .fontSize(12)
-        .font("Helvetica-Bold")
-        .text("CUSTOMER INFORMATION", 50)
-        .font("Helvetica")
         .fontSize(10)
-        .moveDown(0.5);
-
-      doc
-        .text(`Name: ${bookingData.clientName}`)
-        .text(`Phone: ${bookingData.phoneNumber}`)
-        .text(`WhatsApp: ${bookingData.whatsappNumber}`)
-        .text(`Type: ${bookingData.clientType}`);
-
-      doc.moveDown(1);
-
-      // Items Table
-      doc
-        .fontSize(12)
         .font("Helvetica-Bold")
-        .text("ITEMS", 50)
+        .fillColor("#000")
+        .text("Customer Information", 50)
         .moveDown(0.5);
 
-      // Table header
+      const custY = doc.y;
+      doc
+        .fontSize(9)
+        .font("Helvetica")
+        .fillColor("#666")
+        .text("Name", 50, custY)
+        .fillColor("#000")
+        .text(bookingData.clientName, 50, custY + 12)
+        .fillColor("#666")
+        .text("Phone", 280, custY)
+        .fillColor("#000")
+        .text(bookingData.phoneNumber, 280, custY + 12);
+
+      doc.moveDown(2);
+
+      const custY2 = doc.y;
+      doc
+        .fillColor("#666")
+        .text("WhatsApp", 50, custY2)
+        .fillColor("#000")
+        .text(bookingData.whatsappNumber, 50, custY2 + 12)
+        .fillColor("#666")
+        .text("Type", 280, custY2)
+        .fillColor("#000")
+        .text(bookingData.clientType, 280, custY2 + 12);
+
+      doc.moveDown(3);
+
+      // Items Section - Clean table
+      doc
+        .fontSize(10)
+        .font("Helvetica-Bold")
+        .fillColor("#000")
+        .text("Items", 50)
+        .moveDown(0.5);
+
+      // Simple table header with line
       const tableTop = doc.y;
       const itemX = 50;
       const typeX = 200;
       const serialX = 300;
-      const amountX = 450;
+      const amountX = 480;
 
       doc
-        .fontSize(10)
-        .font("Helvetica-Bold")
+        .fontSize(9)
+        .font("Helvetica")
+        .fillColor("#666")
         .text("Item", itemX, tableTop)
         .text("Type", typeX, tableTop)
         .text("Serial #", serialX, tableTop)
-        .text("Amount", amountX, tableTop);
+        .text("Amount", amountX, tableTop, { width: 65, align: "right" });
 
-      doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
+      // Line under header
+      doc.moveTo(50, tableTop + 15).lineTo(545, tableTop + 15).strokeColor("#E5E5E5").lineWidth(1).stroke();
 
-      // Table rows
+      // Table rows - clean, no background colors
       let itemY = tableTop + 25;
-      doc.font("Helvetica").fontSize(9);
+      doc.font("Helvetica").fontSize(9).fillColor("#000");
 
       bookingData.booking_items.forEach((item) => {
         if (itemY > 700) {
@@ -208,50 +294,61 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
         }
 
         doc
+          .fillColor("#000")
           .text(item.name, itemX, itemY, { width: 140 })
           .text(item.type, typeX, itemY)
-          .text(item.serialNumber || "N/A", serialX, itemY, { width: 140 })
-          .text(`Rs. ${item.payableAmount.toLocaleString()}`, amountX, itemY);
+          .fillColor("#666")
+          .text(item.serialNumber || "—", serialX, itemY, { width: 140 })
+          .fillColor("#000")
+          .text(`Rs. ${item.payableAmount.toLocaleString()}`, amountX, itemY, { width: 65, align: "right" });
 
         if (item.reportedIssue) {
           itemY += 15;
-          doc.fontSize(8).fillColor("#666").text(`Issue: ${item.reportedIssue}`, itemX + 10, itemY, { width: 490 }).fillColor("#000").fontSize(9);
+          doc
+            .fontSize(8)
+            .fillColor("#666")
+            .text(`Issue: ${item.reportedIssue}`, itemX, itemY, { width: 490 })
+            .fillColor("#000")
+            .fontSize(9);
         }
 
-        itemY += 25;
+        itemY += item.reportedIssue ? 35 : 20;
       });
 
-      // Payment Summary
+      // Line after items
+      doc.moveTo(50, itemY).lineTo(545, itemY).strokeColor("#E5E5E5").lineWidth(1).stroke();
+
+      // Payment Summary - Stripe style
       doc.moveDown(2);
       const summaryY = doc.y;
+      const balance = (bookingData.payableAmount || 0) - (bookingData.paidAmount || 0);
 
-      doc.moveTo(350, summaryY).lineTo(550, summaryY).stroke();
+      // Right-aligned summary
+      doc
+        .fontSize(9)
+        .font("Helvetica")
+        .fillColor("#666")
+        .text("Total", 380, summaryY)
+        .fillColor("#000")
+        .text(`Rs. ${(bookingData.payableAmount || 0).toLocaleString()}`, 480, summaryY, { width: 65, align: "right" });
 
+      doc
+        .fillColor("#666")
+        .text("Paid", 380, summaryY + 18)
+        .fillColor("#000")
+        .text(`Rs. ${(bookingData.paidAmount || 0).toLocaleString()}`, 480, summaryY + 18, { width: 65, align: "right" });
+
+      // Line before final amount
+      doc.moveTo(380, summaryY + 38).lineTo(545, summaryY + 38).strokeColor("#E5E5E5").lineWidth(1).stroke();
+
+      // Show "Amount Due" if balance > 0, otherwise show "Total Paid"
+      const finalLabel = balance > 0 ? "Amount Due" : "Total Paid";
       doc
         .fontSize(10)
-        .font("Helvetica")
-        .text("Total Amount:", 350, summaryY + 10)
         .font("Helvetica-Bold")
-        .text(`Rs. ${(bookingData.payableAmount || 0).toLocaleString()}`, amountX, summaryY + 10);
-
-      doc
-        .font("Helvetica")
-        .text("Amount Paid:", 350, summaryY + 30)
-        .font("Helvetica-Bold")
-        .fillColor("#27ae60")
-        .text(`Rs. ${(bookingData.paidAmount || 0).toLocaleString()}`, amountX, summaryY + 30)
-        .fillColor("#000");
-
-      const balance = (bookingData.payableAmount || 0) - (bookingData.paidAmount || 0);
-      doc
-        .font("Helvetica")
-        .text("Balance:", 350, summaryY + 50)
-        .font("Helvetica-Bold")
-        .fillColor(balance > 0 ? "#e74c3c" : "#27ae60")
-        .text(`Rs. ${balance.toLocaleString()}`, amountX, summaryY + 50)
-        .fillColor("#000");
-
-      doc.moveTo(350, summaryY + 70).lineTo(550, summaryY + 70).stroke();
+        .fillColor("#000")
+        .text(finalLabel, 380, summaryY + 48)
+        .text(`Rs. ${balance > 0 ? balance.toLocaleString() : (bookingData.paidAmount || 0).toLocaleString()}`, 480, summaryY + 48, { width: 65, align: "right" });
 
       // Footer with warranty terms and contact info
       await generateFooter(doc);
@@ -294,78 +391,162 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
       });
       doc.on("error", reject);
 
-      // Logo
-      const logoPath = path.join(__dirname, "../../../public/assets/logos/logo.png");
+      // Logo (use process.cwd() for correct path in both dev and production)
+      const logoPath = path.join(process.cwd(), "public/assets/logos/logo.png");
       const hasLogo = fs.existsSync(logoPath);
 
+      // Simple header - Stripe style
       if (hasLogo) {
-        doc.image(logoPath, 50, 45, { width: 100 });
+        doc.image(logoPath, 50, 45, { width: 60 });
       }
 
-      // Header
       doc
         .fontSize(20)
-        .text("GPU SAVIORS", hasLogo ? 160 : 50, 50, { align: hasLogo ? "left" : "center" })
+        .font("Helvetica-Bold")
+        .fillColor("#000")
+        .text("GPU SAVIORS", hasLogo ? 125 : 50, 50, { align: hasLogo ? "left" : "center" })
+        .fontSize(9)
+        .font("Helvetica")
+        .fillColor("#666")
+        .text("Professional GPU Repair Services", hasLogo ? 125 : 50, 72, { align: hasLogo ? "left" : "center" });
+
+      // Invoice label on the right
+      doc
+        .fontSize(14)
+        .font("Helvetica")
+        .fillColor("#000")
+        .text("Invoice", 450, 55, { width: 95, align: "right" })
+        .fillColor("#000");
+
+      // Thin separator line
+      doc.moveDown(1.5);
+      const lineY = doc.y;
+      doc.moveTo(50, lineY).lineTo(545, lineY).strokeColor("#E5E5E5").lineWidth(1).stroke();
+
+      doc.moveDown(1.5);
+
+      // Booking Code - Simple box
+      const bookingCode = bookingData.code || bookingData.id.toString();
+      const codeBoxY = doc.y;
+
+      // Light background box
+      doc.rect(50, codeBoxY, 495, 45).fill("#F7F7F7");
+
+      // Booking code text
+      doc
         .fontSize(10)
-        .text("Payment Invoice", hasLogo ? 160 : 50, 75, { align: hasLogo ? "left" : "center" });
+        .font("Helvetica")
+        .fillColor("#666")
+        .text("BOOKING CODE", 60, codeBoxY + 8)
+        .fontSize(14)
+        .fillColor("#000")
+        .font("Helvetica-Bold")
+        .text(bookingCode, 60, codeBoxY + 22);
+
+      // Important notice - subtle
+      doc
+        .fontSize(8)
+        .font("Helvetica")
+        .fillColor("#666")
+        .text("Save this code for tracking and support", 300, codeBoxY + 25)
+        .fillColor("#000");
+
+      doc.moveDown(3);
+
+      // Invoice information - Simple layout
+      const infoY = doc.y;
+      doc
+        .fontSize(9)
+        .fillColor("#666")
+        .text("Invoice No", 50, infoY)
+        .fillColor("#000")
+        .font("Helvetica")
+        .text(`INV-${bookingCode}`, 50, infoY + 12);
+
+      doc
+        .fontSize(9)
+        .fillColor("#666")
+        .text("Date", 200, infoY)
+        .fillColor("#000")
+        .font("Helvetica")
+        .text(new Date().toLocaleDateString(), 200, infoY + 12);
+
+      doc
+        .fontSize(9)
+        .fillColor("#666")
+        .text("Status", 350, infoY)
+        .fillColor("#000")
+        .font("Helvetica")
+        .text(bookingData.status, 350, infoY + 12);
 
       doc.moveDown(2);
-      const topY = doc.y;
 
-      // Invoice details
+      // Bill To - Clean layout
       doc
-        .fontSize(12)
-        .font("Helvetica-Bold")
-        .text("INVOICE", 50, topY)
-        .font("Helvetica")
-        .fontSize(10);
-
-      doc.moveDown(0.5);
-
-      doc
-        .text(`Invoice No: INV-${bookingData.code || bookingData.id}`, 50)
-        .text(`Date: ${new Date().toLocaleDateString()}`)
-        .text(`Booking Status: ${bookingData.status}`);
-
-      // Bill To
-      doc.moveDown(1);
-      doc
-        .fontSize(12)
-        .font("Helvetica-Bold")
-        .text("BILL TO", 50)
-        .font("Helvetica")
         .fontSize(10)
+        .font("Helvetica-Bold")
+        .fillColor("#000")
+        .text("Bill To", 50)
         .moveDown(0.5);
 
+      const billY = doc.y;
       doc
-        .text(bookingData.clientName)
-        .text(`Phone: ${bookingData.phoneNumber}`)
-        .text(`WhatsApp: ${bookingData.whatsappNumber}`)
-        .text(`Customer Type: ${bookingData.clientType}`);
+        .fontSize(9)
+        .font("Helvetica")
+        .fillColor("#666")
+        .text("Name", 50, billY)
+        .fillColor("#000")
+        .text(bookingData.clientName, 50, billY + 12)
+        .fillColor("#666")
+        .text("Phone", 280, billY)
+        .fillColor("#000")
+        .text(bookingData.phoneNumber, 280, billY + 12);
 
-      doc.moveDown(1);
+      doc.moveDown(2);
 
-      // Items table
-      doc.fontSize(12).font("Helvetica-Bold").text("SERVICES / ITEMS", 50).moveDown(0.5);
+      const billY2 = doc.y;
+      doc
+        .fillColor("#666")
+        .text("WhatsApp", 50, billY2)
+        .fillColor("#000")
+        .text(bookingData.whatsappNumber, 50, billY2 + 12)
+        .fillColor("#666")
+        .text("Type", 280, billY2)
+        .fillColor("#000")
+        .text(bookingData.clientType, 280, billY2 + 12);
 
+      doc.moveDown(3);
+
+      // Items Section - Clean table
+      doc
+        .fontSize(10)
+        .font("Helvetica-Bold")
+        .fillColor("#000")
+        .text("Items", 50)
+        .moveDown(0.5);
+
+      // Simple table header with line
       const tableTop = doc.y;
       const itemX = 50;
       const typeX = 200;
       const serialX = 300;
-      const amountX = 450;
+      const amountX = 480;
 
       doc
-        .fontSize(10)
-        .font("Helvetica-Bold")
+        .fontSize(9)
+        .font("Helvetica")
+        .fillColor("#666")
         .text("Item", itemX, tableTop)
         .text("Type", typeX, tableTop)
         .text("Serial #", serialX, tableTop)
-        .text("Amount", amountX, tableTop);
+        .text("Amount", amountX, tableTop, { width: 65, align: "right" });
 
-      doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
+      // Line under header
+      doc.moveTo(50, tableTop + 15).lineTo(545, tableTop + 15).strokeColor("#E5E5E5").lineWidth(1).stroke();
 
+      // Table rows - clean
       let itemY = tableTop + 25;
-      doc.font("Helvetica").fontSize(9);
+      doc.font("Helvetica").fontSize(9).fillColor("#000");
 
       bookingData.booking_items.forEach((item) => {
         if (itemY > 650) {
@@ -374,66 +555,85 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
         }
 
         doc
+          .fillColor("#000")
           .text(item.name, itemX, itemY, { width: 140 })
           .text(item.type, typeX, itemY)
-          .text(item.serialNumber || "N/A", serialX, itemY, { width: 140 })
-          .text(`Rs. ${item.payableAmount.toLocaleString()}`, amountX, itemY);
+          .fillColor("#666")
+          .text(item.serialNumber || "—", serialX, itemY, { width: 140 })
+          .fillColor("#000")
+          .text(`Rs. ${item.payableAmount.toLocaleString()}`, amountX, itemY, { width: 65, align: "right" });
 
         if (item.reportedIssue) {
           itemY += 15;
-          doc.fontSize(8).fillColor("#666").text(`Service: ${item.reportedIssue}`, itemX + 10, itemY, { width: 490 }).fillColor("#000").fontSize(9);
+          doc
+            .fontSize(8)
+            .fillColor("#666")
+            .text(`Service: ${item.reportedIssue}`, itemX, itemY, { width: 490 })
+            .fillColor("#000")
+            .fontSize(9);
         }
 
-        itemY += 25;
+        itemY += item.reportedIssue ? 35 : 20;
       });
 
-      // Payment details
+      // Line after items
+      doc.moveTo(50, itemY).lineTo(545, itemY).strokeColor("#E5E5E5").lineWidth(1).stroke();
+
+      // Payment details - Simple list
       doc.moveDown(2);
-      let summaryY = doc.y;
-
-      doc.fontSize(12).font("Helvetica-Bold").text("PAYMENT DETAILS", 50).font("Helvetica").fontSize(9).moveDown(0.5);
-
-      paidPayments.forEach((payment) => {
-        doc
-          .text(`Payment Date: ${new Date(payment.createdAt).toLocaleDateString()}`)
-          .text(`Method: ${payment.paymentMethod}`)
-          .text(`Amount: Rs. ${(payment.paidAmount || 0).toLocaleString()}`)
-          .moveDown(0.5);
-      });
-
-      // Summary
-      summaryY = doc.y + 20;
-      doc.moveTo(350, summaryY).lineTo(550, summaryY).stroke();
-
-      const totalPaid = paidPayments.reduce((sum, p) => sum + (p.paidAmount || 0), 0);
-
       doc
         .fontSize(10)
-        .font("Helvetica")
-        .text("Subtotal:", 350, summaryY + 10)
         .font("Helvetica-Bold")
-        .text(`Rs. ${(bookingData.payableAmount || 0).toLocaleString()}`, amountX, summaryY + 10);
+        .fillColor("#000")
+        .text("Payments", 50)
+        .moveDown(0.5);
+
+      paidPayments.forEach((payment) => {
+        const paymentY = doc.y;
+        doc
+          .fontSize(9)
+          .font("Helvetica")
+          .fillColor("#666")
+          .text(new Date(payment.createdAt).toLocaleDateString(), 50, paymentY)
+          .text(payment.paymentMethod, 150, paymentY)
+          .fillColor("#000")
+          .text(`Rs. ${(payment.paidAmount || 0).toLocaleString()}`, 280, paymentY);
+
+        doc.moveDown(0.8);
+      });
+
+      // Payment Summary - Stripe style
+      doc.moveDown(1);
+      const summaryY = doc.y;
+      const totalPaid = paidPayments.reduce((sum, p) => sum + (p.paidAmount || 0), 0);
+      const balance = (bookingData.payableAmount || 0) - totalPaid;
+
+      // Right-aligned summary
+      doc
+        .fontSize(9)
+        .font("Helvetica")
+        .fillColor("#666")
+        .text("Subtotal", 380, summaryY)
+        .fillColor("#000")
+        .text(`Rs. ${(bookingData.payableAmount || 0).toLocaleString()}`, 480, summaryY, { width: 65, align: "right" });
 
       doc
-        .font("Helvetica")
-        .text("Total Paid:", 350, summaryY + 30)
+        .fillColor("#666")
+        .text("Paid", 380, summaryY + 18)
+        .fillColor("#000")
+        .text(`Rs. ${totalPaid.toLocaleString()}`, 480, summaryY + 18, { width: 65, align: "right" });
+
+      // Line before final amount
+      doc.moveTo(380, summaryY + 38).lineTo(545, summaryY + 38).strokeColor("#E5E5E5").lineWidth(1).stroke();
+
+      // Show "Amount Due" if balance > 0, otherwise show "Total Paid"
+      const finalLabel = balance > 0 ? "Amount Due" : "Total Paid";
+      doc
+        .fontSize(10)
         .font("Helvetica-Bold")
-        .fillColor("#27ae60")
-        .text(`Rs. ${totalPaid.toLocaleString()}`, amountX, summaryY + 30)
-        .fillColor("#000");
-
-      const balance = (bookingData.payableAmount || 0) - totalPaid;
-      if (balance > 0) {
-        doc
-          .font("Helvetica")
-          .text("Outstanding:", 350, summaryY + 50)
-          .font("Helvetica-Bold")
-          .fillColor("#e74c3c")
-          .text(`Rs. ${balance.toLocaleString()}`, amountX, summaryY + 50)
-          .fillColor("#000");
-      }
-
-      doc.moveTo(350, summaryY + 70).lineTo(550, summaryY + 70).stroke();
+        .fillColor("#000")
+        .text(finalLabel, 380, summaryY + 48)
+        .text(`Rs. ${balance > 0 ? balance.toLocaleString() : totalPaid.toLocaleString()}`, 480, summaryY + 48, { width: 65, align: "right" });
 
       // Footer with warranty terms and contact info
       await generateFooter(doc);
