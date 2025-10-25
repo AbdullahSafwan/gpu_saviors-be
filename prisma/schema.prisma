@@ -93,6 +93,8 @@ model booking {
   createdBy             Int
   modifiedBy            Int
   clientType            client_type       @default(INDIVIDUAL)
+  referralSource        ReferralSource?
+  referralSourceNotes   String?           @db.VarChar(500)
   booking_items         booking_item[]
   delivery              delivery[]
   contact_log           contact_log[]
@@ -322,6 +324,17 @@ enum courier_type {
 enum client_type {
   CORPORATE
   INDIVIDUAL
+}
+
+enum ReferralSource {
+  SOCIAL_MEDIA
+  GOOGLE_SEARCH
+  FRIEND_REFERRAL
+  BUSINESS_REFERRAL
+  EXISTING_CUSTOMER
+  ONLINE_REVIEW
+  FORUM_COMMUNITY
+  OTHER
 }
 
 model warranty {
