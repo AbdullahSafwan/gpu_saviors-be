@@ -74,6 +74,8 @@ const listBookings = async (
         status: true,
         isActive: true,
         clientType: true,
+        referralSource: true,
+        referralSourceNotes: true,
         booking_items: {
           select: {
             name: true,
