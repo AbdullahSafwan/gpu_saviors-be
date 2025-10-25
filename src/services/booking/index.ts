@@ -1,4 +1,4 @@
-import { booking_status, payment_method, payment_status, Prisma, booking_item_status } from "@prisma/client";
+import { booking_status, Prisma, booking_item_status } from "@prisma/client";
 import { CreateBookingItem, CreateBookingRequest, UpdateBookingItem, UpdateBookingRequest, CreateBookingPayment, UpdateBookingPayment } from "../../types/bookingTypes";
 import { CreateContactLogRequest, UpdateContactLogRequest } from "../../types/contactLogTypes";
 import { CreateDeliveryRequest, UpdateDeliveryRequest } from "../../types/deliveryTypes";
@@ -25,15 +25,6 @@ const createBooking = async (data: CreateBookingRequest, createdBy: number) => {
           modifiedByUser: { connect: { id: createdBy } }
         })),
       },
-      booking_payments:{
-        create: {
-          payableAmount: data.payableAmount,
-          status: payment_status.PENDING,
-          paymentMethod: payment_method.CASH,
-          createdByUser: { connect: { id: createdBy } },
-          modifiedByUser: { connect: { id: createdBy } }
-        }
-      }
     };
 
     const result = await bookingDao.createBooking(prisma, bookingData);
@@ -151,9 +142,38 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
       const paymentsToUpdate = booking_payments?.filter((item): item is UpdateBookingPayment => "id" in item && !!item.id) || [];
       const paymentsToCreate = booking_payments?.filter((item): item is CreateBookingPayment => !("id" in item)) || [];
 
+      // Recalculate payableAmount if booking items were added or updated
+      let calculatedPayableAmount: number | undefined;
+      if (booking_items && booking_items.length > 0) {
+        // Calculate new total by combining existing items with updates and new items
+        const existingItems = record.booking_items;
+
+        // Create a map of updated amounts
+        const updatedAmountsMap = new Map(
+          itemsToUpdate
+            .filter(item => item.payableAmount !== undefined)
+            .map(item => [item.id, item.payableAmount!])
+        );
+
+        // Calculate total from existing items (with updates applied)
+        let totalPayableAmount = existingItems.reduce((total, item) => {
+          const updatedAmount = updatedAmountsMap.get(item.id);
+          return total + (updatedAmount !== undefined ? updatedAmount : item.payableAmount);
+        }, 0);
+
+        // Add amounts from newly created items
+        totalPayableAmount += itemsToCreate.reduce(
+          (total, item) => total + item.payableAmount,
+          0
+        );
+
+        calculatedPayableAmount = totalPayableAmount;
+      }
+
       const updateData: Prisma.bookingUpdateInput = {
         ...otherData,
         modifiedByUser: { connect: { id: modifiedBy } },
+        ...(calculatedPayableAmount !== undefined && { payableAmount: calculatedPayableAmount }),
         ...(booking_items && {
           booking_items: {
             updateMany: itemsToUpdate.map(({ id, ...data }) => ({
@@ -229,13 +249,13 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
         }),
       };
 
-      const updatedBooking = await bookingDao.updateBooking(tx, id, updateData);
+      await bookingDao.updateBooking(tx, id, updateData);
 
+      // Auto-create warranties for booking items that are marked as COMPLETED
       if (itemsToUpdate.length > 0) {
         for (const item of itemsToUpdate) {
           if (item.status === booking_item_status.COMPLETED && item.id) {
-            try {
-               // Check if warranty already exists
+            // Check if warranty already exists
             const existingWarranty = await warrantyService.getWarrantyByBookingItem(tx, item.id);
 
             if (!existingWarranty) {
@@ -248,16 +268,15 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
                 modifiedBy
               );
             }
-            } catch (error) {
-              debugLog(`Failed to create warranty for booking item id: ${item.id}. Error: ${error}`);
-              throw error; 
-            }
-           
           }
         }
       }
 
-      return updatedBooking;
+      const finalBooking = await bookingDao.getBooking(tx, id);
+      if (!finalBooking) {
+        throw new Error(`Booking not found after update with id: ${id}`);
+      }
+      return finalBooking;
     });
 
     return result;
