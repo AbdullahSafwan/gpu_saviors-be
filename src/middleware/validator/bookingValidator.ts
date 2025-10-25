@@ -1,5 +1,5 @@
 import { body, query } from "express-validator";
-import { booking_status, booking_item_type, client_type, courier_type } from "@prisma/client";
+import { booking_status, booking_item_type, client_type, courier_type, ReferralSource } from "@prisma/client";
 import { formatWhatsAppNumber } from "./helper";
 import { bookingDao } from "../../dao/booking";
 import prisma from "../../prisma";
@@ -53,6 +53,8 @@ const createBookingValidator = [
     .withMessage("Item payable amount must be a positive integer"),
   body("booking_items.*.paidAmount").optional().isInt({ min: 0 }).withMessage("Item paid amount must be a positive integer"),
   body("appointmentDate").optional().isISO8601().toDate().withMessage("Appointment date must be a valid date format"),
+  body("referralSource").optional().isIn(Object.values(ReferralSource)).withMessage("Invalid referral source"),
+  body("referralSourceNotes").optional().isString().withMessage("Referral source notes must be a string").isLength({ max: 500 }).withMessage("Referral source notes must not exceed 500 characters"),
 ];
 
 const updateBookingValidator = [
@@ -148,8 +150,10 @@ const updateBookingValidator = [
   body("delivery.*.deliveryDate")
     .if(body("delivery.*.id").not().exists())
     .notEmpty().withMessage("DateTime is required").isISO8601().toDate(),
-  
+
   body("appointmentDate").optional().isISO8601().toDate().withMessage("Appointment date must be a valid date format"),
+  body("referralSource").optional().isIn(Object.values(ReferralSource)).withMessage("Invalid referral source"),
+  body("referralSourceNotes").optional().isString().withMessage("Referral source notes must be a string").isLength({ max: 500 }).withMessage("Referral source notes must not exceed 500 characters"),
 ];
 
 const listBookingsValidator = [

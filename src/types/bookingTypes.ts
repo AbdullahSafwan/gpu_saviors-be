@@ -1,4 +1,4 @@
-import { booking_item_type, booking_status, payment_method, payment_status, booking_item_status, client_type } from "@prisma/client";
+import { booking_item_type, booking_status, payment_method, payment_status, booking_item_status, client_type, ReferralSource } from "@prisma/client";
 import { CreateContactLogRequest, UpdateContactLogRequest } from "./contactLogTypes";
 import { CreateDeliveryRequest, UpdateDeliveryRequest } from "./deliveryTypes";
 
@@ -20,6 +20,8 @@ export interface CreateBookingRequest {
   booking_items: BookingItem[];
   createdBy?: number; // Will be set by system
   clientType?: client_type;
+  referralSource?: ReferralSource;
+  referralSourceNotes?: string;
 }
 
 export interface GetBookingDetailsRequest {
@@ -38,6 +40,8 @@ export interface UpdateBookingRequest {
   status?: booking_status;
   modifiedBy?: number; // Will be set by system
   clientType?: client_type;
+  referralSource?: ReferralSource;
+  referralSourceNotes?: string;
 }
 
 export interface ListBookingsRequest {
