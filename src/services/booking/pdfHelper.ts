@@ -319,7 +319,7 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
       doc.moveTo(50, itemY).lineTo(545, itemY).strokeColor("#E5E5E5").lineWidth(1).stroke();
 
       // Payment Summary - Stripe style
-      doc.moveDown(2);
+      doc.moveDown(4);
       const summaryY = doc.y;
       const balance = (bookingData.payableAmount || 0) - (bookingData.paidAmount || 0);
 
@@ -339,16 +339,16 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
         .text(`Rs. ${(bookingData.paidAmount || 0).toLocaleString()}`, 480, summaryY + 18, { width: 65, align: "right" });
 
       // Line before final amount
-      doc.moveTo(380, summaryY + 38).lineTo(545, summaryY + 38).strokeColor("#E5E5E5").lineWidth(1).stroke();
+      doc.moveTo(380, summaryY + 34).lineTo(545, summaryY + 34).strokeColor("#E5E5E5").lineWidth(1).stroke();
 
       // Show "Amount Due" if balance > 0, otherwise show "Total Paid"
       const finalLabel = balance > 0 ? "Amount Due" : "Total Paid";
       doc
-        .fontSize(10)
+        .fontSize(9)
         .font("Helvetica-Bold")
         .fillColor("#000")
-        .text(finalLabel, 380, summaryY + 48)
-        .text(`Rs. ${balance > 0 ? balance.toLocaleString() : (bookingData.paidAmount || 0).toLocaleString()}`, 480, summaryY + 48, { width: 65, align: "right" });
+        .text(finalLabel, 380, summaryY + 42)
+        .text(`Rs. ${balance > 0 ? balance.toLocaleString() : (bookingData.paidAmount || 0).toLocaleString()}`, 480, summaryY + 42, { width: 65, align: "right" });
 
       // Footer with warranty terms and contact info
       await generateFooter(doc);
@@ -624,16 +624,16 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
         .text(`Rs. ${totalPaid.toLocaleString()}`, 480, summaryY + 18, { width: 65, align: "right" });
 
       // Line before final amount
-      doc.moveTo(380, summaryY + 38).lineTo(545, summaryY + 38).strokeColor("#E5E5E5").lineWidth(1).stroke();
+      doc.moveTo(380, summaryY + 34).lineTo(545, summaryY + 34).strokeColor("#E5E5E5").lineWidth(1).stroke();
 
       // Show "Amount Due" if balance > 0, otherwise show "Total Paid"
       const finalLabel = balance > 0 ? "Amount Due" : "Total Paid";
       doc
-        .fontSize(10)
+        .fontSize(9)
         .font("Helvetica-Bold")
         .fillColor("#000")
-        .text(finalLabel, 380, summaryY + 48)
-        .text(`Rs. ${balance > 0 ? balance.toLocaleString() : totalPaid.toLocaleString()}`, 480, summaryY + 48, { width: 65, align: "right" });
+        .text(finalLabel, 380, summaryY + 42)
+        .text(`Rs. ${balance > 0 ? balance.toLocaleString() : totalPaid.toLocaleString()}`, 480, summaryY + 42, { width: 65, align: "right" });
 
       // Footer with warranty terms and contact info
       await generateFooter(doc);
