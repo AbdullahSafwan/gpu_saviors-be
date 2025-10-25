@@ -72,7 +72,8 @@ enum token_type {
 model system_configuration {
   id       Int     @unique @default(autoincrement())
   key      String  @unique
-  value    String
+  value    String  @db.Text
+  description String?
   isActive Boolean @default(true)
 }
 
