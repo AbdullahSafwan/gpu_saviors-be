@@ -124,139 +124,142 @@ const listBookings = async (
 
 const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy: number) => {
   try {
-    const record = await bookingDao.getBooking(prisma, id);
-    if (!record) {
-      throw new Error(`Booking not found against id: ${id}`);
-    }
-    // validating status transition, status can only be changed against allowed records
-    if (data.status && !validateStatusTransition(record.status, data.status)) {
-      throw new Error("Invalid status transition, allowed transitions are: DRAFT -> IN_REVIEW -> CONFIRMED -> PENDING_DELIVERY -> IN_QUEUE -> IN_PROGRESS -> RESOLVED -> PENDING_PAYMENT -> PENDING_DELIVERY -> OUTBOUND_DELIVERY -> CONFIRMED -> COMPLETED");
-    }
-    const { booking_items, contact_log, delivery, booking_payments, ...otherData } = data;
-    
-    // Separate booking items based on the presence of `id`
-    const itemsToUpdate = booking_items?.filter((item): item is UpdateBookingItem => "id" in item && !!item.id) || [];
-    const itemsToCreate = booking_items?.filter((item): item is CreateBookingItem => !("id" in item)) || [];
+    // Wrap everything in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      const record = await bookingDao.getBooking(tx, id);
+      if (!record) {
+        throw new Error(`Booking not found against id: ${id}`);
+      }
+      // validating status transition, status can only be changed against allowed records
+      if (data.status && !validateStatusTransition(record.status, data.status)) {
+        throw new Error("Invalid status transition, allowed transitions are: DRAFT -> IN_REVIEW -> CONFIRMED -> PENDING_DELIVERY -> IN_QUEUE -> IN_PROGRESS -> RESOLVED -> PENDING_PAYMENT -> PENDING_DELIVERY -> OUTBOUND_DELIVERY -> CONFIRMED -> COMPLETED");
+      }
+      const { booking_items, contact_log, delivery, booking_payments, ...otherData } = data;
 
-    // Separate contact logs based on the presence of `id`
-    const contactLogsToUpdate = contact_log?.filter((item): item is UpdateContactLogRequest & { id: number } => "id" in item && !!item.id) || [];
-    const contactLogsToCreate = contact_log?.filter((item): item is CreateContactLogRequest => !("id" in item)) || [];
+      // Separate booking items based on the presence of `id`
+      const itemsToUpdate = booking_items?.filter((item): item is UpdateBookingItem => "id" in item && !!item.id) || [];
+      const itemsToCreate = booking_items?.filter((item): item is CreateBookingItem => !("id" in item)) || [];
 
-    // Separate deliveries based on the presence of `id`
-    const deliveriesToUpdate = delivery?.filter((item): item is UpdateDeliveryRequest & { id: number } => "id" in item && !!item.id) || [];
-    const deliveriesToCreate = delivery?.filter((item): item is CreateDeliveryRequest => !("id" in item)) || [];
+      // Separate contact logs based on the presence of `id`
+      const contactLogsToUpdate = contact_log?.filter((item): item is UpdateContactLogRequest & { id: number } => "id" in item && !!item.id) || [];
+      const contactLogsToCreate = contact_log?.filter((item): item is CreateContactLogRequest => !("id" in item)) || [];
 
-    // Separate booking payments based on the presence of `id`
-    const paymentsToUpdate = booking_payments?.filter((item): item is UpdateBookingPayment => "id" in item && !!item.id) || [];
-    const paymentsToCreate = booking_payments?.filter((item): item is CreateBookingPayment => !("id" in item)) || [];
+      // Separate deliveries based on the presence of `id`
+      const deliveriesToUpdate = delivery?.filter((item): item is UpdateDeliveryRequest & { id: number } => "id" in item && !!item.id) || [];
+      const deliveriesToCreate = delivery?.filter((item): item is CreateDeliveryRequest => !("id" in item)) || [];
 
-    const updateData: Prisma.bookingUpdateInput = {
-      ...otherData,
-      modifiedByUser: { connect: { id: modifiedBy } },
-      ...(booking_items && {
-        booking_items: {
-          updateMany: itemsToUpdate.map(({ id, ...data }) => ({
-            where: { id },
-            data: {
-              ...data,
-              modifiedBy
-            },
-          })),
-          ...(itemsToCreate.length > 0 && {
-            createMany: {
-              data: itemsToCreate.map(item => ({
-                ...item,
-                createdBy: modifiedBy,
-                modifiedBy: modifiedBy
-              })),
-            },
-          }),
-        },
-      }),
-      ...(contact_log && {
-        contact_log: {
-          updateMany: contactLogsToUpdate.map(({ id, ...data }) => ({
-            where: { id },
-            data,
-          })),
-          ...(contactLogsToCreate.length > 0 && {
-            createMany: {
-              data: contactLogsToCreate.map(item => ({ ...item, bookingId: id })),
-            },
-          }),
-        },
-      }),
-      ...(delivery && {
-        delivery: {
-          updateMany: deliveriesToUpdate.map(({ id, ...data }) => ({
-            where: { id },
-            data: {
-              ...data,
-              modifiedBy
-            },
-          })),
-          ...(deliveriesToCreate.length > 0 && {
-            createMany: {
-              data: deliveriesToCreate.map(item => ({
-                ...item,
-                createdBy: modifiedBy,
-                modifiedBy: modifiedBy
-              })),
-            },
-          }),
-        },
-      }),
-      ...(booking_payments && {
-        booking_payments: {
-          updateMany: paymentsToUpdate.map(({ id, ...data }) => ({
-            where: { id },
-            data: {
-              ...data,
-              modifiedBy
-            },
-          })),
-          ...(paymentsToCreate.length > 0 && {
-            createMany: {
-              data: paymentsToCreate.map(item => ({
-                ...item,
-                createdBy: modifiedBy,
-                modifiedBy: modifiedBy
-              })),
-            },
-          }),
-        },
-      }),
-    };
+      // Separate booking payments based on the presence of `id`
+      const paymentsToUpdate = booking_payments?.filter((item): item is UpdateBookingPayment => "id" in item && !!item.id) || [];
+      const paymentsToCreate = booking_payments?.filter((item): item is CreateBookingPayment => !("id" in item)) || [];
 
-    const result = await bookingDao.updateBooking(prisma, id, updateData);
+      const updateData: Prisma.bookingUpdateInput = {
+        ...otherData,
+        modifiedByUser: { connect: { id: modifiedBy } },
+        ...(booking_items && {
+          booking_items: {
+            updateMany: itemsToUpdate.map(({ id, ...data }) => ({
+              where: { id },
+              data: {
+                ...data,
+                modifiedBy
+              },
+            })),
+            ...(itemsToCreate.length > 0 && {
+              createMany: {
+                data: itemsToCreate.map(item => ({
+                  ...item,
+                  createdBy: modifiedBy,
+                  modifiedBy: modifiedBy
+                })),
+              },
+            }),
+          },
+        }),
+        ...(contact_log && {
+          contact_log: {
+            updateMany: contactLogsToUpdate.map(({ id, ...data }) => ({
+              where: { id },
+              data,
+            })),
+            ...(contactLogsToCreate.length > 0 && {
+              createMany: {
+                data: contactLogsToCreate.map(item => ({ ...item, bookingId: id })),
+              },
+            }),
+          },
+        }),
+        ...(delivery && {
+          delivery: {
+            updateMany: deliveriesToUpdate.map(({ id, ...data }) => ({
+              where: { id },
+              data: {
+                ...data,
+                modifiedBy
+              },
+            })),
+            ...(deliveriesToCreate.length > 0 && {
+              createMany: {
+                data: deliveriesToCreate.map(item => ({
+                  ...item,
+                  createdBy: modifiedBy,
+                  modifiedBy: modifiedBy
+                })),
+              },
+            }),
+          },
+        }),
+        ...(booking_payments && {
+          booking_payments: {
+            updateMany: paymentsToUpdate.map(({ id, ...data }) => ({
+              where: { id },
+              data: {
+                ...data,
+                modifiedBy
+              },
+            })),
+            ...(paymentsToCreate.length > 0 && {
+              createMany: {
+                data: paymentsToCreate.map(item => ({
+                  ...item,
+                  createdBy: modifiedBy,
+                  modifiedBy: modifiedBy
+                })),
+              },
+            }),
+          },
+        }),
+      };
 
-    // Auto-create warranties for booking items that are marked as COMPLETED
-    if (itemsToUpdate.length > 0) {
-      for (const item of itemsToUpdate) {
-        // Check if status changed to COMPLETED
-        if (item.status === booking_item_status.COMPLETED && item.id) {
-          try {
-            // Check if warranty already exists
-            const existingWarranty = await warrantyService.getWarrantyByBookingItem(prisma, item.id);
+      const updatedBooking = await bookingDao.updateBooking(tx, id, updateData);
+
+      if (itemsToUpdate.length > 0) {
+        for (const item of itemsToUpdate) {
+          if (item.status === booking_item_status.COMPLETED && item.id) {
+            try {
+               // Check if warranty already exists
+            const existingWarranty = await warrantyService.getWarrantyByBookingItem(tx, item.id);
 
             if (!existingWarranty) {
-              // Create warranty for this booking item
               await warrantyService.createWarranty(
-                prisma,
+                tx,
                 {
                   bookingItemId: item.id,
-                  warrantyDays: 15, // Default 15 days warranty
+                  warrantyDays: 32,
                 },
                 modifiedBy
               );
             }
-          } catch (error) {
-            // Log error but don't fail the entire booking update
-            debugLog(`Failed to create warranty for booking item ${item.id}: ${error}`);
+            } catch (error) {
+              debugLog(`Failed to create warranty for booking item id: ${item.id}. Error: ${error}`);
+              throw error; 
+            }
+           
           }
         }
       }
-    }
+
+      return updatedBooking;
+    });
 
     return result;
   } catch (error) {
