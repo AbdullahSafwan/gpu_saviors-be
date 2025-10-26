@@ -1,9 +1,10 @@
 import { booking_status } from "@prisma/client";
 
-// Workflow order: DRAFT -> CONFIRMED -> IN_PROGRESS -> COMPLETED
+// Workflow order: DRAFT -> CONFIRMED -> PENDING -> IN_PROGRESS -> COMPLETED
 const workflowOrder: string[] = [
   booking_status.DRAFT,
   booking_status.CONFIRMED,
+  booking_status.PENDING,
   booking_status.IN_PROGRESS,
   booking_status.COMPLETED,
 ];
@@ -11,8 +12,9 @@ const workflowOrder: string[] = [
 // Forward transitions allowed from each status
 const forwardTransitions: Record<string, string[]> = {
   [booking_status.DRAFT]: [booking_status.CONFIRMED],
-  [booking_status.CONFIRMED]: [booking_status.IN_PROGRESS],
-  [booking_status.IN_PROGRESS]: [booking_status.COMPLETED],
+  [booking_status.CONFIRMED]: [booking_status.PENDING, booking_status.IN_PROGRESS],
+  [booking_status.PENDING]: [booking_status.IN_PROGRESS],
+  [booking_status.IN_PROGRESS]: [booking_status.PENDING, booking_status.COMPLETED, booking_status.CANCELLED],
 };
 
 export const validateStatusTransition = (currentStatus: string, newStatus: string): boolean => {
