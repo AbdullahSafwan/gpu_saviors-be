@@ -13,8 +13,8 @@ const createBooking = async (data: CreateBookingRequest, createdBy: number) => {
   try {
     data.payableAmount = data.booking_items.reduce((total: number, item) => total + item.payableAmount, 0);
 
-    // generate unique code using timestamp
-    data.code = new Date().getTime().toString(36).toUpperCase();
+    // generate unique 6-character code using timestamp
+    data.code = new Date().getTime().toString(36).toUpperCase().slice(-6);
     const bookingData = {
       ...data,
       createdByUser: { connect: { id: createdBy } },
