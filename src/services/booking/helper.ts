@@ -6,6 +6,7 @@ const workflowOrder: string[] = [
   booking_status.CONFIRMED,
   booking_status.PENDING,
   booking_status.IN_PROGRESS,
+  booking_status.RESOLVED,
   booking_status.COMPLETED,
 ];
 
@@ -14,7 +15,8 @@ const forwardTransitions: Record<string, string[]> = {
   [booking_status.DRAFT]: [booking_status.CONFIRMED, booking_status.PENDING],
   [booking_status.CONFIRMED]: [booking_status.PENDING, booking_status.IN_PROGRESS],
   [booking_status.PENDING]: [booking_status.IN_PROGRESS],
-  [booking_status.IN_PROGRESS]: [booking_status.PENDING, booking_status.COMPLETED, booking_status.CANCELLED],
+  [booking_status.IN_PROGRESS]: [booking_status.PENDING, booking_status.RESOLVED, booking_status.CANCELLED],
+  [booking_status.RESOLVED]: [booking_status.COMPLETED, booking_status.CANCELLED],
 };
 
 export const validateStatusTransition = (currentStatus: string, newStatus: string): boolean => {
