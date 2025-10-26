@@ -167,11 +167,11 @@ const listBookingsValidator = [
 
 const removeBookingValidator = [
   query("id").notEmpty().withMessage("Booking ID is required").isInt({ min: 1 }).withMessage("Booking ID must be a positive integer").toInt(),
-  query("id").custom((value) => {
+  query("id").custom(async (value) => {
     if (isNaN(value) || value <= 0) {
       throw new Error("Invalid booking ID");
     }
-    const isPresent = bookingDao.getBooking(prisma, value);
+    const isPresent = await bookingDao.getBooking(prisma, value);
     if (!isPresent) {
       throw new Error("Booking not found");
     }

@@ -125,6 +125,16 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
       if (data.status && !validateStatusTransition(record.status, data.status)) {
         throw new Error("Invalid status transition. Allowed workflow: DRAFT -> CONFIRMED -> IN_PROGRESS -> RESOLVED -> COMPLETED / CANCELLED. You can move backward to any previous status or use CANCELLED/EXPIRED at any time.");
       }
+
+      // if booking is being marked as COMPLETED, ensure all booking items are in terminal state
+      if (data.status === booking_status.COMPLETED) {
+        const bookingItemsStatus = record.booking_items.every((item: any) =>
+          [booking_item_status.REPAIRED, booking_item_status.NOT_REPAIRED].includes(item.status)
+        );
+        if (!bookingItemsStatus) {
+          throw new Error("Cannot mark booking as COMPLETED unless all booking items are in terminal state (repaired or not repaired)");
+        }
+      }
       const { booking_items, contact_log, delivery, booking_payments, ...otherData } = data;
 
       // Separate booking items based on the presence of `id`
