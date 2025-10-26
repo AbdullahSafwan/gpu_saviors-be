@@ -255,7 +255,7 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
       // Auto-create warranties for booking items that are marked as COMPLETED
       if (itemsToUpdate.length > 0) {
         for (const item of itemsToUpdate) {
-          if (item.status === booking_item_status.COMPLETED && item.id) {
+          if (item.status === booking_item_status.REPAIRED && item.id) {
             // Check if warranty already exists
             const existingWarranty = await warrantyService.getWarrantyByBookingItem(tx, item.id);
 
