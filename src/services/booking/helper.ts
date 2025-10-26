@@ -11,7 +11,7 @@ const workflowOrder: string[] = [
 
 // Forward transitions allowed from each status
 const forwardTransitions: Record<string, string[]> = {
-  [booking_status.DRAFT]: [booking_status.CONFIRMED],
+  [booking_status.DRAFT]: [booking_status.CONFIRMED, booking_status.PENDING],
   [booking_status.CONFIRMED]: [booking_status.PENDING, booking_status.IN_PROGRESS],
   [booking_status.PENDING]: [booking_status.IN_PROGRESS],
   [booking_status.IN_PROGRESS]: [booking_status.PENDING, booking_status.COMPLETED, booking_status.CANCELLED],
