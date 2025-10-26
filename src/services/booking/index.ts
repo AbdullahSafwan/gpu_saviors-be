@@ -123,7 +123,7 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
       }
       // validating status transition, status can only be changed against allowed records
       if (data.status && !validateStatusTransition(record.status, data.status)) {
-        throw new Error("Invalid status transition. Allowed workflow: DRAFT -> CONFIRMED -> IN_PROGRESS -> COMPLETED / CANCELLED. You can move backward to any previous status or use CANCELLED/EXPIRED at any time.");
+        throw new Error("Invalid status transition. Allowed workflow: DRAFT -> CONFIRMED -> IN_PROGRESS -> RESOLVED -> COMPLETED / CANCELLED. You can move backward to any previous status or use CANCELLED/EXPIRED at any time.");
       }
       const { booking_items, contact_log, delivery, booking_payments, ...otherData } = data;
 
