@@ -120,7 +120,6 @@ model booking_item {
   createdAt      DateTime            @default(now())
   modifiedAt     DateTime            @default(now()) @updatedAt
   isActive       Boolean             @default(true)
-  isRepaired     Boolean             @default(false)
   createdBy      Int
   modifiedBy     Int
   bookingId      Int
@@ -299,11 +298,10 @@ enum booking_status {
 
 enum booking_item_status {
   DRAFT
-  IN_REVIEW
-  IN_QUEUE
+  PENDING
   IN_PROGRESS
-  COMPLETED
-  IN_RESOLUTION
+  REPAIRED
+  NOT_REPAIRED
 }
 
 enum booking_item_resolution_status {
