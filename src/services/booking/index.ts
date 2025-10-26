@@ -171,10 +171,35 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
         calculatedPayableAmount = totalPayableAmount;
       }
 
+      // calculate paid amount if booking payments were marked as PAID
+      let totalPaidAmount: number | undefined;
+      if (booking_payments && booking_payments.length > 0) {
+        const existingPayments = record.booking_payments;
+
+        // Create a map of updated amounts for payments marked as PAID
+        const updatedPaidAmountsMap = new Map(
+          paymentsToUpdate
+            .filter(item => item.status === 'PAID' && item.paidAmount !== undefined)
+            .map(item => [item.id, item.paidAmount!])
+        );
+        // Calculate total paid amount from existing payments (with updates applied)
+        let paidAmount = existingPayments.reduce((total, item) => {
+          const updatedAmount = updatedPaidAmountsMap.get(item.id);
+          return total + (updatedAmount !== undefined ? updatedAmount : (item.status === 'PAID' ? (item.paidAmount ?? 0) : 0));
+        }, 0);
+
+        paidAmount += paymentsToCreate.reduce(
+          (total, item) => total + ((item.status === 'PAID' ? item.paidAmount : 0)?? 0),
+          0
+        );
+      totalPaidAmount = paidAmount;
+      }
+
       const updateData: Prisma.bookingUpdateInput = {
         ...otherData,
         modifiedByUser: { connect: { id: modifiedBy } },
         ...(calculatedPayableAmount !== undefined && { payableAmount: calculatedPayableAmount }),
+        ...(totalPaidAmount !== undefined && { paidAmount: totalPaidAmount }),
         ...(booking_items && {
           booking_items: {
             updateMany: itemsToUpdate.map(({ id, ...data }) => ({

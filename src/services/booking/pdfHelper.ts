@@ -69,12 +69,18 @@ const generateFooter = async (doc: PDFKit.PDFDocument): Promise<void> => {
       .fillColor("#000")
       .text("Warranty Terms & Conditions", 50, termsY);
 
-    doc
-      .fontSize(8)
-      .font("Helvetica")
-      .fillColor("#666")
-      .text(warrantyTerms, 50, termsY + 15, { width: 495, align: "justify" })
-      .fillColor("#000");
+    // Split warranty terms by line breaks and render with proper spacing
+    const warrantyLines = warrantyTerms.split('\\n');
+    let currentY = termsY + 15;
+
+    doc.fontSize(8).font("Helvetica").fillColor("#666");
+
+    warrantyLines.forEach((line, index) => {
+      doc.text(line.trim(), 50, currentY, { width: 495, align: "justify" });
+      currentY = doc.y + (index < warrantyLines.length - 1 ? 5 : 0); // Add spacing between paragraphs
+    });
+
+    doc.fillColor("#000");
   }
 
   // Footer - Clean and minimal
