@@ -142,28 +142,31 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
       const logoPath = path.join(process.cwd(), "public/assets/logos/logo.png");
       const hasLogo = fs.existsSync(logoPath);
 
+      // Header with dark background for better logo visibility
+      // Add dark background spanning the full header width
+      doc.rect(50, 40, 495, 50).fillAndStroke("#4A4A4A", "#333333");
+
       // Simple header - Stripe style
       if (hasLogo) {
-        doc.image(logoPath, 50, 45, { width: 60 });
+        doc.image(logoPath, 54, 50, { width: 60 });
       }
 
       doc
         .fontSize(20)
         .font("Helvetica-Bold")
-        .fillColor("#000")
-        .text("GPU SAVIORS", hasLogo ? 125 : 50, 50, { align: hasLogo ? "left" : "center" })
+        .fillColor("#FFFFFF")
+        .text("GPU SAVIORS", hasLogo ? 125 : 50, 53, { align: hasLogo ? "left" : "center" })
         .fontSize(9)
         .font("Helvetica")
-        .fillColor("#666")
-        .text("Professional GPU Repair Services", hasLogo ? 125 : 50, 72, { align: hasLogo ? "left" : "center" });
+        .fillColor("#CCCCCC")
+        .text("Professional GPU Repair Services", hasLogo ? 125 : 50, 74, { align: hasLogo ? "left" : "center" });
 
       // Receipt label on the right
       doc
         .fontSize(14)
         .font("Helvetica")
-        .fillColor("#000")
-        .text("Receipt", 450, 55, { width: 95, align: "right" })
-        .fillColor("#000");
+        .fillColor("#FFFFFF")
+        .text("Receipt", 450, 55, { width: 90, align: "right" })
 
       // Thin separator line
       doc.moveDown(1.5);
@@ -395,28 +398,31 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
       const logoPath = path.join(process.cwd(), "public/assets/logos/logo.png");
       const hasLogo = fs.existsSync(logoPath);
 
+      // Header with dark background for better logo visibility
+      // Add dark background spanning the full header width
+      doc.rect(50, 40, 495, 50).fillAndStroke("#4A4A4A", "#333333");
+
       // Simple header - Stripe style
       if (hasLogo) {
-        doc.image(logoPath, 50, 45, { width: 60 });
+        doc.image(logoPath, 54, 45, { width: 60 });
       }
 
       doc
         .fontSize(20)
         .font("Helvetica-Bold")
-        .fillColor("#000")
-        .text("GPU SAVIORS", hasLogo ? 125 : 50, 50, { align: hasLogo ? "left" : "center" })
+        .fillColor("#FFFFFF")
+        .text("GPU SAVIORS", hasLogo ? 125 : 50, 53, { align: hasLogo ? "left" : "center" })
         .fontSize(9)
         .font("Helvetica")
-        .fillColor("#666")
-        .text("Professional GPU Repair Services", hasLogo ? 125 : 50, 72, { align: hasLogo ? "left" : "center" });
+        .fillColor("#CCCCCC")
+        .text("Professional GPU Repair Services", hasLogo ? 125 : 50, 74, { align: hasLogo ? "left" : "center" });
 
       // Invoice label on the right
       doc
         .fontSize(14)
         .font("Helvetica")
-        .fillColor("#000")
-        .text("Invoice", 450, 55, { width: 95, align: "right" })
-        .fillColor("#000");
+        .fillColor("#FFFFFF")
+        .text("Invoice", 450, 55, { width: 90, align: "right" })
 
       // Thin separator line
       doc.moveDown(1.5);
