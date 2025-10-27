@@ -179,6 +179,9 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
         );
 
         calculatedPayableAmount = totalPayableAmount;
+      } else {
+        // If no booking items changes, use existing payableAmount for payment status calculation
+        calculatedPayableAmount = record.payableAmount ?? undefined;
       }
 
       // calculate paid amount if booking payments were marked as PAID
@@ -202,24 +205,20 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
           (total, item) => total + ((item.status === 'PAID' ? item.paidAmount : 0)?? 0),
           0
         );
-      totalPaidAmount = paidAmount;
+        totalPaidAmount = paidAmount;
+      } else {
+        // If no booking payment changes, use existing paidAmount for payment status calculation
+        totalPaidAmount = record.paidAmount ?? undefined;
       }
 
       let bookingPaymentStatus : booking_payment_status | undefined;
       if (totalPaidAmount !== undefined && calculatedPayableAmount !== undefined) {
-        switch (totalPaidAmount) {
-          case 0:
-            bookingPaymentStatus = booking_payment_status.PENDING;
-            break;
-          case calculatedPayableAmount:
-            bookingPaymentStatus = booking_payment_status.PAID;
-            break;
-          default:
-            if (totalPaidAmount > calculatedPayableAmount) {
-              bookingPaymentStatus = booking_payment_status.REFUNDED;
-            } else {
-              bookingPaymentStatus = booking_payment_status.PARTIAL_PAID;
-            }
+        if (totalPaidAmount === 0) {
+          bookingPaymentStatus = booking_payment_status.PENDING;
+        } else if (totalPaidAmount >= calculatedPayableAmount) {
+          bookingPaymentStatus = booking_payment_status.PAID;
+        } else if (totalPaidAmount > 0 && totalPaidAmount < calculatedPayableAmount) {
+          bookingPaymentStatus = booking_payment_status.PARTIAL_PAID;
         }
       }
 
