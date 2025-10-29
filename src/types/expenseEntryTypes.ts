@@ -1,11 +1,11 @@
-import { expense_category, ledger_payment_method } from "@prisma/client";
+import { expense_category, expense_payment_method } from "@prisma/client";
 
-export interface CreateLedgerEntryRequest {
+export interface CreateExpenseEntryRequest {
   entryDate: string;
   locationId: number;
   category: expense_category;
   amount: number;
-  paymentMethod: ledger_payment_method;
+  paymentMethod: expense_payment_method;
   description: string;
   remarks?: string;
   receiptNumber?: string;
@@ -13,19 +13,19 @@ export interface CreateLedgerEntryRequest {
   vendorName?: string;
 }
 
-export interface UpdateLedgerEntryRequest {
+export interface UpdateExpenseEntryRequest {
   entryDate?: string;
   locationId?: number;
   category?: expense_category;
   amount?: number;
-  paymentMethod?: ledger_payment_method;
+  paymentMethod?: expense_payment_method;
   description?: string;
   remarks?: string;
   receiptNumber?: string;
   vendorName?: string;
 }
 
-export interface ListLedgerEntriesRequest {
+export interface ListExpenseEntriesRequest {
   page?: string;
   pageSize?: string;
   locationId?: string;

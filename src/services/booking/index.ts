@@ -1,4 +1,4 @@
-import { booking_status, Prisma, booking_item_status } from "@prisma/client";
+import { booking_status, Prisma, booking_item_status, booking_payment_status } from "@prisma/client";
 import { CreateBookingItem, CreateBookingRequest, UpdateBookingItem, UpdateBookingRequest, CreateBookingPayment, UpdateBookingPayment } from "../../types/bookingTypes";
 import { CreateContactLogRequest, UpdateContactLogRequest } from "../../types/contactLogTypes";
 import { CreateDeliveryRequest, UpdateDeliveryRequest } from "../../types/deliveryTypes";
@@ -179,6 +179,9 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
         );
 
         calculatedPayableAmount = totalPayableAmount;
+      } else {
+        // If no booking items changes, use existing payableAmount for payment status calculation
+        calculatedPayableAmount = record.payableAmount ?? undefined;
       }
 
       // calculate paid amount if booking payments were marked as PAID
@@ -202,7 +205,21 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
           (total, item) => total + ((item.status === 'PAID' ? item.paidAmount : 0)?? 0),
           0
         );
-      totalPaidAmount = paidAmount;
+        totalPaidAmount = paidAmount;
+      } else {
+        // If no booking payment changes, use existing paidAmount for payment status calculation
+        totalPaidAmount = record.paidAmount ?? undefined;
+      }
+
+      let bookingPaymentStatus : booking_payment_status | undefined;
+      if (totalPaidAmount !== undefined && calculatedPayableAmount !== undefined) {
+        if (totalPaidAmount === 0) {
+          bookingPaymentStatus = booking_payment_status.PENDING;
+        } else if (totalPaidAmount >= calculatedPayableAmount) {
+          bookingPaymentStatus = booking_payment_status.PAID;
+        } else if (totalPaidAmount > 0 && totalPaidAmount < calculatedPayableAmount) {
+          bookingPaymentStatus = booking_payment_status.PARTIAL_PAID;
+        }
       }
 
       const updateData: Prisma.bookingUpdateInput = {
@@ -210,6 +227,7 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
         modifiedByUser: { connect: { id: modifiedBy } },
         ...(calculatedPayableAmount !== undefined && { payableAmount: calculatedPayableAmount }),
         ...(totalPaidAmount !== undefined && { paidAmount: totalPaidAmount }),
+        ...(bookingPaymentStatus !== undefined && { paymentStatus: bookingPaymentStatus }),
         ...(booking_items && {
           booking_items: {
             updateMany: itemsToUpdate.map(({ id, ...data }) => ({

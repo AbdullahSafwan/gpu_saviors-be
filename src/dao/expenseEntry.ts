@@ -1,9 +1,9 @@
 import { Prisma, PrismaClient, expense_category } from "@prisma/client";
 import { debugLog } from "../services/helper";
 
-const createLedgerEntry = async (prisma: PrismaClient, data: Prisma.ledger_entryCreateInput) => {
+const createExpenseEntry = async (prisma: PrismaClient, data: Prisma.expense_entryCreateInput) => {
   try {
-    const result = await prisma.ledger_entry.create({
+    const result = await prisma.expense_entry.create({
       data,
       include: {
         location: {
@@ -29,9 +29,9 @@ const createLedgerEntry = async (prisma: PrismaClient, data: Prisma.ledger_entry
   }
 };
 
-const getLedgerEntry = async (prisma: PrismaClient, id: number) => {
+const getExpenseEntry = async (prisma: PrismaClient, id: number) => {
   try {
-    const result = await prisma.ledger_entry.findUnique({
+    const result = await prisma.expense_entry.findUnique({
       where: { id },
       include: {
         location: {
@@ -65,7 +65,7 @@ const getLedgerEntry = async (prisma: PrismaClient, id: number) => {
   }
 };
 
-const listLedgerEntries = async (
+const listExpenseEntries = async (
   prisma: PrismaClient,
   page: number,
   pageSize: number,
@@ -80,7 +80,7 @@ const listLedgerEntries = async (
   orderBy: "asc" | "desc" = "desc"
 ) => {
   try {
-    const where: Prisma.ledger_entryWhereInput = {
+    const where: Prisma.expense_entryWhereInput = {
       isActive: true,
       ...(filters.locationId && { locationId: filters.locationId }),
       ...(filters.category && { category: filters.category }),
@@ -101,7 +101,7 @@ const listLedgerEntries = async (
     };
 
     const [entries, totalEntries, totalAmount] = await Promise.all([
-      prisma.ledger_entry.findMany({
+      prisma.expense_entry.findMany({
         where,
         skip: (page - 1) * pageSize,
         take: pageSize,
@@ -123,8 +123,8 @@ const listLedgerEntries = async (
           },
         },
       }),
-      prisma.ledger_entry.count({ where }),
-      prisma.ledger_entry.aggregate({
+      prisma.expense_entry.count({ where }),
+      prisma.expense_entry.aggregate({
         where,
         _sum: {
           amount: true,
@@ -146,9 +146,9 @@ const listLedgerEntries = async (
   }
 };
 
-const updateLedgerEntry = async (prisma: PrismaClient, id: number, data: Prisma.ledger_entryUpdateInput) => {
+const updateExpenseEntry = async (prisma: PrismaClient, id: number, data: Prisma.expense_entryUpdateInput) => {
   try {
-    const result = await prisma.ledger_entry.update({
+    const result = await prisma.expense_entry.update({
       where: { id },
       data,
       include: {
@@ -168,9 +168,9 @@ const updateLedgerEntry = async (prisma: PrismaClient, id: number, data: Prisma.
   }
 };
 
-const deleteLedgerEntry = async (prisma: PrismaClient, id: number) => {
+const deleteExpenseEntry = async (prisma: PrismaClient, id: number) => {
   try {
-    const result = await prisma.ledger_entry.update({
+    const result = await prisma.expense_entry.update({
       where: { id },
       data: { isActive: false },
     });
@@ -189,7 +189,7 @@ const getDailySummary = async (prisma: PrismaClient, date: Date, locationId?: nu
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
 
-    const where: Prisma.ledger_entryWhereInput = {
+    const where: Prisma.expense_entryWhereInput = {
       entryDate: {
         gte: startOfDay,
         lte: endOfDay,
@@ -199,14 +199,14 @@ const getDailySummary = async (prisma: PrismaClient, date: Date, locationId?: nu
     };
 
     const [totalAmount, entriesCount, byLocation] = await Promise.all([
-      prisma.ledger_entry.aggregate({
+      prisma.expense_entry.aggregate({
         where,
         _sum: {
           amount: true,
         },
       }),
-      prisma.ledger_entry.count({ where }),
-      prisma.ledger_entry.groupBy({
+      prisma.expense_entry.count({ where }),
+      prisma.expense_entry.groupBy({
         by: ["locationId"],
         where,
         _sum: {
@@ -256,7 +256,7 @@ const generateReport = async (
   }
 ) => {
   try {
-    const where: Prisma.ledger_entryWhereInput = {
+      const where: Prisma.expense_entryWhereInput = {
       entryDate: {
         gte: startDate,
         lte: endDate,
@@ -267,13 +267,13 @@ const generateReport = async (
     };
 
     const [totalAmount, totalEntries] = await Promise.all([
-      prisma.ledger_entry.aggregate({
+      prisma.expense_entry.aggregate({
         where,
         _sum: {
           amount: true,
         },
       }),
-      prisma.ledger_entry.count({ where }),
+      prisma.expense_entry.count({ where }),
     ]);
 
     interface BreakdownItem {
@@ -286,7 +286,7 @@ const generateReport = async (
     let breakdown: BreakdownItem[] = [];
 
     if (filters.groupBy === "category") {
-      const categoryBreakdown = await prisma.ledger_entry.groupBy({
+      const categoryBreakdown = await prisma.expense_entry.groupBy({
         by: ["category"],
         where,
         _sum: {
@@ -302,7 +302,7 @@ const generateReport = async (
         percentage: totalAmount._sum.amount ? ((item._sum.amount || 0) / totalAmount._sum.amount) * 100 : 0,
       }));
     } else if (filters.groupBy === "location") {
-      const locationBreakdown = await prisma.ledger_entry.groupBy({
+      const locationBreakdown = await prisma.expense_entry.groupBy({
         by: ["locationId"],
         where,
         _sum: {
@@ -328,7 +328,7 @@ const generateReport = async (
         };
       });
     } else if (filters.groupBy === "paymentMethod") {
-      const paymentMethodBreakdown = await prisma.ledger_entry.groupBy({
+      const paymentMethodBreakdown = await prisma.expense_entry.groupBy({
         by: ["paymentMethod"],
         where,
         _sum: {
@@ -374,12 +374,12 @@ const generateReport = async (
   }
 };
 
-export const ledgerEntryDao = {
-  createLedgerEntry,
-  getLedgerEntry,
-  listLedgerEntries,
-  updateLedgerEntry,
-  deleteLedgerEntry,
+export const expenseEntryDao = {
+  createExpenseEntry,
+  getExpenseEntry,
+  listExpenseEntries,
+  updateExpenseEntry,
+  deleteExpenseEntry,
   getDailySummary,
   generateReport,
 };
