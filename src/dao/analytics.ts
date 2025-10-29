@@ -1,10 +1,6 @@
 import { PrismaClient, booking_status } from "@prisma/client";
 import { debugLog } from "../services/helper";
 
-// ============================================
-// VIEW QUERIES (Type-safe, reusable)
-// ============================================
-
 /**
  * Query customer_first_booking view
  * Returns aggregated customer statistics

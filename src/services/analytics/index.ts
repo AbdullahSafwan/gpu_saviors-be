@@ -247,9 +247,7 @@ const getFinancialSummary = async (request: DashboardRequest): Promise<Financial
   }
 };
 
-// ============================================
-// HELPER FUNCTIONS
-// ============================================
+// helper functions
 
 /**
  * Calculate revenue metrics
