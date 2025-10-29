@@ -17,9 +17,11 @@ import { verifyToken } from "./middleware/auth";
 import { authValidator } from "./middleware/validator/authValidator";
 import { warrantyClaimController } from "./controllers/warrantyClaim";
 import { warrantyClaimValidator } from "./middleware/validator/warrantyClaimValidator";
-import { ledgerEntryController } from "./controllers/ledgerEntry";
-import { ledgerEntryValidator } from "./middleware/validator/ledgerEntryValidator";
+import { expenseEntryController } from "./controllers/expenseEntry";
+import { expenseEntryValidator } from "./middleware/validator/expenseEntryValidator";
 import { locationController } from "./controllers/location";
+import { analyticsController } from "./controllers/analytics";
+import { analyticsValidator } from "./middleware/validator/analyticsValidator";
 
 const router = express.Router();
 
@@ -66,15 +68,23 @@ router.get("/warrantyClaim/", verifyToken, warrantyClaimValidator.listWarrantyCl
 router.get("/warrantyClaim/:id", verifyToken, warrantyClaimValidator.getWarrantyClaimByIdValidator, throwValidationResult, warrantyClaimController.getWarrantyClaimById);
 router.get("/warrantyClaim/claim/:claimNumber", verifyToken, warrantyClaimValidator.getWarrantyClaimByClaimNumberValidator, throwValidationResult, warrantyClaimController.getWarrantyClaimByClaimNumber);
 
-router.post("/ledger-entry/", verifyToken, ledgerEntryValidator.createLedgerEntryValidator, throwValidationResult, ledgerEntryController.createLedgerEntry);
-router.get("/ledger-entry/", verifyToken, ledgerEntryValidator.listLedgerEntriesValidator, throwValidationResult, ledgerEntryController.listLedgerEntries);
-router.get("/ledger-entry/report", verifyToken, ledgerEntryValidator.generateReportValidator, throwValidationResult, ledgerEntryController.generateReport);
-router.get("/ledger-entry/daily-summary", verifyToken, ledgerEntryValidator.dailySummaryValidator, throwValidationResult, ledgerEntryController.getDailySummary);
-router.get("/ledger-entry/monthly-summary", verifyToken, ledgerEntryValidator.monthlySummaryValidator, throwValidationResult, ledgerEntryController.getMonthlySummary);
-router.get("/ledger-entry/:id", verifyToken, ledgerEntryController.getLedgerEntryDetails);
-router.patch("/ledger-entry/:id", verifyToken, ledgerEntryValidator.updateLedgerEntryValidator, throwValidationResult, ledgerEntryController.updateLedgerEntry);
-router.delete("/ledger-entry/:id", verifyToken, ledgerEntryController.deleteLedgerEntry);
+router.post("/expense-entry/", verifyToken, expenseEntryValidator.createExpenseEntryValidator, throwValidationResult, expenseEntryController.createExpenseEntry);
+router.get("/expense-entry/", verifyToken, expenseEntryValidator.listExpenseEntriesValidator, throwValidationResult, expenseEntryController.listExpenseEntries);
+router.get("/expense-entry/report", verifyToken, expenseEntryValidator.generateReportValidator, throwValidationResult, expenseEntryController.generateReport);
+router.get("/expense-entry/daily-summary", verifyToken, expenseEntryValidator.dailySummaryValidator, throwValidationResult, expenseEntryController.getDailySummary);
+router.get("/expense-entry/monthly-summary", verifyToken, expenseEntryValidator.monthlySummaryValidator, throwValidationResult, expenseEntryController.getMonthlySummary);
+router.get("/expense-entry/:id", verifyToken, expenseEntryController.getExpenseEntryDetails);
+router.patch("/expense-entry/:id", verifyToken, expenseEntryValidator.updateExpenseEntryValidator, throwValidationResult, expenseEntryController.updateExpenseEntry);
+router.delete("/expense-entry/:id", verifyToken, expenseEntryController.deleteExpenseEntry);
 
 
 router.get("/locations", verifyToken, locationController.fetchActiveLocations);
+
+router.get("/analytics/dashboard", verifyToken, analyticsValidator.dashboardValidator, throwValidationResult, analyticsController.getDashboard);
+router.get("/analytics/revenue", verifyToken, analyticsValidator.revenueAnalyticsValidator, throwValidationResult, analyticsController.getRevenueAnalytics);
+router.get("/analytics/customers", verifyToken, analyticsValidator.customerAnalyticsValidator, throwValidationResult, analyticsController.getCustomerAnalytics);
+router.get("/analytics/repairs", verifyToken, analyticsValidator.repairAnalyticsValidator, throwValidationResult, analyticsController.getRepairAnalytics);
+router.get("/analytics/warranties", verifyToken, analyticsValidator.warrantyAnalyticsValidator, throwValidationResult, analyticsController.getWarrantyAnalytics);
+router.get("/analytics/financial-summary", verifyToken, analyticsValidator.financialSummaryValidator, throwValidationResult, analyticsController.getFinancialSummary);
+
 export default router;

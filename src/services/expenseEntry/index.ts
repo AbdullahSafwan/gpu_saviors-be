@@ -1,17 +1,17 @@
 import { expense_category } from "@prisma/client";
-import { ledgerEntryDao } from "../../dao/ledgerEntry";
+import { expenseEntryDao } from "../../dao/expenseEntry";
 import { locationDao } from "../../dao/location";
 import prisma from "../../prisma";
 import { debugLog } from "../helper";
 import {
-  CreateLedgerEntryRequest,
-  UpdateLedgerEntryRequest,
+  CreateExpenseEntryRequest,
+  UpdateExpenseEntryRequest,
   GenerateReportRequest,
   DailySummaryRequest,
   MonthlySummaryRequest,
-} from "../../types/ledgerEntryTypes";
+} from "../../types/expenseEntryTypes";
 
-const createLedgerEntry = async (data: CreateLedgerEntryRequest, userId: number) => {
+const createExpenseEntry = async (data: CreateExpenseEntryRequest, userId: number) => {
   try {
     // Validate location exists and is active
     const location = await locationDao.getLocation(prisma, data.locationId);
@@ -22,8 +22,8 @@ const createLedgerEntry = async (data: CreateLedgerEntryRequest, userId: number)
       throw new Error(`Location with id ${data.locationId} is not active`);
     }
 
-    // Create ledger entry (direct entry without approval workflow)
-    const entry = await ledgerEntryDao.createLedgerEntry(prisma, {
+    // Create expense entry (direct entry without approval workflow)
+    const entry = await expenseEntryDao.createExpenseEntry(prisma, {
       entryDate: new Date(data.entryDate),
       location: {
         connect: { id: data.locationId },
@@ -51,11 +51,11 @@ const createLedgerEntry = async (data: CreateLedgerEntryRequest, userId: number)
   }
 };
 
-const getLedgerEntry = async (id: number) => {
+const getExpenseEntry = async (id: number) => {
   try {
-    const entry = await ledgerEntryDao.getLedgerEntry(prisma, id);
+    const entry = await expenseEntryDao.getExpenseEntry(prisma, id);
     if (!entry) {
-      throw new Error(`Ledger entry with id ${id} not found`);
+      throw new Error(`Expense entry with id ${id} not found`);
     }
     return entry;
   } catch (error) {
@@ -64,7 +64,7 @@ const getLedgerEntry = async (id: number) => {
   }
 };
 
-const listLedgerEntries = async (
+const listExpenseEntries = async (
   page: number,
   pageSize: number,
   filters: {
@@ -78,19 +78,19 @@ const listLedgerEntries = async (
   orderBy: "asc" | "desc" = "desc"
 ) => {
   try {
-    return await ledgerEntryDao.listLedgerEntries(prisma, page, pageSize, filters, sortBy, orderBy);
+    return await expenseEntryDao.listExpenseEntries(prisma, page, pageSize, filters, sortBy, orderBy);
   } catch (error) {
     debugLog(error);
     throw error;
   }
 };
 
-const updateLedgerEntry = async (id: number, data: UpdateLedgerEntryRequest, userId: number) => {
+const updateExpenseEntry = async (id: number, data: UpdateExpenseEntryRequest, userId: number) => {
   try {
     // Get existing entry
-    const existingEntry = await ledgerEntryDao.getLedgerEntry(prisma, id);
+    const existingEntry = await expenseEntryDao.getExpenseEntry(prisma, id);
     if (!existingEntry) {
-      throw new Error(`Ledger entry with id ${id} not found`);
+      throw new Error(`Expense entry with id ${id} not found`);
     }
 
     // Validate location if provided
@@ -123,7 +123,7 @@ const updateLedgerEntry = async (id: number, data: UpdateLedgerEntryRequest, use
       },
     };
 
-    const entry = await ledgerEntryDao.updateLedgerEntry(prisma, id, updateData);
+    const entry = await expenseEntryDao.updateExpenseEntry(prisma, id, updateData);
     return entry;
   } catch (error) {
     debugLog(error);
@@ -131,15 +131,15 @@ const updateLedgerEntry = async (id: number, data: UpdateLedgerEntryRequest, use
   }
 };
 
-const deleteLedgerEntry = async (id: number) => {
+const deleteExpenseEntry = async (id: number) => {
   try {
-    const existingEntry = await ledgerEntryDao.getLedgerEntry(prisma, id);
+    const existingEntry = await expenseEntryDao.getExpenseEntry(prisma, id);
     if (!existingEntry) {
-      throw new Error(`Ledger entry with id ${id} not found`);
+      throw new Error(`Expense entry with id ${id} not found`);
     }
 
     // Soft delete
-    return await ledgerEntryDao.deleteLedgerEntry(prisma, id);
+    return await expenseEntryDao.deleteExpenseEntry(prisma, id);
   } catch (error) {
     debugLog(error);
     throw error;
@@ -150,7 +150,7 @@ const getDailySummary = async (data: DailySummaryRequest) => {
   try {
     const date = new Date(data.date);
     const locationId = data.locationId ? parseInt(data.locationId) : undefined;
-    return await ledgerEntryDao.getDailySummary(prisma, date, locationId);
+    return await expenseEntryDao.getDailySummary(prisma, date, locationId);
   } catch (error) {
     debugLog(error);
     throw error;
@@ -168,7 +168,7 @@ const getMonthlySummary = async (data: MonthlySummaryRequest) => {
 
     const locationId = data.locationId ? parseInt(data.locationId) : undefined;
 
-    return await ledgerEntryDao.generateReport(prisma, startDate, endDate, {
+    return await expenseEntryDao.generateReport(prisma, startDate, endDate, {
       locationId,
       groupBy: "category",
     });
@@ -195,19 +195,19 @@ const generateReport = async (data: GenerateReportRequest) => {
       filters.category = data.category;
     }
 
-    return await ledgerEntryDao.generateReport(prisma, startDate, endDate, filters);
+    return await expenseEntryDao.generateReport(prisma, startDate, endDate, filters);
   } catch (error) {
     debugLog(error);
     throw error;
   }
 };
 
-export const ledgerEntryService = {
-  createLedgerEntry,
-  getLedgerEntry,
-  listLedgerEntries,
-  updateLedgerEntry,
-  deleteLedgerEntry,
+export const expenseEntryService = {
+  createExpenseEntry,
+  getExpenseEntry,
+  listExpenseEntries,
+  updateExpenseEntry,
+  deleteExpenseEntry,
   getDailySummary,
   getMonthlySummary,
   generateReport,
