@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
 }
 
 datasource db {
@@ -456,4 +457,42 @@ enum expense_payment_method {
   CHEQUE
   CREDIT_CARD
   DEBIT_CARD
+}
+
+/// aggregates booking data by customer (booking phone number)
+view customer_first_booking {
+  phoneNumber      String   @unique
+  firstBookingDate DateTime
+  totalBookings    Int
+  totalRevenue     Int
+  totalPaid        Int
+}
+
+/// breaks down revenue by payment status
+view revenue_by_payment_status {
+  paymentStatus  String @unique
+  bookingCount   Int
+  totalRevenue   Int
+  totalCollected Int
+  outstanding    Int
+}
+
+/// aggregates repair success rates by item type
+view repair_stats_by_type {
+  type          String   @unique
+  totalItems    Int
+  repaired      Int
+  notRepaired   Int
+  successRate   Decimal?
+  avgRepairDays Decimal?
+}
+
+/// View: Daily Revenue Summary
+/// Aggregates revenue by date for trend analysis
+view daily_revenue_summary {
+  date        DateTime @unique
+  bookings    Int
+  revenue     Int
+  collected   Int
+  outstanding Int
 }
