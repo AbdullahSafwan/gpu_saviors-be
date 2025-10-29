@@ -128,5 +128,5 @@ jobs:
       - name: Health Check
         run: |
           sleep 25
-          curl -f http://${{ secrets.VPS_IP }}:8080/health || exit 1
+          curl -f https://api.gpusaviors.com/health || exit 1
           echo "Health Check Passed!"
