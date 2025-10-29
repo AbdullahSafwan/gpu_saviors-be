@@ -16,6 +16,7 @@ interface BookingData {
   createdAt: Date;
   status: string;
   clientType: string;
+  paymentStatus: string;
   booking_items: Array<{
     name: string;
     type: string;
@@ -226,6 +227,18 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
         .fillColor("#000")
         .font("Helvetica")
         .text(bookingData.status, 300, infoY + 12);
+
+      doc.moveDown(2);
+
+      // Payment Status row
+      const paymentStatusY = doc.y;
+      doc
+        .fontSize(9)
+        .fillColor("#666")
+        .text("Payment Status", 50, paymentStatusY)
+        .fillColor("#000")
+        .font("Helvetica")
+        .text(bookingData.paymentStatus, 50, paymentStatusY + 12);
 
       doc.moveDown(2);
 
@@ -490,6 +503,18 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
         .fillColor("#000")
         .font("Helvetica")
         .text(bookingData.status, 350, infoY + 12);
+
+      doc.moveDown(2);
+
+      // Payment Status row
+      const paymentStatusY = doc.y;
+      doc
+        .fontSize(9)
+        .fillColor("#666")
+        .text("Payment Status", 50, paymentStatusY)
+        .fillColor("#000")
+        .font("Helvetica")
+        .text(bookingData.paymentStatus, 50, paymentStatusY + 12);
 
       doc.moveDown(2);
 

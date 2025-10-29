@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
 }
 
 datasource db {
@@ -40,8 +41,8 @@ model user {
   modified_warranty_claims  warranty_claim[]          @relation("WarrantyClaimModifiedBy")
   created_locations         location[]                @relation("LocationCreatedBy")
   modified_locations        location[]                @relation("LocationModifiedBy")
-  created_ledger_entries    ledger_entry[]            @relation("LedgerEntryCreatedBy")
-  modified_ledger_entries   ledger_entry[]            @relation("LedgerEntryModifiedBy")
+  created_expense_entries   expense_entry[]           @relation("ExpenseEntryCreatedBy")
+  modified_expense_entries  expense_entry[]           @relation("ExpenseEntryModifiedBy")
 }
 
 model user_session {
@@ -78,32 +79,33 @@ model system_configuration {
 }
 
 model booking {
-  id                    Int               @unique @default(autoincrement())
+  id                    Int                    @unique @default(autoincrement())
   clientName            String
   phoneNumber           String
   whatsappNumber        String
-  status                booking_status    @default(DRAFT)
-  code                  String?           @unique
+  status                booking_status         @default(DRAFT)
+  paymentStatus         booking_payment_status @default(PENDING)
+  code                  String?                @unique
   payableAmount         Int?
   paidAmount            Int?
-  createdAt             DateTime          @default(now())
-  modifiedAt            DateTime          @default(now()) @updatedAt
-  isActive              Boolean           @default(true)
-  isWarrantyClaim       Boolean           @default(false)
+  createdAt             DateTime               @default(now())
+  modifiedAt            DateTime               @default(now()) @updatedAt
+  isActive              Boolean                @default(true)
+  isWarrantyClaim       Boolean                @default(false)
   appointmentDate       DateTime?
   createdBy             Int
   modifiedBy            Int
-  clientType            client_type       @default(INDIVIDUAL)
+  clientType            client_type            @default(INDIVIDUAL)
   referralSource        ReferralSource?
-  referralSourceNotes   String?           @db.VarChar(500)
+  referralSourceNotes   String?                @db.VarChar(500)
   booking_items         booking_item[]
   delivery              delivery[]
   contact_log           contact_log[]
   booking_payments      booking_payment[]
-  warrantyClaims        warranty_claim[]  @relation("WarrantyClaimBooking")
-  originalBookingClaims warranty_claim[]  @relation("OriginalBookingClaims")
-  createdByUser         user              @relation("BookingCreatedBy", fields: [createdBy], references: [id])
-  modifiedByUser        user              @relation("BookingModifiedBy", fields: [modifiedBy], references: [id])
+  warrantyClaims        warranty_claim[]       @relation("WarrantyClaimBooking")
+  originalBookingClaims warranty_claim[]       @relation("OriginalBookingClaims")
+  createdByUser         user                   @relation("BookingCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser        user                   @relation("BookingModifiedBy", fields: [modifiedBy], references: [id])
 }
 
 model booking_item {
@@ -256,6 +258,14 @@ enum payment_status {
   PAID
 }
 
+enum booking_payment_status {
+  PENDING
+  PARTIAL_PAID
+  PAID
+  REFUNDED
+  PARTIAL_REFUND
+}
+
 enum contact_method {
   SMS
   CALL
@@ -385,45 +395,47 @@ model warranty_claim_item {
 }
 
 model location {
-  id             Int            @unique @default(autoincrement())
-  name           String
-  code           String         @unique
-  country        String
-  address        String?
-  city           String?
-  postalCode     String?
-  phoneNumber    String?
-  managerName    String?
-  isActive       Boolean        @default(true)
-  createdAt      DateTime       @default(now())
-  modifiedAt     DateTime       @default(now()) @updatedAt
-  createdBy      Int
-  modifiedBy     Int
-  createdByUser  user           @relation("LocationCreatedBy", fields: [createdBy], references: [id])
-  modifiedByUser user           @relation("LocationModifiedBy", fields: [modifiedBy], references: [id])
-  ledger_entries ledger_entry[]
+  id              Int             @unique @default(autoincrement())
+  name            String
+  code            String          @unique
+  country         String
+  address         String?
+  city            String?
+  postalCode      String?
+  phoneNumber     String?
+  managerName     String?
+  isActive        Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+  modifiedAt      DateTime        @default(now()) @updatedAt
+  createdBy       Int
+  modifiedBy      Int
+  createdByUser   user            @relation("LocationCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser  user            @relation("LocationModifiedBy", fields: [modifiedBy], references: [id])
+  expense_entries expense_entry[]
 }
 
-model ledger_entry {
-  id                Int                   @unique @default(autoincrement())
+model expense_entry {
+  id                Int                    @unique @default(autoincrement())
   entryDate         DateTime
   locationId        Int
-  location          location              @relation(fields: [locationId], references: [id])
+  location          location               @relation(fields: [locationId], references: [id])
   category          expense_category
-  amount            Float
-  paymentMethod     ledger_payment_method @default(CASH)
+  amount            Int
+  paymentMethod     expense_payment_method @default(CASH)
   description       String
   remarks           String?
   receiptNumber     String?
   receiptAttachment String?
   vendorName        String?
-  isActive          Boolean               @default(true)
-  createdAt         DateTime              @default(now())
-  modifiedAt        DateTime              @default(now()) @updatedAt
+  isActive          Boolean                @default(true)
+  createdAt         DateTime               @default(now())
+  modifiedAt        DateTime               @default(now()) @updatedAt
   createdBy         Int
   modifiedBy        Int
-  createdByUser     user                  @relation("LedgerEntryCreatedBy", fields: [createdBy], references: [id])
-  modifiedByUser    user                  @relation("LedgerEntryModifiedBy", fields: [modifiedBy], references: [id])
+  createdByUser     user                   @relation("ExpenseEntryCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser    user                   @relation("ExpenseEntryModifiedBy", fields: [modifiedBy], references: [id])
+
+  @@index([entryDate, category, isActive])
 }
 
 enum expense_category {
@@ -438,11 +450,49 @@ enum expense_category {
   MISCELLANEOUS
 }
 
-enum ledger_payment_method {
+enum expense_payment_method {
   CASH
   BANK_TRANSFER
   WALLET
   CHEQUE
   CREDIT_CARD
   DEBIT_CARD
+}
+
+/// aggregates booking data by customer (booking phone number)
+view customer_first_booking {
+  phoneNumber      String   @unique
+  firstBookingDate DateTime
+  totalBookings    Int
+  totalRevenue     Int
+  totalPaid        Int
+}
+
+/// breaks down revenue by payment status
+view revenue_by_payment_status {
+  paymentStatus  String @unique
+  bookingCount   Int
+  totalRevenue   Int
+  totalCollected Int
+  outstanding    Int
+}
+
+/// aggregates repair success rates by item type
+view repair_stats_by_type {
+  type          String   @unique
+  totalItems    Int
+  repaired      Int
+  notRepaired   Int
+  successRate   Decimal?
+  avgRepairDays Decimal?
+}
+
+/// View: Daily Revenue Summary
+/// Aggregates revenue by date for trend analysis
+view daily_revenue_summary {
+  date        DateTime @unique
+  bookings    Int
+  revenue     Int
+  collected   Int
+  outstanding Int
 }

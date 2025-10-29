@@ -1,45 +1,45 @@
 import { Request, Response } from "express";
 import { debugLog } from "../services/helper";
 import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
-import { ledgerEntryService } from "../services/ledgerEntry";
+import { expenseEntryService } from "../services/expenseEntry";
 import {
-  CreateLedgerEntryRequest,
-  UpdateLedgerEntryRequest,
-  ListLedgerEntriesRequest,
+  CreateExpenseEntryRequest,
+  UpdateExpenseEntryRequest,
+  ListExpenseEntriesRequest,
   GenerateReportRequest,
   DailySummaryRequest,
   MonthlySummaryRequest,
-} from "../types/ledgerEntryTypes";
+} from "../types/expenseEntryTypes";
 import { expense_category } from "@prisma/client";
 
-const createLedgerEntry = async (req: Request, res: Response) => {
+const createExpenseEntry = async (req: Request, res: Response) => {
   try {
-    const data = req.body as CreateLedgerEntryRequest;
+    const data = req.body as CreateExpenseEntryRequest;
     const userId = req.user.userId;
 
-    const result = await ledgerEntryService.createLedgerEntry(data, userId);
-    sendSuccessResponse(res, 200, "Successfully created ledger entry", result);
+    const result = await expenseEntryService.createExpenseEntry(data, userId);
+    sendSuccessResponse(res, 200, "Successfully created expense entry", result);
   } catch (error) {
     debugLog(error);
-    sendErrorResponse(res, 400, "Error creating ledger entry", error);
+    sendErrorResponse(res, 400, "Error creating expense entry", error);
   }
 };
 
-const getLedgerEntryDetails = async (req: Request<{ id: string }, {}, {}>, res: Response) => {
+const getExpenseEntryDetails = async (req: Request<{ id: string }, {}, {}>, res: Response) => {
   try {
     const id = req.params.id ? +req.params.id : null;
     if (!id) {
       throw new Error("id is required");
     }
-    const result = await ledgerEntryService.getLedgerEntry(id);
-    sendSuccessResponse(res, 200, "Successfully fetched ledger entry", result);
+    const result = await expenseEntryService.getExpenseEntry(id);
+    sendSuccessResponse(res, 200, "Successfully fetched expense entry", result);
   } catch (error) {
     debugLog(error);
-    sendErrorResponse(res, 400, "Error fetching ledger entry", error);
+    sendErrorResponse(res, 400, "Error fetching expense entry", error);
   }
 };
 
-const listLedgerEntries = async (req: Request<unknown, unknown, unknown, ListLedgerEntriesRequest>, res: Response) => {
+const listExpenseEntries = async (req: Request<unknown, unknown, unknown, ListExpenseEntriesRequest>, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const pageSize = parseInt(req.query.pageSize as string) || 10;
@@ -63,15 +63,15 @@ const listLedgerEntries = async (req: Request<unknown, unknown, unknown, ListLed
       filters.searchString = req.query.searchString;
     }
 
-    const result = await ledgerEntryService.listLedgerEntries(page, pageSize, filters, sortBy, orderBy);
-    sendSuccessResponse(res, 200, "Successfully fetched ledger entries list", result);
+    const result = await expenseEntryService.listExpenseEntries(page, pageSize, filters, sortBy, orderBy);
+    sendSuccessResponse(res, 200, "Successfully fetched expense entries list", result);
   } catch (error) {
     debugLog(error);
-    sendErrorResponse(res, 400, "Error fetching ledger entries list", error);
+    sendErrorResponse(res, 400, "Error fetching expense entries list", error);
   }
 };
 
-const updateLedgerEntry = async (req: Request<{ id: string }, {}, UpdateLedgerEntryRequest>, res: Response) => {
+const updateExpenseEntry = async (req: Request<{ id: string }, {}, UpdateExpenseEntryRequest>, res: Response) => {
   try {
     const id = req.params.id ? +req.params.id : null;
     if (!id) {
@@ -80,26 +80,26 @@ const updateLedgerEntry = async (req: Request<{ id: string }, {}, UpdateLedgerEn
     const data = req.body;
     const userId = req.user.userId;
 
-    const result = await ledgerEntryService.updateLedgerEntry(id, data, userId);
-    sendSuccessResponse(res, 200, "Successfully updated ledger entry", result);
+    const result = await expenseEntryService.updateExpenseEntry(id, data, userId);
+    sendSuccessResponse(res, 200, "Successfully updated expense entry", result);
   } catch (error) {
     debugLog(error);
-    sendErrorResponse(res, 400, "Error updating ledger entry", error);
+    sendErrorResponse(res, 400, "Error updating expense entry", error);
   }
 };
 
-const deleteLedgerEntry = async (req: Request<{ id: string }, {}, {}>, res: Response) => {
+const deleteExpenseEntry = async (req: Request<{ id: string }, {}, {}>, res: Response) => {
   try {
     const id = req.params.id ? +req.params.id : null;
     if (!id) {
       throw new Error("id is required");
     }
 
-    const result = await ledgerEntryService.deleteLedgerEntry(id);
-    sendSuccessResponse(res, 200, "Successfully deleted ledger entry", result);
+    const result = await expenseEntryService.deleteExpenseEntry(id);
+    sendSuccessResponse(res, 200, "Successfully deleted expense entry", result);
   } catch (error) {
     debugLog(error);
-    sendErrorResponse(res, 400, "Error deleting ledger entry", error);
+    sendErrorResponse(res, 400, "Error deleting expense entry", error);
   }
 };
 
@@ -113,7 +113,7 @@ const getDailySummary = async (req: Request, res: Response) => {
       throw new Error("date is required");
     }
 
-    const result = await ledgerEntryService.getDailySummary(data);
+    const result = await expenseEntryService.getDailySummary(data);
     sendSuccessResponse(res, 200, "Successfully fetched daily summary", result);
   } catch (error) {
     debugLog(error);
@@ -129,7 +129,7 @@ const getMonthlySummary = async (req: Request, res: Response) => {
       locationId: req.query.locationId as string | undefined,
     };
 
-    const result = await ledgerEntryService.getMonthlySummary(data);
+    const result = await expenseEntryService.getMonthlySummary(data);
     sendSuccessResponse(res, 200, "Successfully fetched monthly summary", result);
   } catch (error) {
     debugLog(error);
@@ -150,7 +150,7 @@ const generateReport = async (req: Request, res: Response) => {
       throw new Error("startDate and endDate are required");
     }
 
-    const result = await ledgerEntryService.generateReport(data);
+    const result = await expenseEntryService.generateReport(data);
     sendSuccessResponse(res, 200, "Successfully generated report", result);
   } catch (error) {
     debugLog(error);
@@ -158,12 +158,12 @@ const generateReport = async (req: Request, res: Response) => {
   }
 };
 
-export const ledgerEntryController = {
-  createLedgerEntry,
-  getLedgerEntryDetails,
-  listLedgerEntries,
-  updateLedgerEntry,
-  deleteLedgerEntry,
+export const expenseEntryController = {
+  createExpenseEntry,
+  getExpenseEntryDetails,
+  listExpenseEntries,
+  updateExpenseEntry,
+  deleteExpenseEntry,
   getDailySummary,
   getMonthlySummary,
   generateReport,

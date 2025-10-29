@@ -1,9 +1,9 @@
 import { body, query } from "express-validator";
-import { expense_category, ledger_payment_method } from "@prisma/client";
+import { expense_category, expense_payment_method } from "@prisma/client";
 import { locationDao } from "../../dao/location";
 import prisma from "../../prisma";
 
-const createLedgerEntryValidator = [
+const createExpenseEntryValidator = [
   body("entryDate")
     .notEmpty()
     .withMessage("Entry date is required")
@@ -56,7 +56,7 @@ const createLedgerEntryValidator = [
     .notEmpty()
     .withMessage("Payment method is required")
     .bail()
-    .isIn(Object.values(ledger_payment_method))
+    .isIn(Object.values(expense_payment_method))
     .withMessage("Invalid payment method"),
 
   body("description")
@@ -98,7 +98,7 @@ const createLedgerEntryValidator = [
     .withMessage("Vendor name cannot exceed 200 characters"),
 ];
 
-const updateLedgerEntryValidator = [
+const updateExpenseEntryValidator = [
   body("entryDate")
     .optional()
     .isISO8601()
@@ -133,7 +133,7 @@ const updateLedgerEntryValidator = [
 
   body("amount").optional().isFloat({ min: 0.01 }).withMessage("Amount must be a positive number"),
 
-  body("paymentMethod").optional().isIn(Object.values(ledger_payment_method)).withMessage("Invalid payment method"),
+  body("paymentMethod").optional().isIn(Object.values(expense_payment_method)).withMessage("Invalid payment method"),
 
   body("description")
     .optional()
@@ -164,7 +164,7 @@ const updateLedgerEntryValidator = [
     .withMessage("Vendor name cannot exceed 200 characters"),
 ];
 
-const listLedgerEntriesValidator = [
+const listExpenseEntriesValidator = [
   query("page").optional().isInt({ min: 1 }).withMessage("Page must be a positive integer"),
 
   query("pageSize").optional().isInt({ min: 1, max: 100 }).withMessage("Page size must be between 1 and 100"),
@@ -278,10 +278,10 @@ const monthlySummaryValidator = [
   query("locationId").optional().isInt({ min: 1 }).withMessage("Location ID must be a positive integer"),
 ];
 
-export const ledgerEntryValidator = {
-  createLedgerEntryValidator,
-  updateLedgerEntryValidator,
-  listLedgerEntriesValidator,
+export const expenseEntryValidator = {
+  createExpenseEntryValidator,
+  updateExpenseEntryValidator,
+  listExpenseEntriesValidator,
   generateReportValidator,
   dailySummaryValidator,
   monthlySummaryValidator,
