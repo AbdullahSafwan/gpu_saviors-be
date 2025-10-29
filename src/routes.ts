@@ -20,6 +20,8 @@ import { warrantyClaimValidator } from "./middleware/validator/warrantyClaimVali
 import { expenseEntryController } from "./controllers/expenseEntry";
 import { expenseEntryValidator } from "./middleware/validator/expenseEntryValidator";
 import { locationController } from "./controllers/location";
+import { analyticsController } from "./controllers/analytics";
+import { analyticsValidator } from "./middleware/validator/analyticsValidator";
 
 const router = express.Router();
 
@@ -77,4 +79,12 @@ router.delete("/expense-entry/:id", verifyToken, expenseEntryController.deleteEx
 
 
 router.get("/locations", verifyToken, locationController.fetchActiveLocations);
+
+router.get("/analytics/dashboard", verifyToken, analyticsValidator.dashboardValidator, throwValidationResult, analyticsController.getDashboard);
+router.get("/analytics/revenue", verifyToken, analyticsValidator.revenueAnalyticsValidator, throwValidationResult, analyticsController.getRevenueAnalytics);
+router.get("/analytics/customers", verifyToken, analyticsValidator.customerAnalyticsValidator, throwValidationResult, analyticsController.getCustomerAnalytics);
+router.get("/analytics/repairs", verifyToken, analyticsValidator.repairAnalyticsValidator, throwValidationResult, analyticsController.getRepairAnalytics);
+router.get("/analytics/warranties", verifyToken, analyticsValidator.warrantyAnalyticsValidator, throwValidationResult, analyticsController.getWarrantyAnalytics);
+router.get("/analytics/financial-summary", verifyToken, analyticsValidator.financialSummaryValidator, throwValidationResult, analyticsController.getFinancialSummary);
+
 export default router;
