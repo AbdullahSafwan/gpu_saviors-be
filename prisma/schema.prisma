@@ -95,9 +95,11 @@ model booking {
   appointmentDate       DateTime?
   createdBy             Int
   modifiedBy            Int
+  locationId            Int
   clientType            client_type            @default(INDIVIDUAL)
   referralSource        ReferralSource?
   referralSourceNotes   String?                @db.VarChar(500)
+  location              location               @relation(fields: [locationId], references: [id])
   booking_items         booking_item[]
   delivery              delivery[]
   contact_log           contact_log[]
@@ -412,6 +414,7 @@ model location {
   createdByUser   user            @relation("LocationCreatedBy", fields: [createdBy], references: [id])
   modifiedByUser  user            @relation("LocationModifiedBy", fields: [modifiedBy], references: [id])
   expense_entries expense_entry[]
+  bookings        booking[]
 }
 
 model expense_entry {
