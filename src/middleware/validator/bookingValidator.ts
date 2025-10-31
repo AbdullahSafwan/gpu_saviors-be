@@ -4,12 +4,30 @@ import { formatWhatsAppNumber } from "./helper";
 import { bookingDao } from "../../dao/booking";
 import prisma from "../../prisma";
 import { deliveryDao } from "../../dao/delivery";
+import { locationDao } from "../../dao/location";
 
 const createBookingValidator = [
   // Validate booking fields
   body("paidAmount").optional().isInt({ min: 0 }).withMessage("Paid amount must be a positive integer"),
   body("clientType").optional().isIn(Object.values(client_type)).withMessage("Invalid client type"),
   body("clientName").notEmpty().withMessage("name is required").bail().isString().withMessage("name should be valid string"),
+
+  body("locationId")
+    .notEmpty()
+    .withMessage("Location ID is required")
+    .bail()
+    .isInt({ min: 1 })
+    .withMessage("Location ID must be a positive integer")
+    .custom(async (value) => {
+      const location = await locationDao.getLocation(prisma, parseInt(value));
+      if (!location) {
+        throw new Error(`Location with id ${value} does not exist`);
+      }
+      if (!location.isActive) {
+        throw new Error(`Location with id ${value} is not active`);
+      }
+      return true;
+    }),
 
   body("phoneNumber")
     .trim()
@@ -62,6 +80,23 @@ const updateBookingValidator = [
   body("status").optional().isIn(Object.values(booking_status)).withMessage("Invalid booking status"),
   body("clientType").optional().isIn(Object.values(client_type)).withMessage("Invalid client type"),
   body("paidAmount").optional().isInt({ min: 0 }).withMessage("Paid amount must be a positive integer"),
+
+  body("locationId")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Location ID must be a positive integer")
+    .custom(async (value) => {
+      if (value) {
+        const location = await locationDao.getLocation(prisma, parseInt(value));
+        if (!location) {
+          throw new Error(`Location with id ${value} does not exist`);
+        }
+        if (!location.isActive) {
+          throw new Error(`Location with id ${value} is not active`);
+        }
+      }
+      return true;
+    }),
 
   body("phoneNumber")
     .optional()

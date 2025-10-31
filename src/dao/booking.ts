@@ -22,6 +22,14 @@ const getBooking = async (prisma: PrismaClient | Prisma.TransactionClient, id: n
         booking_payments: true,
         contact_log: true,
         delivery: true,
+        location: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+            city: true,
+          },
+        },
       },
     });
     return result;
@@ -76,6 +84,13 @@ const listBookings = async (
         clientType: true,
         referralSource: true,
         referralSourceNotes: true,
+        location: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+          },
+        },
         booking_items: {
           select: {
             name: true,
