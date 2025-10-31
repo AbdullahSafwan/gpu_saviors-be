@@ -15,6 +15,7 @@ export interface CreateBookingRequest {
   phoneNumber: string;
   whatsappNumber: string;
   payableAmount: number;
+  locationId: number;
   code?: string;
   paidAmount?: number;
   booking_items: BookingItem[];
@@ -33,6 +34,7 @@ export interface UpdateBookingRequest {
   phoneNumber?: string;
   whatsappNumber?: string;
   paidAmount?: number;
+  locationId?: number;
   booking_items?: (UpdateBookingItem | CreateBookingItem)[];
   contact_log?: (UpdateContactLogRequest | CreateContactLogRequest)[];
   delivery?: (CreateDeliveryRequest | UpdateDeliveryRequest)[];

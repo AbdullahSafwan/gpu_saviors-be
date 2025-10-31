@@ -17,6 +17,7 @@ const createBooking = async (data: CreateBookingRequest, createdBy: number) => {
     data.code = new Date().getTime().toString(36).toUpperCase().slice(-6);
     const bookingData = {
       ...data,
+      location: { connect: { id: data.locationId } },
       createdByUser: { connect: { id: createdBy } },
       modifiedByUser: { connect: { id: createdBy } },
       booking_items: {
@@ -224,6 +225,7 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
 
       const updateData: Prisma.bookingUpdateInput = {
         ...otherData,
+        ...(data.locationId && { location: { connect: { id: data.locationId } } }),
         modifiedByUser: { connect: { id: modifiedBy } },
         ...(calculatedPayableAmount !== undefined && { payableAmount: calculatedPayableAmount }),
         ...(totalPaidAmount !== undefined && { paidAmount: totalPaidAmount }),
