@@ -68,6 +68,7 @@ const createWarrantyClaim = async (
         payableAmount: 0, // Warranty repairs are free
         paidAmount: 0,
         isWarrantyClaim: true,
+        location: { connect: { id: originalBooking.locationId } },
         createdByUser: { connect: { id: userId } },
         modifiedByUser: { connect: { id: userId } },
         booking_items: {
