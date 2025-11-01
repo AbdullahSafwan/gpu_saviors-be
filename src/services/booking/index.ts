@@ -1,5 +1,12 @@
 import { booking_status, Prisma, booking_item_status, booking_payment_status } from "@prisma/client";
-import { CreateBookingItem, CreateBookingRequest, UpdateBookingItem, UpdateBookingRequest, CreateBookingPayment, UpdateBookingPayment } from "../../types/bookingTypes";
+import {
+  CreateBookingItem,
+  CreateBookingRequest,
+  UpdateBookingItem,
+  UpdateBookingRequest,
+  CreateBookingPayment,
+  UpdateBookingPayment,
+} from "../../types/bookingTypes";
 import { CreateContactLogRequest, UpdateContactLogRequest } from "../../types/contactLogTypes";
 import { CreateDeliveryRequest, UpdateDeliveryRequest } from "../../types/deliveryTypes";
 import { bookingDao } from "../../dao/booking";
@@ -11,20 +18,20 @@ import { generateReceipt, generateInvoice } from "./pdfHelper";
 
 const createBooking = async (data: CreateBookingRequest, createdBy: number) => {
   try {
-    data.payableAmount = data.booking_items.reduce((total: number, item) => total + item.payableAmount, 0);
+    const { locationId, booking_items, ...rest } = data;
+    rest.payableAmount = booking_items.reduce((total: number, item) => total + item.payableAmount, 0);
 
-    // generate unique 6-character code using timestamp
-    data.code = new Date().getTime().toString(36).toUpperCase().slice(-6);
     const bookingData = {
-      ...data,
+      ...rest,
+      code: new Date().getTime().toString(36).toUpperCase().slice(-6), // generate a unique code based on timestamp
       location: { connect: { id: data.locationId } },
       createdByUser: { connect: { id: createdBy } },
       modifiedByUser: { connect: { id: createdBy } },
       booking_items: {
-        create: data.booking_items.map(item => ({
+        create: booking_items.map((item) => ({
           ...item,
           createdByUser: { connect: { id: createdBy } },
-          modifiedByUser: { connect: { id: createdBy } }
+          modifiedByUser: { connect: { id: createdBy } },
         })),
       },
     };
@@ -79,31 +86,14 @@ const listBookings = async (
   orderBy: string | null,
   status: booking_status | undefined,
   searchString?: string,
-  isActive?: boolean | undefined,
+  isActive?: boolean | undefined
 ) => {
   try {
     // Define searchable fields here in the service layer
-    const searchFields = [
-      'clientName',
-      'code',
-      'whatsappNumber',
-      'phoneNumber',
-      'booking_items.serialNumber',
-      'booking_items.code'
-    ];
+    const searchFields = ["clientName", "code", "whatsappNumber", "phoneNumber", "booking_items.serialNumber", "booking_items.code"];
 
-    const result = await bookingDao.listBookings(
-      prisma,
-      page,
-      pageSize,
-      sortBy,
-      orderBy,
-      status,
-      searchString,
-      searchFields,
-      isActive
-    );
-    
+    const result = await bookingDao.listBookings(prisma, page, pageSize, sortBy, orderBy, status, searchString, searchFields, isActive);
+
     if (!result) {
       throw new Error(`Booking list not found`);
     }
@@ -124,7 +114,9 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
       }
       // validating status transition, status can only be changed against allowed records
       if (data.status && !validateStatusTransition(record.status, data.status)) {
-        throw new Error("Invalid status transition. Allowed workflow: DRAFT -> CONFIRMED -> IN_PROGRESS -> RESOLVED -> COMPLETED / CANCELLED. You can move backward to any previous status or use CANCELLED/EXPIRED at any time.");
+        throw new Error(
+          "Invalid status transition. Allowed workflow: DRAFT -> CONFIRMED -> IN_PROGRESS -> RESOLVED -> COMPLETED / CANCELLED. You can move backward to any previous status or use CANCELLED/EXPIRED at any time."
+        );
       }
 
       // if booking is being marked as COMPLETED, ensure all booking items are in terminal state
@@ -162,9 +154,7 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
 
         // Create a map of updated amounts
         const updatedAmountsMap = new Map(
-          itemsToUpdate
-            .filter(item => item.payableAmount !== undefined)
-            .map(item => [item.id, item.payableAmount!])
+          itemsToUpdate.filter((item) => item.payableAmount !== undefined).map((item) => [item.id, item.payableAmount!])
         );
 
         // Calculate total from existing items (with updates applied)
@@ -174,10 +164,7 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
         }, 0);
 
         // Add amounts from newly created items
-        totalPayableAmount += itemsToCreate.reduce(
-          (total, item) => total + item.payableAmount,
-          0
-        );
+        totalPayableAmount += itemsToCreate.reduce((total, item) => total + item.payableAmount, 0);
 
         calculatedPayableAmount = totalPayableAmount;
       } else {
@@ -192,27 +179,22 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
 
         // Create a map of updated amounts for payments marked as PAID
         const updatedPaidAmountsMap = new Map(
-          paymentsToUpdate
-            .filter(item => item.status === 'PAID' && item.paidAmount !== undefined)
-            .map(item => [item.id, item.paidAmount!])
+          paymentsToUpdate.filter((item) => item.status === "PAID" && item.paidAmount !== undefined).map((item) => [item.id, item.paidAmount!])
         );
         // Calculate total paid amount from existing payments (with updates applied)
         let paidAmount = existingPayments.reduce((total, item) => {
           const updatedAmount = updatedPaidAmountsMap.get(item.id);
-          return total + (updatedAmount !== undefined ? updatedAmount : (item.status === 'PAID' ? (item.paidAmount ?? 0) : 0));
+          return total + (updatedAmount !== undefined ? updatedAmount : item.status === "PAID" ? item.paidAmount ?? 0 : 0);
         }, 0);
 
-        paidAmount += paymentsToCreate.reduce(
-          (total, item) => total + ((item.status === 'PAID' ? item.paidAmount : 0)?? 0),
-          0
-        );
+        paidAmount += paymentsToCreate.reduce((total, item) => total + ((item.status === "PAID" ? item.paidAmount : 0) ?? 0), 0);
         totalPaidAmount = paidAmount;
       } else {
         // If no booking payment changes, use existing paidAmount for payment status calculation
         totalPaidAmount = record.paidAmount ?? undefined;
       }
 
-      let bookingPaymentStatus : booking_payment_status | undefined;
+      let bookingPaymentStatus: booking_payment_status | undefined;
       if (totalPaidAmount !== undefined && calculatedPayableAmount !== undefined) {
         if (totalPaidAmount === 0) {
           bookingPaymentStatus = booking_payment_status.PENDING;
@@ -236,15 +218,15 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
               where: { id },
               data: {
                 ...data,
-                modifiedBy
+                modifiedBy,
               },
             })),
             ...(itemsToCreate.length > 0 && {
               createMany: {
-                data: itemsToCreate.map(item => ({
+                data: itemsToCreate.map((item) => ({
                   ...item,
                   createdBy: modifiedBy,
-                  modifiedBy: modifiedBy
+                  modifiedBy: modifiedBy,
                 })),
               },
             }),
@@ -258,7 +240,7 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
             })),
             ...(contactLogsToCreate.length > 0 && {
               createMany: {
-                data: contactLogsToCreate.map(item => ({ ...item, bookingId: id })),
+                data: contactLogsToCreate.map((item) => ({ ...item, bookingId: id })),
               },
             }),
           },
@@ -269,15 +251,15 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
               where: { id },
               data: {
                 ...data,
-                modifiedBy
+                modifiedBy,
               },
             })),
             ...(deliveriesToCreate.length > 0 && {
               createMany: {
-                data: deliveriesToCreate.map(item => ({
+                data: deliveriesToCreate.map((item) => ({
                   ...item,
                   createdBy: modifiedBy,
-                  modifiedBy: modifiedBy
+                  modifiedBy: modifiedBy,
                 })),
               },
             }),
@@ -289,15 +271,15 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
               where: { id },
               data: {
                 ...data,
-                modifiedBy
+                modifiedBy,
               },
             })),
             ...(paymentsToCreate.length > 0 && {
               createMany: {
-                data: paymentsToCreate.map(item => ({
+                data: paymentsToCreate.map((item) => ({
                   ...item,
                   createdBy: modifiedBy,
-                  modifiedBy: modifiedBy
+                  modifiedBy: modifiedBy,
                 })),
               },
             }),
@@ -344,15 +326,8 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
 
 const dashboard = async (searchString?: string) => {
   try {
-    const searchFields = [
-      'clientName',
-      'code',
-      'whatsappNumber',
-      'phoneNumber',
-      'booking_items.serialNumber',
-      'booking_items.code'
-    ];
-    
+    const searchFields = ["clientName", "code", "whatsappNumber", "phoneNumber", "booking_items.serialNumber", "booking_items.code"];
+
     const draft = await bookingDao.fetchingBookingsByFilter(prisma, booking_status.DRAFT, searchString, searchFields);
     const confirmed = await bookingDao.fetchingBookingsByFilter(prisma, booking_status.CONFIRMED, searchString, searchFields);
     const inProgress = await bookingDao.fetchingBookingsByFilter(prisma, booking_status.IN_PROGRESS, searchString, searchFields);
