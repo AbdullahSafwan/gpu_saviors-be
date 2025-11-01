@@ -85,7 +85,7 @@ model booking {
   whatsappNumber        String
   status                booking_status         @default(DRAFT)
   paymentStatus         booking_payment_status @default(PENDING)
-  code                  String?                @unique
+  code                  String                @unique
   payableAmount         Int?
   paidAmount            Int?
   createdAt             DateTime               @default(now())
