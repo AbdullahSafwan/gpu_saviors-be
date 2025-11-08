@@ -49,7 +49,7 @@ const createExpenseEntryValidator = [
     .notEmpty()
     .withMessage("Amount is required")
     .bail()
-    .isFloat({ min: 0.01 })
+    .isInt({ min: 1 })
     .withMessage("Amount must be a positive number"),
 
   body("paymentMethod")
