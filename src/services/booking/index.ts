@@ -18,7 +18,7 @@ import { generateReceipt, generateInvoice } from "./pdfHelper";
 
 const createBooking = async (data: CreateBookingRequest, createdBy: number) => {
   try {
-    const { locationId, booking_items, ...rest } = data;
+    const { locationId, booking_items,delivery, ...rest } = data;
     rest.payableAmount = booking_items.reduce((total: number, item) => total + item.payableAmount, 0);
 
     const bookingData = {
@@ -34,6 +34,13 @@ const createBooking = async (data: CreateBookingRequest, createdBy: number) => {
           modifiedByUser: { connect: { id: createdBy } },
         })),
       },
+      delivery: delivery ? {
+        create: delivery.map((item) => ({
+          ...item,
+          createdByUser: { connect: { id: createdBy } },
+          modifiedByUser: { connect: { id: createdBy } },
+        } )),
+      } : undefined,
     };
 
     const result = await bookingDao.createBooking(prisma, bookingData);
