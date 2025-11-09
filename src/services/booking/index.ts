@@ -127,7 +127,7 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
       }
 
       // if booking is being marked as COMPLETED, ensure all booking items are in terminal state
-      if (data.status === booking_status.COMPLETED) {
+      if (data.status === booking_status.COMPLETED || data.status === booking_status.RESOLVED) {
         const bookingItemsStatus = record.booking_items.every((item: any) =>
           [booking_item_status.REPAIRED, booking_item_status.NOT_REPAIRED].includes(item.status)
         );
