@@ -64,6 +64,9 @@ ENV NODE_ENV production
 COPY package.json .
 COPY prisma ./prisma
 
+# Copy public assets (logos, etc.) for PDF generation
+COPY public ./public
+
 # Copy the production dependencies from the deps stage and also
 # the built application from the build stage into the image.
 COPY --from=deps /opt/gpu_saviors-be/node_modules ./node_modules
