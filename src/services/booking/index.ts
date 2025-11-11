@@ -14,7 +14,7 @@ import { clientDao } from "../../dao/client";
 import prisma from "../../prisma";
 import { debugLog } from "../helper";
 import { warrantyService } from "../warranty";
-import { validateStatusTransition } from "./helper";
+import { validateTerminalStatus, validateStatusTransition } from "./helper";
 import { generateReceipt, generateInvoice } from "./pdfHelper";
 
 const createBooking = async (data: CreateBookingRequest, createdBy: number) => {
@@ -61,13 +61,15 @@ const createBooking = async (data: CreateBookingRequest, createdBy: number) => {
           modifiedByUser: { connect: { id: createdBy } },
         })),
       },
-      delivery: delivery ? {
-        create: delivery.map((item) => ({
-          ...item,
-          createdByUser: { connect: { id: createdBy } },
-          modifiedByUser: { connect: { id: createdBy } },
-        })),
-      } : undefined,
+      delivery: delivery
+        ? {
+            create: delivery.map((item) => ({
+              ...item,
+              createdByUser: { connect: { id: createdBy } },
+              modifiedByUser: { connect: { id: createdBy } },
+            })),
+          }
+        : undefined,
     };
 
     const result = await bookingDao.createBooking(prisma, bookingData);
@@ -158,14 +160,9 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
         );
       }
 
-      // if booking is being marked as COMPLETED, ensure all booking items are in terminal state
+      // if booking is being marked as COMPLETED or RESOLVED, ensure all booking items are in terminal state
       if (data.status === booking_status.COMPLETED || data.status === booking_status.RESOLVED) {
-        const bookingItemsStatus = record.booking_items.every((item: any) =>
-          [booking_item_status.REPAIRED, booking_item_status.NOT_REPAIRED].includes(item.status)
-        );
-        if (!bookingItemsStatus) {
-          throw new Error("Cannot mark booking as COMPLETED unless all booking items are in terminal state (repaired or not repaired)");
-        }
+        validateTerminalStatus(data, record);
       }
       const { booking_items, contact_log, delivery, booking_payments, ...otherData } = data;
 
