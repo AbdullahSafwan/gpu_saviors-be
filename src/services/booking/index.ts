@@ -1,4 +1,4 @@
-import { booking_status, Prisma, booking_item_status, booking_payment_status } from "@prisma/client";
+import { booking_status, Prisma, booking_item_status, booking_payment_status, client_type } from "@prisma/client";
 import {
   CreateBookingItem,
   CreateBookingRequest,
@@ -27,7 +27,7 @@ const createBooking = async (data: CreateBookingRequest, createdBy: number) => {
     let finalPhoneNumber = rest.phoneNumber;
     let finalWhatsappNumber = rest.whatsappNumber;
 
-    if (clientId && data.clientType === "CORPORATE") {
+    if (clientId && data.clientType === client_type.CORPORATE) {
       const client = await clientDao.getClient(prisma, clientId);
       if (!client) {
         throw new Error(`Client with id ${clientId} does not exist`);

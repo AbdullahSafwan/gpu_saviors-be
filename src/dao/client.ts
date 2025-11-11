@@ -1,13 +1,7 @@
 import { PrismaClient, client_status, Prisma } from "@prisma/client";
 import { debugLog } from "../services/helper";
 
-/**
- * Create a new client
- */
-const createClient = async (
-  prisma: PrismaClient,
-  data: Prisma.clientCreateInput
-) => {
+const createClient = async (prisma: PrismaClient, data: Prisma.clientCreateInput) => {
   try {
     return await prisma.client.create({
       data,
@@ -27,9 +21,6 @@ const createClient = async (
   }
 };
 
-/**
- * Get client by ID
- */
 const getClient = async (prisma: PrismaClient, id: number) => {
   try {
     return await prisma.client.findUnique({
@@ -65,9 +56,6 @@ const getClient = async (prisma: PrismaClient, id: number) => {
   }
 };
 
-/**
- * Get client by code
- */
 const getClientByCode = async (prisma: PrismaClient, code: string) => {
   try {
     return await prisma.client.findUnique({
@@ -79,9 +67,6 @@ const getClientByCode = async (prisma: PrismaClient, code: string) => {
   }
 };
 
-/**
- * List clients with pagination and filters
- */
 const listClients = async (
   prisma: PrismaClient,
   filters: {
@@ -150,19 +135,12 @@ const listClients = async (
       },
     };
   } catch (error) {
-    debugLog("Error in client DAO:", error);
+    debugLog("Error listing clients:", error);
     throw error;
   }
 };
 
-/**
- * Update client
- */
-const updateClient = async (
-  prisma: PrismaClient,
-  id: number,
-  data: Prisma.clientUpdateInput
-) => {
+const updateClient = async (prisma: PrismaClient, id: number, data: Prisma.clientUpdateInput) => {
   try {
     return await prisma.client.update({
       where: { id },
@@ -178,14 +156,13 @@ const updateClient = async (
       },
     });
   } catch (error) {
-    debugLog("Error in client DAO:", error);
+    debugLog("Error updating client:", error);
     throw error;
   }
 };
 
-/**
- * Soft delete client (set isActive = false)
- */
+// Soft delete client (set isActive = false)
+
 const deleteClient = async (prisma: PrismaClient, id: number) => {
   try {
     return await prisma.client.update({
@@ -193,7 +170,7 @@ const deleteClient = async (prisma: PrismaClient, id: number) => {
       data: { isActive: false },
     });
   } catch (error) {
-    debugLog("Error in client DAO:", error);
+    debugLog("Error deleting client:", error);
     throw error;
   }
 };
@@ -228,14 +205,11 @@ const updateClientFinancials = async (prisma: PrismaClient, clientId: number) =>
       },
     });
   } catch (error) {
-    debugLog("Error in client DAO:", error);
+    debugLog("Error updating client financials:", error);
     throw error;
   }
 };
 
-/**
- * Get client bookings with pagination
- */
 const getClientBookings = async (
   prisma: PrismaClient,
   clientId: number,
@@ -295,14 +269,11 @@ const getClientBookings = async (
       },
     };
   } catch (error) {
-    debugLog("Error in client DAO:", error);
+    debugLog("Error getting client bookings:", error);
     throw error;
   }
 };
 
-/**
- * Check if client exists
- */
 const checkClientExists = async (prisma: PrismaClient, id: number): Promise<boolean> => {
   try {
     const client = await prisma.client.findUnique({
@@ -311,7 +282,7 @@ const checkClientExists = async (prisma: PrismaClient, id: number): Promise<bool
     });
     return !!client;
   } catch (error) {
-    debugLog("Error in client DAO:", error);
+    debugLog("Error checking if client exists:", error);
     throw error;
   }
 };
