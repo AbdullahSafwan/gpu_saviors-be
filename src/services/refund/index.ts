@@ -1,6 +1,7 @@
 import prisma from "../../prisma";
 import { debugLog } from "../helper";
 import { refundDao } from "../../dao/refund";
+import { clientDao } from "../../dao/client";
 import { CreateRefundRequest, UpdateRefundRequest } from "../../types/refundTypes";
 
 const createRefund = async (data: CreateRefundRequest, createdBy?: number) => {
@@ -21,6 +22,23 @@ const createRefund = async (data: CreateRefundRequest, createdBy?: number) => {
     };
 
     const result = await refundDao.createRefund(prisma, refundData);
+
+    // Get the booking payment to find the booking and client
+    const payment = await prisma.booking_payment.findUnique({
+      where: { id: paymentId },
+      include: {
+        booking: {
+          select: {
+            clientId: true,
+          },
+        },
+      },
+    });
+
+    // Update client financials if booking is linked to a client
+    if (payment?.booking?.clientId) {
+      await clientDao.updateClientFinancials(prisma, payment.booking.clientId);
+    }
 
     return result;
   } catch (error) {
@@ -57,6 +75,24 @@ const updateRefund = async (id: number, data: UpdateRefundRequest, modifiedBy?: 
       }),
     };
     const result = await refundDao.updateRefund(prisma, id, refundData);
+
+    // Get the booking payment to find the booking and client
+    const payment = await prisma.booking_payment.findUnique({
+      where: { id: record.paymentId },
+      include: {
+        booking: {
+          select: {
+            clientId: true,
+          },
+        },
+      },
+    });
+
+    // Update client financials if booking is linked to a client
+    if (payment?.booking?.clientId) {
+      await clientDao.updateClientFinancials(prisma, payment.booking.clientId);
+    }
+
     return result;
   } catch (error) {
     debugLog(error);

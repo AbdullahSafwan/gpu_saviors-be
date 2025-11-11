@@ -5,12 +5,53 @@ import { bookingDao } from "../../dao/booking";
 import prisma from "../../prisma";
 import { deliveryDao } from "../../dao/delivery";
 import { locationDao } from "../../dao/location";
+import { clientDao } from "../../dao/client";
 
 const createBookingValidator = [
   // Validate booking fields
   body("paidAmount").optional().isInt({ min: 0 }).withMessage("Paid amount must be a positive integer"),
   body("clientType").optional().isIn(Object.values(client_type)).withMessage("Invalid client type"),
-  body("clientName").notEmpty().withMessage("name is required").bail().isString().withMessage("name should be valid string"),
+
+  // ClientId is REQUIRED for CORPORATE bookings
+  body("clientId")
+    .if(body("clientType").equals(client_type.CORPORATE))
+    .notEmpty()
+    .withMessage("Client ID is required for CORPORATE bookings")
+    .bail()
+    .isInt({ min: 1 })
+    .withMessage("Client ID must be a positive integer")
+    .custom(async (value) => {
+      const client = await clientDao.getClient(prisma, parseInt(value));
+      if (!client) {
+        throw new Error(`Client with id ${value} does not exist`);
+      }
+      if (!client.isActive) {
+        throw new Error(`Client with id ${value} is disabled`);
+      }
+      if (client.status !== "ACTIVE") {
+        throw new Error(`Client with id ${value} is not in ACTIVE status (current: ${client.status})`);
+      }
+      return true;
+    }),
+
+  // ClientId must be NULL for INDIVIDUAL bookings
+  body("clientId")
+    .if(body("clientType").equals(client_type.INDIVIDUAL))
+    .custom((value) => {
+      if (value !== undefined && value !== null) {
+        throw new Error("Client ID must not be provided for INDIVIDUAL bookings");
+      }
+      return true;
+    }),
+
+  // Make clientName, phoneNumber, whatsappNumber optional for CORPORATE (auto-populated from client)
+  body("clientName")
+    .if(body("clientType").equals(client_type.INDIVIDUAL))
+    .notEmpty()
+    .withMessage("name is required")
+    .bail()
+    .isString()
+    .withMessage("name should be valid string"),
 
   body("locationId")
     .notEmpty()
@@ -30,17 +71,19 @@ const createBookingValidator = [
     }),
 
   body("phoneNumber")
+    .if(body("clientType").equals(client_type.INDIVIDUAL))
     .trim()
     .notEmpty()
-    .withMessage("Phone number is required") // Validate if it's not empty
+    .withMessage("Phone number is required")
     .bail()
     .isString()
-    .withMessage("Phone number should be a valid string") // Validate if it's a string
+    .withMessage("Phone number should be a valid string")
     .bail()
     .matches(/^0[1-9]{2}[0-9]{7}$|^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
     .withMessage("Invalid phone number"),
 
   body("whatsappNumber")
+    .if(body("clientType").equals(client_type.INDIVIDUAL))
     .trim()
     .notEmpty()
     .withMessage("whatsapp Number is required")
@@ -51,7 +94,7 @@ const createBookingValidator = [
     .matches(/^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
     .withMessage("Invalid WhatsApp Number")
     .bail()
-    .customSanitizer((value) => formatWhatsAppNumber(value)), // Convert Whatsapp Numbers in One format "92"
+    .customSanitizer((value) => formatWhatsAppNumber(value)),
 
   // Validate each booking_item in the array
   body("booking_items").isArray({ min: 1 }).withMessage("Booking items are required"),
@@ -129,6 +172,27 @@ const updateBookingValidator = [
   body("status").optional().isIn(Object.values(booking_status)).withMessage("Invalid booking status"),
   body("clientType").optional().isIn(Object.values(client_type)).withMessage("Invalid client type"),
   body("paidAmount").optional().isInt({ min: 0 }).withMessage("Paid amount must be a positive integer"),
+
+  // ClientId validation for updates
+  body("clientId")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Client ID must be a positive integer")
+    .custom(async (value) => {
+      if (value) {
+        const client = await clientDao.getClient(prisma, parseInt(value));
+        if (!client) {
+          throw new Error(`Client with id ${value} does not exist`);
+        }
+        if (!client.isActive) {
+          throw new Error(`Client with id ${value} is not active`);
+        }
+        if (client.status !== "ACTIVE") {
+          throw new Error(`Client with id ${value} is not in ACTIVE status (current: ${client.status})`);
+        }
+      }
+      return true;
+    }),
 
   body("locationId")
     .optional()
