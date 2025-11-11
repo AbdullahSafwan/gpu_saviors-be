@@ -22,6 +22,7 @@ import { expenseEntryValidator } from "./middleware/validator/expenseEntryValida
 import { locationController } from "./controllers/location";
 import { analyticsController } from "./controllers/analytics";
 import { analyticsValidator } from "./middleware/validator/analyticsValidator";
+import clientRoutes from "./routes/client";
 
 const router = express.Router();
 
@@ -86,5 +87,8 @@ router.get("/analytics/customers", verifyToken, analyticsValidator.customerAnaly
 router.get("/analytics/repairs", verifyToken, analyticsValidator.repairAnalyticsValidator, throwValidationResult, analyticsController.getRepairAnalytics);
 router.get("/analytics/warranties", verifyToken, analyticsValidator.warrantyAnalyticsValidator, throwValidationResult, analyticsController.getWarrantyAnalytics);
 router.get("/analytics/financial-summary", verifyToken, analyticsValidator.financialSummaryValidator, throwValidationResult, analyticsController.getFinancialSummary);
+
+// Client management routes
+router.use("/clients", clientRoutes);
 
 export default router;

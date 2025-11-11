@@ -11,9 +11,9 @@ export interface BookingItem {
 }
 
 export interface CreateBookingRequest {
-  clientName: string;
-  phoneNumber: string;
-  whatsappNumber: string;
+  clientName?: string; // Optional for CORPORATE (auto-populated from client)
+  phoneNumber?: string; // Optional for CORPORATE
+  whatsappNumber?: string; // Optional for CORPORATE
   payableAmount: number;
   locationId: number;
   code?: string;
@@ -22,6 +22,7 @@ export interface CreateBookingRequest {
   delivery?: delivery[];
   createdBy?: number; // Will be set by system
   clientType?: client_type;
+  clientId?: number; // REQUIRED for CORPORATE bookings
   referralSource?: ReferralSource;
   referralSourceNotes?: string;
 }
@@ -43,6 +44,7 @@ export interface UpdateBookingRequest {
   status?: booking_status;
   modifiedBy?: number; // Will be set by system
   clientType?: client_type;
+  clientId?: number; // Optional: link/update client
   referralSource?: ReferralSource;
   referralSourceNotes?: string;
 }
