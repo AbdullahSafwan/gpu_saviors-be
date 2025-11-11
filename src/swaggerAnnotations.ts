@@ -2602,3 +2602,240 @@
  *                           type: string
  *                         example: ["Error sending password reset email", "Password must be at least 8 characters long, contain at least one Uppercase letter and one number"]
  */
+
+// Client annotations
+
+/**
+ * @openapi
+ * /api/clients:
+ *   post:
+ *     summary: Create a new client
+ *     tags: [Clients]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - businessName
+ *               - contactPersonName
+ *               - phoneNumber
+ *               - whatsappNumber
+ *               - locationId
+ *             properties:
+ *               businessName:
+ *                 type: string
+ *               contactPersonName:
+ *                 type: string
+ *               phoneNumber:
+ *                 type: string
+ *               whatsappNumber:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               businessAddress:
+ *                 type: string
+ *               city:
+ *                 type: string
+ *               postalCode:
+ *                 type: string
+ *               paymentTermsDays:
+ *                 type: integer
+ *               creditLimit:
+ *                 type: integer
+ *               locationId:
+ *                 type: integer
+ *               notes:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Client created successfully
+ */
+
+/**
+ * @openapi
+ * /api/clients:
+ *   get:
+ *     summary: List all clients with filters
+ *     tags: [Clients]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: orderBy
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: locationId
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: searchString
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: isActive
+ *         schema:
+ *           type: boolean
+ *     responses:
+ *       200:
+ *         description: Clients fetched successfully
+ */
+
+/**
+ * @openapi
+ * /api/clients/{id}:
+ *   get:
+ *     summary: Get client details by ID
+ *     tags: [Clients]
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Client details fetched successfully
+ */
+
+/**
+ * @openapi
+ * /api/clients/{id}:
+ *   put:
+ *     summary: Update client
+ *     tags: [Clients]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Client updated successfully
+ */
+
+/**
+ * @openapi
+ * /api/clients/{id}:
+ *   delete:
+ *     summary: Delete client (soft delete)
+ *     tags: [Clients]
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Client deleted successfully
+ */
+
+/**
+ * @openapi
+ * /api/clients/{id}/bookings:
+ *   get:
+ *     summary: Get all bookings for a client
+ *     tags: [Clients]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Client bookings fetched successfully
+ */
+
+/**
+ * @openapi
+ * /api/clients/{id}/financial-summary:
+ *   get:
+ *     summary: Get client financial summary
+ *     tags: [Clients]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Client financial summary fetched successfully
+ */
+
+/**
+ * @openapi
+ * /api/clients/reports/outstanding:
+ *   get:
+ *     summary: Get all clients with outstanding balance
+ *     tags: [Clients]
+ *     responses:
+ *       200:
+ *         description: Clients with outstanding balance fetched successfully
+ */
+
+/**
+ * @openapi
+ * /api/clients/reports/overdue:
+ *   get:
+ *     summary: Get clients with overdue payments
+ *     tags: [Clients]
+ *     responses:
+ *       200:
+ *         description: Overdue clients fetched successfully
+ */
+
+/**
+ * @openapi
+ * /api/clients/reports/top-clients:
+ *   get:
+ *     summary: Get top clients by revenue
+ *     tags: [Clients]
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Number of top clients to return (default 20)
+ *     responses:
+ *       200:
+ *         description: Top clients fetched successfully
+ */

@@ -43,6 +43,8 @@ model user {
   modified_locations        location[]                @relation("LocationModifiedBy")
   created_expense_entries   expense_entry[]           @relation("ExpenseEntryCreatedBy")
   modified_expense_entries  expense_entry[]           @relation("ExpenseEntryModifiedBy")
+  created_clients           client[]                  @relation("ClientCreatedBy")
+  modified_clients          client[]                  @relation("ClientModifiedBy")
 }
 
 model user_session {
@@ -85,7 +87,7 @@ model booking {
   whatsappNumber        String
   status                booking_status         @default(DRAFT)
   paymentStatus         booking_payment_status @default(PENDING)
-  code                  String                @unique
+  code                  String                 @unique
   payableAmount         Int?
   paidAmount            Int?
   createdAt             DateTime               @default(now())
@@ -97,9 +99,11 @@ model booking {
   modifiedBy            Int
   locationId            Int
   clientType            client_type            @default(INDIVIDUAL)
+  clientId              Int?
   referralSource        ReferralSource?
   referralSourceNotes   String?                @db.VarChar(500)
   location              location               @relation(fields: [locationId], references: [id])
+  client                client?                @relation(fields: [clientId], references: [id])
   booking_items         booking_item[]
   delivery              delivery[]
   contact_log           contact_log[]
@@ -108,6 +112,8 @@ model booking {
   originalBookingClaims warranty_claim[]       @relation("OriginalBookingClaims")
   createdByUser         user                   @relation("BookingCreatedBy", fields: [createdBy], references: [id])
   modifiedByUser        user                   @relation("BookingModifiedBy", fields: [modifiedBy], references: [id])
+
+  @@index([clientId, status, isActive])
 }
 
 model booking_item {
@@ -348,6 +354,47 @@ enum ReferralSource {
   OTHER
 }
 
+enum client_status {
+  ACTIVE
+  SUSPENDED
+  CREDIT_HOLD
+  INACTIVE
+}
+
+model client {
+  id                 Int           @unique @default(autoincrement())
+  businessName       String
+  code               String        @unique
+  contactPersonName  String
+  phoneNumber        String
+  whatsappNumber     String
+  email              String?
+  businessAddress    String?
+  city               String?
+  postalCode         String?
+  paymentTermsDays   Int           @default(30)
+  creditLimit        Int?
+  status             client_status @default(ACTIVE)
+  totalPayable       Int           @default(0)
+  totalPaid          Int           @default(0)
+  outstandingBalance Int           @default(0)
+  locationId         Int
+  location           location      @relation(fields: [locationId], references: [id])
+  notes              String?       @db.Text
+  createdAt          DateTime      @default(now())
+  modifiedAt         DateTime      @default(now()) @updatedAt
+  isActive           Boolean       @default(true)
+  createdBy          Int
+  modifiedBy         Int
+  createdByUser      user          @relation("ClientCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser     user          @relation("ClientModifiedBy", fields: [modifiedBy], references: [id])
+  bookings           booking[]
+
+  @@index([businessName, phoneNumber, status, isActive])
+  @@index([locationId, status])
+  @@index([code])
+}
+
 model warranty {
   id                 Int                   @unique @default(autoincrement())
   bookingItemId      Int                   @unique
@@ -415,6 +462,7 @@ model location {
   modifiedByUser  user            @relation("LocationModifiedBy", fields: [modifiedBy], references: [id])
   expense_entries expense_entry[]
   bookings        booking[]
+  clients         client[]
 }
 
 model expense_entry {
