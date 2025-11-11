@@ -76,6 +76,7 @@ export interface CreateBookingItem {
   payableAmount: number;
   paidAmount?: number;
   createdBy?: number; // Will be set by system
+  status?: booking_item_status;
 }
 
 export interface DashboardRequest {
