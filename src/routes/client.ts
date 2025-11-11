@@ -25,7 +25,7 @@ router.get("/", verifyToken, clientValidator.listClientsValidator, throwValidati
 router.get("/:id", verifyToken, clientValidator.getClientDetailsValidator, throwValidationResult, getClientDetails);
 
 
-router.put("/:id", verifyToken, clientValidator.updateClientValidator, throwValidationResult, updateClient);
+router.patch("/:id", verifyToken, clientValidator.updateClientValidator, throwValidationResult, updateClient);
 
 
 router.delete("/:id", verifyToken, clientValidator.deleteClientValidator, throwValidationResult, deleteClient);
