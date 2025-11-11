@@ -1,4 +1,4 @@
-import { booking_status, Prisma, booking_item_status, booking_payment_status } from "@prisma/client";
+import { booking_status, Prisma, booking_item_status, booking_payment_status, client_type } from "@prisma/client";
 import {
   CreateBookingItem,
   CreateBookingRequest,
@@ -10,6 +10,7 @@ import {
 import { CreateContactLogRequest, UpdateContactLogRequest } from "../../types/contactLogTypes";
 import { CreateDeliveryRequest, UpdateDeliveryRequest } from "../../types/deliveryTypes";
 import { bookingDao } from "../../dao/booking";
+import { clientDao } from "../../dao/client";
 import prisma from "../../prisma";
 import { debugLog } from "../helper";
 import { warrantyService } from "../warranty";
@@ -18,13 +19,39 @@ import { generateReceipt, generateInvoice } from "./pdfHelper";
 
 const createBooking = async (data: CreateBookingRequest, createdBy: number) => {
   try {
-    const { locationId, booking_items,delivery, ...rest } = data;
+    const { locationId, booking_items, delivery, clientId, ...rest } = data;
     rest.payableAmount = booking_items.reduce((total: number, item) => total + item.payableAmount, 0);
+
+    // If CORPORATE booking with clientId, auto-populate client fields
+    let finalClientName = rest.clientName;
+    let finalPhoneNumber = rest.phoneNumber;
+    let finalWhatsappNumber = rest.whatsappNumber;
+
+    if (clientId && data.clientType === client_type.CORPORATE) {
+      const client = await clientDao.getClient(prisma, clientId);
+      if (!client) {
+        throw new Error(`Client with id ${clientId} does not exist`);
+      }
+
+      // Auto-populate from client
+      finalClientName = client.businessName;
+      finalPhoneNumber = client.phoneNumber;
+      finalWhatsappNumber = client.whatsappNumber;
+    }
+
+    // Ensure required fields are present
+    if (!finalClientName || !finalPhoneNumber || !finalWhatsappNumber) {
+      throw new Error("Client name, phone number, and WhatsApp number are required");
+    }
 
     const bookingData = {
       ...rest,
+      clientName: finalClientName,
+      phoneNumber: finalPhoneNumber,
+      whatsappNumber: finalWhatsappNumber,
       code: new Date().getTime().toString(36).toUpperCase().slice(-6), // generate a unique code based on timestamp
       location: { connect: { id: data.locationId } },
+      ...(clientId && { client: { connect: { id: clientId } } }),
       createdByUser: { connect: { id: createdBy } },
       modifiedByUser: { connect: { id: createdBy } },
       booking_items: {
@@ -39,11 +66,16 @@ const createBooking = async (data: CreateBookingRequest, createdBy: number) => {
           ...item,
           createdByUser: { connect: { id: createdBy } },
           modifiedByUser: { connect: { id: createdBy } },
-        } )),
+        })),
       } : undefined,
     };
 
     const result = await bookingDao.createBooking(prisma, bookingData);
+
+    // Update client financials if linked to client
+    if (clientId) {
+      await clientDao.updateClientFinancials(prisma, clientId);
+    }
 
     return result;
   } catch (error) {
@@ -323,6 +355,18 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
       }
       return finalBooking;
     });
+
+    // Update client financials if booking is linked to a client
+    // Check both the updated clientId and the existing one
+    const clientIdToUpdate = data.clientId !== undefined ? data.clientId : result.clientId;
+    if (clientIdToUpdate) {
+      await clientDao.updateClientFinancials(prisma, clientIdToUpdate);
+    }
+
+    // If clientId was changed, update the old client's financials too
+    if (data.clientId !== undefined && result.clientId && data.clientId !== result.clientId) {
+      await clientDao.updateClientFinancials(prisma, result.clientId);
+    }
 
     return result;
   } catch (error) {
