@@ -182,6 +182,40 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
       const paymentsToUpdate = booking_payments?.filter((item): item is UpdateBookingPayment => "id" in item && !!item.id) || [];
       const paymentsToCreate = booking_payments?.filter((item): item is CreateBookingPayment => !("id" in item)) || [];
 
+      // if item is marked NOT REPAIRED then its payable amount will not be charged
+      itemsToUpdate.filter(item=> item.status === booking_item_status.NOT_REPAIRED).map(item=> item.payableAmount = 0)
+
+      // for future, if need be: keep record payable amount of item but total payable amount 0 if NOT_REPAIRED
+      // if (booking_items && booking_items.length > 0) {
+      //   // Calculate new total by combining existing items with updates and new items
+      //   const existingItems = record.booking_items;
+      //   const existingItemsMap = new Map(existingItems.map(item => [item.id, item]))
+      //   // Create a map of updated amounts
+      //   // const updatedAmountsMap = new Map(
+      //   //   itemsToUpdate.filter((item) => item.payableAmount !== undefined).map((item) => [item.id, item.payableAmount!])
+      //   // );
+      //   const updatedAmountsMap = new Map(
+      //     itemsToUpdate.map(item => [item.id, item.payableAmount= item.payableAmount !== undefined ? item.payableAmount : existingItemsMap.get(item.id)?.payableAmount])
+      //   );
+      //   const updatedStatusMap = new Map(
+      //     itemsToUpdate.map(item => [item.id, item.status= item.status !== undefined ? item.status : existingItemsMap.get(item.id)?.status])
+      //   );
+      //   // Calculate total from existing items (with updates applied)
+      //   let totalPayableAmount = existingItems.reduce((total, item) => {
+      //     const updatedStatus = updatedStatusMap.get(item.id)
+      //     const updatedAmount = updatedStatus === booking_item_status.NOT_REPAIRED ? 0 : updatedAmountsMap.get(item.id);
+      //     // return total + 
+      //     return total + ((updatedAmount !== undefined )? updatedAmount : (item.status === booking_item_status.NOT_REPAIRED ? 0 :item.payableAmount));
+      //   }, 0);
+
+      //   // Add amounts from newly created items
+      //   totalPayableAmount += itemsToCreate.filter(item=> item.status !== booking_item_status.NOT_REPAIRED).reduce((total, item) => total + item.payableAmount, 0);
+
+      //   calculatedPayableAmount = totalPayableAmount;
+      // } else {
+      //   // If no booking items changes, use existing payableAmount for payment status calculation
+      //   calculatedPayableAmount = record.payableAmount ?? undefined;
+      // }
       // Recalculate payableAmount if booking items were added or updated
       let calculatedPayableAmount: number | undefined;
       if (booking_items && booking_items.length > 0) {
