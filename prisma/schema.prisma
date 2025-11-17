@@ -272,6 +272,7 @@ enum booking_payment_status {
   PAID
   REFUNDED
   PARTIAL_REFUND
+  NOT_APPLICABLE
 }
 
 enum contact_method {

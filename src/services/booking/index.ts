@@ -266,7 +266,9 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
 
       let bookingPaymentStatus: booking_payment_status | undefined;
       if (totalPaidAmount !== undefined && calculatedPayableAmount !== undefined) {
-        if (totalPaidAmount === 0) {
+        if (calculatedPayableAmount === 0) {
+          bookingPaymentStatus = booking_payment_status.NOT_APPLICABLE;
+        } else if (totalPaidAmount === 0) {
           bookingPaymentStatus = booking_payment_status.PENDING;
         } else if (totalPaidAmount >= calculatedPayableAmount) {
           bookingPaymentStatus = booking_payment_status.PAID;
