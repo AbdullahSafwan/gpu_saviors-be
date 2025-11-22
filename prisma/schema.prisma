@@ -102,6 +102,7 @@ model booking {
   clientId              Int?
   referralSource        ReferralSource?
   referralSourceNotes   String?                @db.VarChar(500)
+  comments              String?                @db.Text
   location              location               @relation(fields: [locationId], references: [id])
   client                client?                @relation(fields: [clientId], references: [id])
   booking_items         booking_item[]
