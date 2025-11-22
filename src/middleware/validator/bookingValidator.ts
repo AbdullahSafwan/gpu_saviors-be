@@ -1,4 +1,4 @@
-import { body, query } from "express-validator";
+import { body, query, param } from "express-validator";
 import { booking_status, booking_item_type, client_type, courier_type, ReferralSource } from "@prisma/client";
 import { formatWhatsAppNumber } from "./helper";
 import { bookingDao } from "../../dao/booking";
@@ -339,4 +339,23 @@ const generateDocumentValidator = [
     .withMessage("Format must be 'pdf' (currently only PDF is supported)"),
 ];
 
-export const bookingValidator = { createBookingValidator, updateBookingValidator, listBookingsValidator, removeBookingValidator, generateDocumentValidator };
+const reopenBookingValidator = [
+  param("id")
+    .notEmpty()
+    .withMessage("Booking ID is required")
+    .isInt({ min: 1 })
+    .withMessage("Booking ID must be a positive integer")
+    .toInt()
+    .custom(async (value) => {
+      const booking = await bookingDao.getBooking(prisma, value);
+      if (!booking) {
+        throw new Error("Booking not found");
+      }
+      if (booking.status !== booking_status.EXPIRED) {
+        throw new Error(`Only EXPIRED bookings can be reopened. Current status: ${booking.status}`);
+      }
+      return true;
+    }),
+];
+
+export const bookingValidator = { createBookingValidator, updateBookingValidator, listBookingsValidator, removeBookingValidator, generateDocumentValidator, reopenBookingValidator };
