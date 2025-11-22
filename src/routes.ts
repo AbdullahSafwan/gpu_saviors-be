@@ -34,6 +34,7 @@ router.post("/booking/", verifyToken, bookingValidator.createBookingValidator, t
 router.get("/booking/", verifyToken, bookingValidator.listBookingsValidator, throwValidationResult, bookingController.listBookings);
 router.patch("/booking/:id", verifyToken, bookingValidator.updateBookingValidator, throwValidationResult, bookingController.updateBooking);
 router.delete("/booking/:id", verifyToken, bookingValidator.removeBookingValidator, bookingController.removeBooking);
+router.post("/booking/:id/reopen", verifyToken, bookingValidator.reopenBookingValidator, throwValidationResult, bookingController.reopenBooking);
 router.get("/dashboard/", verifyToken, bookingController.dashboard);
 router.get("/booking/:id/document", verifyToken, bookingValidator.generateDocumentValidator, throwValidationResult, bookingController.generateDocument);
 router.get("/booking/:id", verifyToken, bookingController.getBookingDetails);

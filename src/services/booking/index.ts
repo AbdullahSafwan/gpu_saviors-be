@@ -452,4 +452,31 @@ const generateDocument = async (id: number, documentType: "receipt" | "invoice",
   }
 };
 
-export const bookingService = { updateBooking, createBooking, getBooking, listBookings, dashboard, generateDocument };
+const reopenBooking = async (id: number, modifiedBy: number) => {
+  try {
+    const booking = await bookingDao.getBooking(prisma, id);
+
+    if (!booking) {
+      throw new Error(`Booking not found against id: ${id}`);
+    }
+
+    // Validate that the booking is in EXPIRED status
+    if (booking.status !== booking_status.EXPIRED) {
+      throw new Error(`Only EXPIRED bookings can be reopened. Current status: ${booking.status}`);
+    }
+
+    // Update the booking status to DRAFT
+    const result = await bookingDao.updateBooking(prisma, id, {
+      status: booking_status.DRAFT,
+      isActive: true,
+      modifiedByUser: { connect: { id: modifiedBy } },
+    });
+
+    return result;
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+
+export const bookingService = { updateBooking, createBooking, getBooking, listBookings, dashboard, generateDocument, reopenBooking };
