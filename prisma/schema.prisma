@@ -313,6 +313,7 @@ enum booking_status {
   COMPLETED
   CANCELLED
   EXPIRED
+  DELETED
 }
 
 enum booking_item_status {
