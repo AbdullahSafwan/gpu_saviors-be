@@ -322,6 +322,7 @@ enum booking_item_status {
   IN_PROGRESS
   REPAIRED
   NOT_REPAIRED
+  NO_ISSUE
 }
 
 enum booking_item_resolution_status {
@@ -346,7 +347,10 @@ enum client_type {
 }
 
 enum ReferralSource {
-  SOCIAL_MEDIA
+  FACEBOOK
+  WHATSAPP
+  INSTAGRAM
+  WEBSITE
   GOOGLE_SEARCH
   FRIEND_REFERRAL
   BUSINESS_REFERRAL
