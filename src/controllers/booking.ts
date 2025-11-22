@@ -54,7 +54,7 @@ const updateBooking = async (req: Request, res: Response) => {
     const id = +req.params.id;
     const data = req.body as UpdateBookingRequest;
     const userId = req.user.userId;
-    
+
     const result = await bookingService.updateBooking(id, data, userId);
     sendSuccessResponse(res, 200, "Successfully updated booking", result);
   } catch (error) {
@@ -80,7 +80,7 @@ const removeBooking = async (req: Request, res: Response) => {
     if (typeof id !== "number" || isNaN(id) || id <= 0) {
       throw new Error("Invalid booking ID");
     }
-    const data = {isActive: false} as UpdateBookingRequest;
+    const data = { isActive: false, status: booking_status.DELETED } as UpdateBookingRequest;
     const userId = req.user.userId;
 
     const result = await bookingService.updateBooking(id, data, userId);
