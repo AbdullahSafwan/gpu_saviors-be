@@ -49,7 +49,7 @@ export const validateStatusTransition = (currentStatus: string, newStatus: strin
 
 export const validateTerminalStatus = (data: UpdateBookingRequest, record: Prisma.bookingGetPayload<{ include: { booking_items: true } }>) => {
   try {
-    const terminalStatuses: booking_item_status[] = [booking_item_status.REPAIRED, booking_item_status.NOT_REPAIRED];
+    const terminalStatuses: booking_item_status[] = [booking_item_status.REPAIRED, booking_item_status.NOT_REPAIRED, booking_item_status.NO_ISSUE] ;
 
     // create a map of incoming booking items for quick lookup
     const incomingUpdates = data.booking_items?.filter((item): item is UpdateBookingItem => "id" in item && !!item.id) || [];
