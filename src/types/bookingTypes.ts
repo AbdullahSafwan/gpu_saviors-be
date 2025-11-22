@@ -25,6 +25,7 @@ export interface CreateBookingRequest {
   clientId?: number; // REQUIRED for CORPORATE bookings
   referralSource?: ReferralSource;
   referralSourceNotes?: string;
+  comments?: string;
 }
 
 export interface GetBookingDetailsRequest {
@@ -47,6 +48,7 @@ export interface UpdateBookingRequest {
   clientId?: number; // Optional: link/update client
   referralSource?: ReferralSource;
   referralSourceNotes?: string;
+  comments?: string;
 }
 
 export interface ListBookingsRequest {

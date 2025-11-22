@@ -116,6 +116,7 @@ const createBookingValidator = [
   body("appointmentDate").optional().isISO8601().toDate().withMessage("Appointment date must be a valid date format"),
   body("referralSource").optional().isIn(Object.values(ReferralSource)).withMessage("Invalid referral source"),
   body("referralSourceNotes").optional().isString().withMessage("Referral source notes must be a string").isLength({ max: 500 }).withMessage("Referral source notes must not exceed 500 characters"),
+  body("comments").optional().isString().withMessage("Comments must be a string"),
   body("delivery").optional().isArray().withMessage("Delivery must be an array if provided"),
 
   body("delivery.*.id").optional().isInt().withMessage("Delivery id must be a valid integer")
@@ -302,6 +303,7 @@ const updateBookingValidator = [
   body("appointmentDate").optional().isISO8601().toDate().withMessage("Appointment date must be a valid date format"),
   body("referralSource").optional().isIn(Object.values(ReferralSource)).withMessage("Invalid referral source"),
   body("referralSourceNotes").optional().isString().withMessage("Referral source notes must be a string").isLength({ max: 500 }).withMessage("Referral source notes must not exceed 500 characters"),
+  body("comments").optional().isString().withMessage("Comments must be a string"),
 ];
 
 const listBookingsValidator = [
