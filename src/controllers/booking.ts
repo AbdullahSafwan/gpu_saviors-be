@@ -35,13 +35,14 @@ const listBookings = async (req: Request<unknown, unknown, unknown, ListBookings
   try {
     const page = parseInt(req.query.page as string) || 1;
     const pageSize = parseInt(req.query.pageSize as string) || 10;
+    const locationId = req.query.locationId ? parseInt(req.query.locationId as string) : undefined;
     const sort = req.query.sortBy ? req.query.sortBy.toString() : null;
     const orderBy = req.query.orderBy ? req.query.orderBy.toString() : "desc";
     const status = req.query.status ? (req.query.status.toString() as booking_status) : undefined;
     const searchString = req.query.searchString;
     const isActive = req.query.isActive === undefined ? undefined : req.query.isActive === true;
 
-    const result = await bookingService.listBookings(page, pageSize, sort, orderBy, status, searchString, isActive);
+    const result = await bookingService.listBookings(page, pageSize, sort, orderBy, status, searchString, isActive, locationId);
     sendSuccessResponse(res, 200, "Successfully fetched bookings list", result);
   } catch (error) {
     debugLog(error);

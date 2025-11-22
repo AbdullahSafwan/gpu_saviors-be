@@ -48,7 +48,8 @@ const listBookings = async (
   status: booking_status | undefined,
   searchString?: string,
   searchFields?: string[],
-  isActive?: boolean | undefined
+  isActive?: boolean | undefined,
+  locationId?: number | null
 ) => {
   try {
     const sort = (_sort ?? "id").toString();
@@ -56,7 +57,12 @@ const listBookings = async (
     const orderBy = { [sort]: order };
 
     const where = {
-      AND: [status ? { status } : {}, searchString && searchFields ? buildSearchCondition(searchString, searchFields) : {}, { isActive }],
+      AND: [
+        status ? { status } : {},
+        searchString && searchFields ? buildSearchCondition(searchString, searchFields) : {},
+        { isActive },
+        locationId ? { locationId } : {},
+      ],
     };
 
     const result = await prisma.booking.findMany({
