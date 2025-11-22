@@ -127,13 +127,14 @@ const listBookings = async (
   orderBy: string | null,
   status: booking_status | undefined,
   searchString?: string,
-  isActive?: boolean | undefined
+  isActive?: boolean | undefined,
+  locationId?: number | null
 ) => {
   try {
     // Define searchable fields here in the service layer
     const searchFields = ["clientName", "code", "whatsappNumber", "phoneNumber", "booking_items.serialNumber", "booking_items.code"];
 
-    const result = await bookingDao.listBookings(prisma, page, pageSize, sortBy, orderBy, status, searchString, searchFields, isActive);
+    const result = await bookingDao.listBookings(prisma, page, pageSize, sortBy, orderBy, status, searchString, searchFields, isActive, locationId);
 
     if (!result) {
       throw new Error(`Booking list not found`);
