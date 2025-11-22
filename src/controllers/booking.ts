@@ -124,4 +124,20 @@ const generateDocument = async (req: Request<{ id: string }, {}, {}, { type: str
   }
 };
 
-export const bookingController = { createBooking, getBookingDetails, updateBooking, listBookings, dashboard, removeBooking, generateDocument };
+const reopenBooking = async (req: Request, res: Response) => {
+  try {
+    const id = +req.params.id;
+    if (typeof id !== "number" || isNaN(id) || id <= 0) {
+      throw new Error("Invalid booking ID");
+    }
+    const userId = req.user.userId;
+
+    const result = await bookingService.reopenBooking(id, userId);
+    sendSuccessResponse(res, 200, "Successfully reopened booking", result);
+  } catch (error) {
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error reopening booking", error);
+  }
+};
+
+export const bookingController = { createBooking, getBookingDetails, updateBooking, listBookings, dashboard, removeBooking, generateDocument, reopenBooking };
