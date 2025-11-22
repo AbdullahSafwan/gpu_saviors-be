@@ -311,6 +311,16 @@ const listBookingsValidator = [
   query("orderBy").optional().isIn(["asc", "desc"]).withMessage("OrderBy must be 'asc' or 'desc'.").default("desc"),
   query("status").optional().isString().isIn(Object.values(booking_status)).withMessage("Invalid booking status"),
   query("isActive").optional().isBoolean().withMessage("isActive must be a boolean value").toBoolean(),
+  query("locationId").optional().isInt({ min: 1 }).withMessage("Location ID must be a positive integer").bail().toInt().custom(async (value) => {
+    const location = await locationDao.getLocation(prisma, parseInt(value));
+    if (!location) {
+      throw new Error(`Location with id ${value} does not exist`);
+    }
+    if (!location.isActive) {
+      throw new Error(`Location with id ${value} is not active`);
+    }
+    return true;
+  }),
 ];
 
 const removeBookingValidator = [

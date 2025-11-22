@@ -54,6 +54,7 @@ export interface ListBookingsRequest {
   pageSize?: string;
   sortBy?: string;
   orderBy?: string;
+  locationId?: string;
   status?: booking_status;
   searchString?: string;
   isActive?: boolean;
