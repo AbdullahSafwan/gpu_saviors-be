@@ -33,6 +33,7 @@ const markExpiredDraftBookings = async () => {
       },
       {
         status: booking_status.EXPIRED,
+        isActive: false
       }
     );
 
