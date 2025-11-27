@@ -148,12 +148,75 @@ const listBookings = async (
 
 const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy: number) => {
   try {
+    // Store old clientId for financial updates outside transaction
+    let oldClientId: number | null = null;
+
     // Wrap everything in a transaction
     const result = await prisma.$transaction(async (tx) => {
       const record = await bookingDao.getBooking(tx, id);
       if (!record) {
         throw new Error(`Booking not found against id: ${id}`);
       }
+
+      // Store the old clientId before any updates
+      oldClientId = record.clientId;
+
+      // Handle conversion from INDIVIDUAL to CORPORATE
+      if (data.clientType === client_type.CORPORATE && record.clientType === client_type.INDIVIDUAL) {
+        // ClientId is REQUIRED when converting to CORPORATE
+        if (!data.clientId) {
+          throw new Error("Client ID is required when converting booking from INDIVIDUAL to CORPORATE");
+        }
+
+        // Fetch client data to auto-populate fields
+        const client = await clientDao.getClient(prisma, data.clientId);
+        if (!client) {
+          throw new Error(`Client with id ${data.clientId} does not exist`);
+        }
+        if (!client.isActive) {
+          throw new Error(`Client with id ${data.clientId} is not active`);
+        }
+        if (client.status !== "ACTIVE") {
+          throw new Error(`Client with id ${data.clientId} is not in ACTIVE status (current: ${client.status})`);
+        }
+
+        // Auto-populate client fields (override any provided values)
+        data.clientName = client.businessName;
+        data.phoneNumber = client.phoneNumber;
+        data.whatsappNumber = client.whatsappNumber;
+      }
+
+      // Handle clientId update for existing CORPORATE bookings (changing client without changing type)
+      if (data.clientId && record.clientType === client_type.CORPORATE && record.clientId !== data.clientId && !data.clientType) {
+        // ClientId is being updated for a CORPORATE booking
+        const client = await clientDao.getClient(prisma, data.clientId);
+        if (!client) {
+          throw new Error(`Client with id ${data.clientId} does not exist`);
+        }
+        if (!client.isActive) {
+          throw new Error(`Client with id ${data.clientId} is not active`);
+        }
+        if (client.status !== "ACTIVE") {
+          throw new Error(`Client with id ${data.clientId} is not in ACTIVE status (current: ${client.status})`);
+        }
+
+        // Auto-populate client fields from new client (override any provided values)
+        data.clientName = client.businessName;
+        data.phoneNumber = client.phoneNumber;
+        data.whatsappNumber = client.whatsappNumber;
+      }
+
+      // Handle conversion from CORPORATE to INDIVIDUAL
+      if (data.clientType === client_type.INDIVIDUAL && record.clientType === client_type.CORPORATE) {
+        // When converting to INDIVIDUAL, clientId must be removed/disconnected
+        // This will be handled in updateData by not including clientId
+
+        // clientName, phoneNumber, and whatsappNumber are required for INDIVIDUAL
+        if (!data.clientName || !data.phoneNumber || !data.whatsappNumber) {
+          throw new Error("Client name, phone number, and WhatsApp number are required when converting booking from CORPORATE to INDIVIDUAL");
+        }
+      }
+
       // validating status transition, status can only be changed against allowed records
       if (data.status && !validateStatusTransition(record.status, data.status)) {
         throw new Error(
@@ -165,7 +228,8 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
       if (data.status === booking_status.COMPLETED || data.status === booking_status.RESOLVED) {
         validateTerminalStatus(data, record);
       }
-      const { booking_items, contact_log, delivery, booking_payments, ...otherData } = data;
+      // Extract nested objects and clientId from data
+      const { booking_items, contact_log, delivery, booking_payments, clientId, ...otherData } = data;
 
       // Separate booking items based on the presence of `id`
       const itemsToUpdate = booking_items?.filter((item): item is UpdateBookingItem => "id" in item && !!item.id) || [];
@@ -286,6 +350,11 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
       const updateData: Prisma.bookingUpdateInput = {
         ...otherData,
         ...(data.locationId && { location: { connect: { id: data.locationId } } }),
+        // Handle client connection based on clientType change or clientId update
+        ...(data.clientType === client_type.CORPORATE && clientId && { client: { connect: { id: clientId } } }),
+        ...(data.clientType === client_type.INDIVIDUAL && record.clientType === client_type.CORPORATE && { client: { disconnect: true } }),
+        // Handle clientId update for existing CORPORATE bookings (changing client without changing type)
+        ...(clientId && record.clientType === client_type.CORPORATE && record.clientId !== clientId && !data.clientType && { client: { connect: { id: clientId } } }),
         modifiedByUser: { connect: { id: modifiedBy } },
         ...(calculatedPayableAmount !== undefined && { payableAmount: calculatedPayableAmount }),
         ...(totalPaidAmount !== undefined && { paidAmount: totalPaidAmount }),
@@ -395,16 +464,23 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
       return finalBooking;
     });
 
-    // Update client financials if booking is linked to a client
-    // Check both the updated clientId and the existing one
-    const clientIdToUpdate = data.clientId !== undefined ? data.clientId : result.clientId;
-    if (clientIdToUpdate) {
-      await clientDao.updateClientFinancials(prisma, clientIdToUpdate);
-    }
+    // Update client financials when clientId is involved
+    const newClientId = result.clientId;
 
-    // If clientId was changed, update the old client's financials too
-    if (data.clientId !== undefined && result.clientId && data.clientId !== result.clientId) {
-      await clientDao.updateClientFinancials(prisma, result.clientId);
+    // If clientId was changed (either by direct update or by type conversion)
+    if (oldClientId !== newClientId) {
+      // Update old client's financials if it existed
+      if (oldClientId) {
+        await clientDao.updateClientFinancials(prisma, oldClientId);
+      }
+      // Update new client's financials if it exists
+      if (newClientId) {
+        await clientDao.updateClientFinancials(prisma, newClientId);
+      }
+    } else if (newClientId) {
+      // If clientId didn't change but booking is still linked to a client, update its financials
+      // (in case payable/paid amounts changed)
+      await clientDao.updateClientFinancials(prisma, newClientId);
     }
 
     return result;
