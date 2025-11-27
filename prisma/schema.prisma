@@ -135,6 +135,7 @@ model booking_item {
   modifiedBy     Int
   bookingId      Int
   paymentId      Int?
+  discount       Int?
   vendor         String?
   service        service[]
   contact_log    contact_log[]
