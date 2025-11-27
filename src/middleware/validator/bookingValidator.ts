@@ -176,6 +176,29 @@ const updateBookingValidator = [
 
   // ClientId validation for updates
   body("clientId")
+    .if(body("clientType").equals(client_type.CORPORATE))
+    .notEmpty()
+    .withMessage("Client ID is required when clientType is CORPORATE")
+    .bail()
+    .isInt({ min: 1 })
+    .withMessage("Client ID must be a positive integer")
+    .custom(async (value) => {
+      const client = await clientDao.getClient(prisma, parseInt(value));
+      if (!client) {
+        throw new Error(`Client with id ${value} does not exist`);
+      }
+      if (!client.isActive) {
+        throw new Error(`Client with id ${value} is not active`);
+      }
+      if (client.status !== "ACTIVE") {
+        throw new Error(`Client with id ${value} is not in ACTIVE status (current: ${client.status})`);
+      }
+      return true;
+    }),
+
+  // Optional clientId validation when NOT changing to CORPORATE
+  body("clientId")
+    .if(body("clientType").not().equals(client_type.CORPORATE))
     .optional()
     .isInt({ min: 1 })
     .withMessage("Client ID must be a positive integer")
@@ -212,31 +235,72 @@ const updateBookingValidator = [
       return true;
     }),
 
+  // Phone number validation - required when converting to INDIVIDUAL
   body("phoneNumber")
-    .optional()
+    .if(body("clientType").equals(client_type.INDIVIDUAL))
     .trim()
     .notEmpty()
-    .withMessage("Phone number is optional") // Validate if it's not empty
+    .withMessage("Phone number is required when clientType is INDIVIDUAL")
     .bail()
     .isString()
-    .withMessage("Phone number should be a valid string") // Validate if it's a string
+    .withMessage("Phone number should be a valid string")
     .bail()
     .matches(/^0[1-9]{2}[0-9]{7}$|^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
     .withMessage("Invalid phone number"),
 
-  body("whatsappNumber")
-    .trim()
+  // Phone number validation - optional when NOT INDIVIDUAL
+  body("phoneNumber")
+    .if(body("clientType").not().equals(client_type.INDIVIDUAL))
     .optional()
+    .trim()
     .notEmpty()
-    .withMessage("whatsapp Number is optional")
+    .withMessage("Phone number is optional")
     .bail()
     .isString()
-    .withMessage("whatsapp number should be valid string")
+    .withMessage("Phone number should be a valid string")
+    .bail()
+    .matches(/^0[1-9]{2}[0-9]{7}$|^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
+    .withMessage("Invalid phone number"),
+
+  // WhatsApp number validation - required when converting to INDIVIDUAL
+  body("whatsappNumber")
+    .if(body("clientType").equals(client_type.INDIVIDUAL))
+    .trim()
+    .notEmpty()
+    .withMessage("WhatsApp number is required when clientType is INDIVIDUAL")
+    .bail()
+    .isString()
+    .withMessage("WhatsApp number should be valid string")
     .bail()
     .matches(/^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
     .withMessage("Invalid WhatsApp Number")
     .bail()
     .customSanitizer((value) => formatWhatsAppNumber(value)),
+
+  // WhatsApp number validation - optional when NOT INDIVIDUAL
+  body("whatsappNumber")
+    .if(body("clientType").not().equals(client_type.INDIVIDUAL))
+    .trim()
+    .optional()
+    .notEmpty()
+    .withMessage("WhatsApp Number is optional")
+    .bail()
+    .isString()
+    .withMessage("WhatsApp number should be valid string")
+    .bail()
+    .matches(/^((\+92)?(0092)?(92)?(0)?)(3)([0-9]{9})$/)
+    .withMessage("Invalid WhatsApp Number")
+    .bail()
+    .customSanitizer((value) => formatWhatsAppNumber(value)),
+
+  // Client name validation - required when converting to INDIVIDUAL
+  body("clientName")
+    .if(body("clientType").equals(client_type.INDIVIDUAL))
+    .notEmpty()
+    .withMessage("Client name is required when clientType is INDIVIDUAL")
+    .bail()
+    .isString()
+    .withMessage("Client name should be a valid string"),
 
   // Validate the booking_items array if it is provided
   body("booking_items").optional().isArray().withMessage("Booking items must be an array if provided"),
