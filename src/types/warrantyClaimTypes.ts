@@ -1,3 +1,5 @@
+import { booking_status } from "@prisma/client";
+
 export interface ClaimedItemRequest {
   bookingItemId: number;
   reportedIssue: string;
@@ -16,4 +18,6 @@ export interface ListWarrantyClaimsRequest {
   searchString?: string;
   sortBy?: string;
   orderBy?: string;
+  isActive?: boolean;
+  claimBookingStatus?: booking_status;
 }
