@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, booking_status } from "@prisma/client";
 import { debugLog } from "../services/helper";
 
 const getWarrantyClaim = async (prisma: PrismaClient, id: number) => {
@@ -81,23 +81,31 @@ const listWarrantyClaims = async (
   pageSize: number,
   _sort: string | null,
   _orderBy: string | null,
-  searchString?: string
+  searchString?: string,
+  isActive?: boolean,
+  claimBookingStatus?: booking_status
 ) => {
   try {
     const sort = (_sort ?? "id").toString();
     const order = _orderBy ?? "desc";
     const orderBy = { [sort]: order };
 
-    const where: any = {};
-
-    if (searchString) {
-      where.OR = [
-        { claimNumber: { contains: searchString } },
-        { originalBooking: { clientName: { contains: searchString } } },
-        { originalBooking: { code: { contains: searchString } } },
-        { claimBooking: { code: { contains: searchString } } },
-      ];
-    }
+    const where = {
+      AND: [
+        isActive !== undefined ? { isActive } : {},
+        claimBookingStatus ? { claimBooking: { is: { status: claimBookingStatus } } } : {},
+        searchString
+          ? {
+              OR: [
+                { claimNumber: { contains: searchString } },
+                { originalBooking: { is: { clientName: { contains: searchString } } } },
+                { originalBooking: { is: { code: { contains: searchString } } } },
+                { claimBooking: { is: { code: { contains: searchString } } } },
+              ],
+            }
+          : {},
+      ],
+    };
 
     const result = await prisma.warranty_claim.findMany({
       orderBy,
@@ -148,7 +156,7 @@ const validateWarrantyClaimExists = async (prisma: PrismaClient, id: number) => 
     where: { id },
   });
   return !!claim;
-}
+};
 
 export const warrantyClaimDao = {
   getWarrantyClaim,

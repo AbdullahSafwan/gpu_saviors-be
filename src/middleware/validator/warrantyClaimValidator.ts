@@ -2,6 +2,7 @@ import { body, query, param } from "express-validator";
 import { bookingDao } from "../../dao/booking";
 import prisma from "../../prisma";
 import { warrantyClaimDao } from "../../dao/warrantyClaim";
+import { booking_status } from "@prisma/client";
 
 const createWarrantyClaimValidator = [
   // Validate bookingId
@@ -120,6 +121,16 @@ const listWarrantyClaimsValidator = [
     .optional()
     .isString()
     .withMessage("Search string must be a string if provided"),
+
+  query("isActive")
+    .optional()
+    .isBoolean()
+    .withMessage("isActive must be 'true' or 'false'").toBoolean(),
+
+  query("claimBookingStatus")
+    .optional()
+    .isString()
+    .isIn(Object.values(booking_status)).withMessage("Invalid claim booking status"),
 ];
 
 export const warrantyClaimValidator = {

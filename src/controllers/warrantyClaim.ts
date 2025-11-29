@@ -17,10 +17,7 @@ const createWarrantyClaim = async (req: Request, res: Response) => {
   }
 };
 
-const getWarrantyClaimById = async (
-  req: Request<{ id: string }, {}, {}>,
-  res: Response
-) => {
+const getWarrantyClaimById = async (req: Request<{ id: string }, {}, {}>, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     if (!id || isNaN(id)) {
@@ -35,10 +32,7 @@ const getWarrantyClaimById = async (
   }
 };
 
-const getWarrantyClaimByClaimNumber = async (
-  req: Request<{ claimNumber: string }, {}, {}>,
-  res: Response
-) => {
+const getWarrantyClaimByClaimNumber = async (req: Request<{ claimNumber: string }, {}, {}>, res: Response) => {
   try {
     const claimNumber = req.params.claimNumber;
     if (!claimNumber) {
@@ -53,20 +47,17 @@ const getWarrantyClaimByClaimNumber = async (
   }
 };
 
-const listWarrantyClaims = async (
-  req: Request<unknown, unknown, unknown, ListWarrantyClaimsRequest>,
-  res: Response
-) => {
+const listWarrantyClaims = async (req: Request<unknown, unknown, unknown, ListWarrantyClaimsRequest>, res: Response) => {
   try {
-    const params: ListWarrantyClaimsRequest = {
-      page: req.query.page,
-      pageSize: req.query.pageSize,
-      searchString: req.query.searchString,
-      sortBy: req.query.sortBy,
-      orderBy: req.query.orderBy,
-    };
-
-    const result = await warrantyClaimService.listWarrantyClaims(params);
+    // Parse and extract query parameters
+    const page = parseInt(req.query.page || "1");
+    const pageSize = parseInt(req.query.pageSize || "10");
+    const sortBy = req.query.sortBy || null;
+    const orderBy = req.query.orderBy || null;
+    const searchString = req.query.searchString;
+    const isActive = req.query.isActive === undefined ? undefined : req.query.isActive as boolean === true;
+    const claimBookingStatus = req.query.claimBookingStatus || undefined;
+    const result = await warrantyClaimService.listWarrantyClaims(page, pageSize, sortBy, orderBy, searchString, isActive, claimBookingStatus);
     sendSuccessResponse(res, 200, "Successfully fetched warranty claims list", result);
   } catch (error) {
     debugLog(error);

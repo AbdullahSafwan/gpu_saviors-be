@@ -1,9 +1,10 @@
 import { warrantyClaimDao } from "../../dao/warrantyClaim";
 import { warrantyService } from "../warranty";
 import { bookingDao } from "../../dao/booking";
-import { CreateWarrantyClaimRequest, ListWarrantyClaimsRequest } from "../../types/warrantyClaimTypes";
+import { CreateWarrantyClaimRequest } from "../../types/warrantyClaimTypes";
 import { debugLog } from "../helper";
 import prisma from "../../prisma";
+import { booking_status } from "@prisma/client";
 
 const generateClaimNumber = (): string => {
   const timestamp = new Date().getTime().toString(36).toUpperCase();
@@ -63,7 +64,7 @@ const createWarrantyClaim = async (
         clientName: originalBooking.clientName,
         phoneNumber: originalBooking.phoneNumber,
         whatsappNumber: originalBooking.whatsappNumber,
-        status: originalBooking.status,
+        status: booking_status.DRAFT,
         code: new Date().getTime().toString(36).toUpperCase(),
         payableAmount: 0, // Warranty repairs are free
         paidAmount: 0,
@@ -185,21 +186,25 @@ const getWarrantyClaimByClaimNumber = async (claimNumber: string) => {
   }
 };
 
-const listWarrantyClaims = async (params: ListWarrantyClaimsRequest) => {
+const listWarrantyClaims = async (
+  page: number,
+  pageSize: number,
+  sortBy: string | null,
+  orderBy: string | null,
+  searchString?: string,
+  isActive?: boolean,
+  claimBookingStatus?: string
+) => {
   try {
-    const page = parseInt(params.page || "1");
-    const pageSize = parseInt(params.pageSize || "10");
-    const sortBy = params.sortBy || null;
-    const orderBy = params.orderBy || null;
-    const searchString = params.searchString;
-
     const result = await warrantyClaimDao.listWarrantyClaims(
       prisma,
       page,
       pageSize,
       sortBy,
       orderBy,
-      searchString
+      searchString,
+      isActive,
+      claimBookingStatus as booking_status | undefined
     );
 
     if (!result) {
