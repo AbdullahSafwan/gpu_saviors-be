@@ -19,8 +19,25 @@ import { generateReceipt, generateInvoice } from "./pdfHelper";
 
 const createBooking = async (data: CreateBookingRequest, createdBy: number) => {
   try {
+    // Extract and ignore discountAmount/finalAmount if somehow provided (they are calculated, not user input)
     const { locationId, booking_items, delivery, clientId, ...rest } = data;
+    // Remove discountAmount and finalAmount from rest if present
+    delete (rest as any).discountAmount;
+    delete (rest as any).finalAmount;
+
+    // Calculate payableAmount (sum of item payableAmounts WITHOUT discounts)
     rest.payableAmount = booking_items.reduce((total: number, item) => total + item.payableAmount, 0);
+
+    // Calculate total discount (sum of item discounts)
+    const totalDiscountAmount = booking_items.reduce((total: number, item) => total + (item.discountAmount ?? 0), 0);
+
+    // Calculate finalAmount (payableAmount - discountAmount)
+    const finalAmount = rest.payableAmount - totalDiscountAmount;
+
+    // Validation: finalAmount cannot be negative
+    if (finalAmount < 0) {
+      throw new Error("Total discount cannot exceed total payable amount");
+    }
 
     // If CORPORATE booking with clientId, auto-populate client fields
     let finalClientName = rest.clientName;
@@ -50,6 +67,8 @@ const createBooking = async (data: CreateBookingRequest, createdBy: number) => {
       phoneNumber: finalPhoneNumber,
       whatsappNumber: finalWhatsappNumber,
       code: new Date().getTime().toString(36).toUpperCase().slice(-6), // generate a unique code based on timestamp
+      discountAmount: totalDiscountAmount,
+      finalAmount: finalAmount,
       location: { connect: { id: data.locationId } },
       ...(clientId && { client: { connect: { id: clientId } } }),
       createdByUser: { connect: { id: createdBy } },
@@ -229,7 +248,10 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
         validateTerminalStatus(data, record);
       }
       // Extract nested objects and clientId from data
+      // Also remove discountAmount/finalAmount if present (they are calculated, not user input)
       const { booking_items, contact_log, delivery, booking_payments, clientId, ...otherData } = data;
+      delete (otherData as any).discountAmount;
+      delete (otherData as any).finalAmount;
 
       // Separate booking items based on the presence of `id`
       const itemsToUpdate = booking_items?.filter((item): item is UpdateBookingItem => "id" in item && !!item.id) || [];
@@ -281,30 +303,64 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
       //   // If no booking items changes, use existing payableAmount for payment status calculation
       //   calculatedPayableAmount = record.payableAmount ?? undefined;
       // }
-      // Recalculate payableAmount if booking items were added or updated
+      // Recalculate payableAmount, discountAmount, and finalAmount if booking items were added or updated
       let calculatedPayableAmount: number | undefined;
+      let calculatedDiscountAmount: number | undefined;
+      let calculatedFinalAmount: number | undefined;
+
       if (booking_items && booking_items.length > 0) {
         // Calculate new total by combining existing items with updates and new items
         const existingItems = record.booking_items;
 
         // Create a map of updated amounts
         const updatedAmountsMap = new Map(
-          itemsToUpdate.filter((item) => item.payableAmount !== undefined).map((item) => [item.id, item.payableAmount!])
+          itemsToUpdate
+            .filter((item) => item.payableAmount !== undefined || item.discountAmount !== undefined)
+            .map((item) => [
+              item.id,
+              {
+                payableAmount: item.payableAmount,
+                discountAmount: item.discountAmount,
+              },
+            ])
         );
 
-        // Calculate total from existing items (with updates applied)
+        // Calculate total payableAmount from existing items (with updates applied)
+        // payableAmount = sum of item.payableAmount WITHOUT discounts
         let totalPayableAmount = existingItems.reduce((total, item) => {
           const updatedAmount = updatedAmountsMap.get(item.id);
-          return total + (updatedAmount !== undefined ? updatedAmount : item.payableAmount);
+          const itemPayableAmount = updatedAmount?.payableAmount !== undefined ? updatedAmount.payableAmount : item.payableAmount;
+          return total + itemPayableAmount;
+        }, 0);
+
+        // Calculate total discount from existing items (with updates applied)
+        let totalDiscountAmount = existingItems.reduce((total, item) => {
+          const updatedAmount = updatedAmountsMap.get(item.id);
+          const itemDiscount = updatedAmount?.discountAmount !== undefined ? updatedAmount.discountAmount : item.discountAmount ?? 0;
+          return total + itemDiscount;
         }, 0);
 
         // Add amounts from newly created items
-        totalPayableAmount += itemsToCreate.reduce((total, item) => total + item.payableAmount, 0);
+        totalPayableAmount += itemsToCreate.reduce((total, item) => total + (item.payableAmount ?? 0), 0);
+        totalDiscountAmount += itemsToCreate.reduce((total, item) => total + (item.discountAmount ?? 0), 0);
 
+        // Set calculated values
         calculatedPayableAmount = totalPayableAmount;
+        calculatedDiscountAmount = totalDiscountAmount;
+        calculatedFinalAmount = totalPayableAmount - totalDiscountAmount;
+
+        // Validation: finalAmount cannot be negative
+        if (calculatedFinalAmount < 0) {
+          throw new Error("Total discount cannot exceed total payable amount");
+        }
       } else {
-        // If no booking items changes, use existing payableAmount for payment status calculation
+        // If no booking items changes, use existing amounts
         calculatedPayableAmount = record.payableAmount ?? undefined;
+        calculatedDiscountAmount = record.discountAmount ?? undefined;
+        // Calculate finalAmount from existing values if not present
+        if (calculatedPayableAmount !== undefined && calculatedDiscountAmount !== undefined) {
+          calculatedFinalAmount = calculatedPayableAmount - calculatedDiscountAmount;
+        }
       }
 
       // calculate paid amount if booking payments were marked as PAID
@@ -329,20 +385,17 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
         totalPaidAmount = record.paidAmount ?? undefined;
       }
 
+      // Calculate payment status based on finalAmount (after discounts) not payableAmount
       let bookingPaymentStatus: booking_payment_status | undefined;
-      
-      if(calculatedPayableAmount === 0){
-        bookingPaymentStatus = booking_payment_status.NOT_APPLICABLE
-      }
-      
-      if (totalPaidAmount !== undefined && calculatedPayableAmount !== undefined) {
-        if (calculatedPayableAmount === 0) {
+
+      if (totalPaidAmount !== undefined && calculatedFinalAmount !== undefined) {
+        if (calculatedFinalAmount === 0) {
           bookingPaymentStatus = booking_payment_status.NOT_APPLICABLE;
         } else if (totalPaidAmount === 0) {
           bookingPaymentStatus = booking_payment_status.PENDING;
-        } else if (totalPaidAmount >= calculatedPayableAmount) {
+        } else if (totalPaidAmount >= calculatedFinalAmount) {
           bookingPaymentStatus = booking_payment_status.PAID;
-        } else if (totalPaidAmount > 0 && totalPaidAmount < calculatedPayableAmount) {
+        } else if (totalPaidAmount > 0 && totalPaidAmount < calculatedFinalAmount) {
           bookingPaymentStatus = booking_payment_status.PARTIAL_PAID;
         }
       }
@@ -357,6 +410,8 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
         ...(clientId && record.clientType === client_type.CORPORATE && record.clientId !== clientId && !data.clientType && { client: { connect: { id: clientId } } }),
         modifiedByUser: { connect: { id: modifiedBy } },
         ...(calculatedPayableAmount !== undefined && { payableAmount: calculatedPayableAmount }),
+        ...(calculatedDiscountAmount !== undefined && { discountAmount: calculatedDiscountAmount }),
+        ...(calculatedFinalAmount !== undefined && { finalAmount: calculatedFinalAmount }),
         ...(totalPaidAmount !== undefined && { paidAmount: totalPaidAmount }),
         ...(bookingPaymentStatus !== undefined && { paymentStatus: bookingPaymentStatus }),
         ...(booking_items && {

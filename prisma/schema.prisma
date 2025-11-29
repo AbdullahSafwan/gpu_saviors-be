@@ -98,6 +98,8 @@ model booking {
   createdBy             Int
   modifiedBy            Int
   locationId            Int
+  discountAmount        Int?                   @default(0)
+  finalAmount           Int?
   clientType            client_type            @default(INDIVIDUAL)
   clientId              Int?
   referralSource        ReferralSource?
@@ -135,7 +137,7 @@ model booking_item {
   modifiedBy     Int
   bookingId      Int
   paymentId      Int?
-  discountAmount Int?
+  discountAmount Int? @default(0)
   vendor         String?
   service        service[]
   contact_log    contact_log[]
