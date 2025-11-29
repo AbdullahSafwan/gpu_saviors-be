@@ -1,2 +1,2 @@
 -- AlterTable
-ALTER TABLE `booking_item` ADD COLUMN `discount` INTEGER NULL;
+ALTER TABLE `booking_item` ADD COLUMN `discountAmount` INTEGER NULL;
