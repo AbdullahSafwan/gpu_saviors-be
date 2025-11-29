@@ -1,4 +1,4 @@
-import { booking_status, Prisma, booking_item_status, booking_payment_status, client_type } from "@prisma/client";
+import { booking_status, Prisma, booking_item_status, booking_payment_status, client_type, delivery_status, courier_type } from "@prisma/client";
 import {
   CreateBookingItem,
   CreateBookingRequest,
@@ -61,8 +61,13 @@ const createBooking = async (data: CreateBookingRequest, createdBy: number) => {
       throw new Error("Client name, phone number, and WhatsApp number are required");
     }
 
+    const bookingStatus =
+      data.delivery && data.delivery.length && data.delivery[0].type === courier_type.INBOUND && data.delivery[0].status === delivery_status.DELIVERED
+        ? booking_status.CONFIRMED
+        : booking_status.DRAFT;
     const bookingData = {
       ...rest,
+      status: bookingStatus,
       clientName: finalClientName,
       phoneNumber: finalPhoneNumber,
       whatsappNumber: finalWhatsappNumber,
@@ -270,7 +275,7 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
       const paymentsToCreate = booking_payments?.filter((item): item is CreateBookingPayment => !("id" in item)) || [];
 
       // if item is marked NOT REPAIRED then its payable amount will not be charged
-      itemsToUpdate.filter(item=> item.status === booking_item_status.NOT_REPAIRED).map(item=> item.payableAmount = 0)
+      itemsToUpdate.filter((item) => item.status === booking_item_status.NOT_REPAIRED).map((item) => (item.payableAmount = 0));
 
       // for future, if need be: keep record payable amount of item but total payable amount 0 if NOT_REPAIRED
       // if (booking_items && booking_items.length > 0) {
@@ -291,7 +296,7 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
       //   let totalPayableAmount = existingItems.reduce((total, item) => {
       //     const updatedStatus = updatedStatusMap.get(item.id)
       //     const updatedAmount = updatedStatus === booking_item_status.NOT_REPAIRED ? 0 : updatedAmountsMap.get(item.id);
-      //     // return total + 
+      //     // return total +
       //     return total + ((updatedAmount !== undefined )? updatedAmount : (item.status === booking_item_status.NOT_REPAIRED ? 0 :item.payableAmount));
       //   }, 0);
 
@@ -407,7 +412,10 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
         ...(data.clientType === client_type.CORPORATE && clientId && { client: { connect: { id: clientId } } }),
         ...(data.clientType === client_type.INDIVIDUAL && record.clientType === client_type.CORPORATE && { client: { disconnect: true } }),
         // Handle clientId update for existing CORPORATE bookings (changing client without changing type)
-        ...(clientId && record.clientType === client_type.CORPORATE && record.clientId !== clientId && !data.clientType && { client: { connect: { id: clientId } } }),
+        ...(clientId &&
+          record.clientType === client_type.CORPORATE &&
+          record.clientId !== clientId &&
+          !data.clientType && { client: { connect: { id: clientId } } }),
         modifiedByUser: { connect: { id: modifiedBy } },
         ...(calculatedPayableAmount !== undefined && { payableAmount: calculatedPayableAmount }),
         ...(calculatedDiscountAmount !== undefined && { discountAmount: calculatedDiscountAmount }),
