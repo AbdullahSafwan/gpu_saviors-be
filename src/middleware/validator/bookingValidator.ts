@@ -113,10 +113,41 @@ const createBookingValidator = [
     .isInt({ min: 0 })
     .withMessage("Item payable amount must be a positive integer"),
   body("booking_items.*.paidAmount").optional().isInt({ min: 0 }).withMessage("Item paid amount must be a positive integer"),
+  body("booking_items.*.discountAmount")
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage("Item discount amount must be a non-negative integer")
+    .custom((value, { req, path }) => {
+      // Extract item index from path (e.g., "booking_items[0].discountAmount")
+      const match = path.match(/\[(\d+)\]/);
+      if (match && value !== undefined) {
+        const index = parseInt(match[1]);
+        const item = req.body.booking_items[index];
+        if (item && value > item.payableAmount) {
+          throw new Error("Item discount cannot exceed item payable amount");
+        }
+      }
+      return true;
+    }),
   body("appointmentDate").optional().isISO8601().toDate().withMessage("Appointment date must be a valid date format"),
   body("referralSource").optional().isIn(Object.values(ReferralSource)).withMessage("Invalid referral source"),
   body("referralSourceNotes").optional().isString().withMessage("Referral source notes must be a string").isLength({ max: 500 }).withMessage("Referral source notes must not exceed 500 characters"),
   body("comments").optional().isString().withMessage("Comments must be a string"),
+
+  // Booking-level discountAmount and finalAmount are READ-ONLY (calculated from items)
+  body("discountAmount").custom((value) => {
+    if (value !== undefined) {
+      throw new Error("discountAmount is read-only and calculated from booking items. Set discounts on individual items instead.");
+    }
+    return true;
+  }),
+  body("finalAmount").custom((value) => {
+    if (value !== undefined) {
+      throw new Error("finalAmount is read-only and calculated automatically. Do not provide this field.");
+    }
+    return true;
+  }),
+
   body("delivery").optional().isArray().withMessage("Delivery must be an array if provided"),
 
   body("delivery.*.id").optional().isInt().withMessage("Delivery id must be a valid integer")
@@ -314,7 +345,26 @@ const updateBookingValidator = [
 
   body("booking_items.*.paidAmount").optional().isInt({ min: 0 }).withMessage("Item paid amount must be a positive integer"),
 
+  body("booking_items.*.discountAmount")
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage("Item discount amount must be a non-negative integer"),
+
   body("booking_items.*.serialNumber").optional().isString().withMessage("Serial number should be a valid string if provided"),
+
+  // Booking-level discountAmount and finalAmount are READ-ONLY (calculated from items)
+  body("discountAmount").custom((value) => {
+    if (value !== undefined) {
+      throw new Error("discountAmount is read-only and calculated from booking items. Set discounts on individual items instead.");
+    }
+    return true;
+  }),
+  body("finalAmount").custom((value) => {
+    if (value !== undefined) {
+      throw new Error("finalAmount is read-only and calculated automatically. Do not provide this field.");
+    }
+    return true;
+  }),
 
   body("delivery").optional().isArray().withMessage("Delivery must be an array if provided"),
 
