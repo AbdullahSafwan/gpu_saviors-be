@@ -8,6 +8,7 @@ export interface BookingItem {
   payableAmount: number;
   paidAmount?: number;
   reportedIssue?: string;
+  discountAmount?: number;
 }
 
 export interface CreateBookingRequest {
@@ -70,7 +71,8 @@ export interface UpdateBookingItem {
   paidAmount?: number;
   reportedIssue?: string;
   status?: booking_item_status;
-  modifiedBy?: number; // Will be set by system
+  modifiedBy?: number;
+  discountAmount?: number;
 }
 
 export interface CreateBookingItem {
@@ -80,6 +82,7 @@ export interface CreateBookingItem {
   paidAmount?: number;
   createdBy?: number; // Will be set by system
   status?: booking_item_status;
+  discountAmount?: number;
 }
 
 export interface DashboardRequest {

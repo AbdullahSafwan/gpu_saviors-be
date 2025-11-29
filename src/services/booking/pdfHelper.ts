@@ -12,6 +12,8 @@ interface BookingData {
   phoneNumber: string;
   whatsappNumber: string;
   payableAmount: number | null;
+  discountAmount: number | null;
+  finalAmount: number | null;
   paidAmount: number | null;
   createdAt: Date;
   status: string;
@@ -22,6 +24,7 @@ interface BookingData {
     type: string;
     serialNumber: string | null;
     payableAmount: number;
+    discountAmount: number | null;
     reportedIssue: string | null;
   }>;
   booking_payments: Array<{
@@ -289,8 +292,10 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
       // Simple table header with line
       const tableTop = doc.y;
       const itemX = 50;
-      const typeX = 200;
-      const serialX = 300;
+      const typeX = 180;
+      const serialX = 260;
+      const priceX = 360;
+      const discountX = 420;
       const amountX = 480;
 
       doc
@@ -300,7 +305,9 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
         .text("Item", itemX, tableTop)
         .text("Type", typeX, tableTop)
         .text("Serial #", serialX, tableTop)
-        .text("Amount", amountX, tableTop, { width: 65, align: "right" });
+        .text("Price", priceX, tableTop, { width: 50, align: "right" })
+        .text("Disc.", discountX, tableTop, { width: 50, align: "right" })
+        .text("Total", amountX, tableTop, { width: 65, align: "right" });
 
       // Line under header
       doc.moveTo(50, tableTop + 15).lineTo(545, tableTop + 15).strokeColor("#E5E5E5").lineWidth(1).stroke();
@@ -315,14 +322,26 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
           itemY = 50;
         }
 
+        const itemDiscount = item.discountAmount || 0;
+        const itemTotal = item.payableAmount - itemDiscount;
+
         doc
           .fillColor("#000")
-          .text(item.name, itemX, itemY, { width: 140 })
-          .text(item.type, typeX, itemY)
+          .text(item.name, itemX, itemY, { width: 120 })
+          .text(item.type, typeX, itemY, { width: 70 })
           .fillColor("#666")
-          .text(item.serialNumber || "—", serialX, itemY, { width: 140 })
+          .text(item.serialNumber || "—", serialX, itemY, { width: 90 })
           .fillColor("#000")
-          .text(`Rs. ${item.payableAmount.toLocaleString()}`, amountX, itemY, { width: 65, align: "right" });
+          .text(`Rs. ${item.payableAmount.toLocaleString()}`, priceX, itemY, { width: 50, align: "right" });
+
+        // Show discount if present
+        if (itemDiscount > 0) {
+          doc.fillColor("#E74C3C").text(`-${itemDiscount.toLocaleString()}`, discountX, itemY, { width: 50, align: "right" });
+        } else {
+          doc.fillColor("#666").text("—", discountX, itemY, { width: 50, align: "right" });
+        }
+
+        doc.fillColor("#000").text(`Rs. ${itemTotal.toLocaleString()}`, amountX, itemY, { width: 65, align: "right" });
 
         if (item.reportedIssue) {
           itemY += 15;
@@ -340,37 +359,79 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
       // Line after items
       doc.moveTo(50, itemY).lineTo(545, itemY).strokeColor("#E5E5E5").lineWidth(1).stroke();
 
-      // Payment Summary - Stripe style
+      // Payment Summary - Stripe style with discounts
       doc.moveDown(4);
       const summaryY = doc.y;
-      const balance = (bookingData.payableAmount || 0) - (bookingData.paidAmount || 0);
+      const subtotal = bookingData.payableAmount || 0;
+      const totalDiscount = bookingData.discountAmount || 0;
+      const finalAmount = bookingData.finalAmount || subtotal - totalDiscount;
+      const balance = finalAmount - (bookingData.paidAmount || 0);
 
       // Right-aligned summary
       doc
         .fontSize(9)
         .font("Helvetica")
         .fillColor("#666")
-        .text("Total", 380, summaryY)
+        .text("Subtotal", 380, summaryY)
         .fillColor("#000")
-        .text(`Rs. ${(bookingData.payableAmount || 0).toLocaleString()}`, 480, summaryY, { width: 65, align: "right" });
+        .text(`Rs. ${subtotal.toLocaleString()}`, 480, summaryY, { width: 65, align: "right" });
 
-      doc
-        .fillColor("#666")
-        .text("Paid", 380, summaryY + 18)
-        .fillColor("#000")
-        .text(`Rs. ${(bookingData.paidAmount || 0).toLocaleString()}`, 480, summaryY + 18, { width: 65, align: "right" });
+      // Show discount if present
+      if (totalDiscount > 0) {
+        doc
+          .fillColor("#666")
+          .text("Discount", 380, summaryY + 18)
+          .fillColor("#E74C3C")
+          .text(`-Rs. ${totalDiscount.toLocaleString()}`, 480, summaryY + 18, { width: 65, align: "right" });
 
-      // Line before final amount
-      doc.moveTo(380, summaryY + 34).lineTo(545, summaryY + 34).strokeColor("#E5E5E5").lineWidth(1).stroke();
+        // Line before final amount
+        doc.moveTo(380, summaryY + 34).lineTo(545, summaryY + 34).strokeColor("#E5E5E5").lineWidth(1).stroke();
 
-      // Show "Amount Due" if balance > 0, otherwise show "Total Paid"
-      const finalLabel = balance > 0 ? "Amount Due" : "Total Paid";
-      doc
-        .fontSize(9)
-        .font("Helvetica-Bold")
-        .fillColor("#000")
-        .text(finalLabel, 380, summaryY + 42)
-        .text(`Rs. ${balance > 0 ? balance.toLocaleString() : (bookingData.paidAmount || 0).toLocaleString()}`, 480, summaryY + 42, { width: 65, align: "right" });
+        doc
+          .fillColor("#666")
+          .text("Final Amount", 380, summaryY + 42)
+          .fillColor("#000")
+          .font("Helvetica-Bold")
+          .text(`Rs. ${finalAmount.toLocaleString()}`, 480, summaryY + 42, { width: 65, align: "right" })
+          .font("Helvetica");
+
+        doc
+          .fillColor("#666")
+          .text("Paid", 380, summaryY + 60)
+          .fillColor("#000")
+          .text(`Rs. ${(bookingData.paidAmount || 0).toLocaleString()}`, 480, summaryY + 60, { width: 65, align: "right" });
+
+        // Line before balance
+        doc.moveTo(380, summaryY + 76).lineTo(545, summaryY + 76).strokeColor("#E5E5E5").lineWidth(1).stroke();
+
+        // Show "Amount Due" if balance > 0, otherwise show "Total Paid"
+        const finalLabel = balance > 0 ? "Amount Due" : "Paid in Full";
+        doc
+          .fontSize(9)
+          .font("Helvetica-Bold")
+          .fillColor("#000")
+          .text(finalLabel, 380, summaryY + 84)
+          .text(`Rs. ${balance > 0 ? balance.toLocaleString() : (bookingData.paidAmount || 0).toLocaleString()}`, 480, summaryY + 84, { width: 65, align: "right" });
+      } else {
+        // No discount - simpler layout
+        doc
+          .fillColor("#666")
+          .text("Paid", 380, summaryY + 18)
+          .fillColor("#000")
+          .text(`Rs. ${(bookingData.paidAmount || 0).toLocaleString()}`, 480, summaryY + 18, { width: 65, align: "right" });
+
+        // Line before final amount
+        doc.moveTo(380, summaryY + 34).lineTo(545, summaryY + 34).strokeColor("#E5E5E5").lineWidth(1).stroke();
+
+        // Show "Amount Due" if balance > 0, otherwise show "Total Paid"
+        const finalLabel = balance > 0 ? "Amount Due" : "Paid in Full";
+        doc
+          .fontSize(9)
+          .font("Helvetica-Bold")
+          .fillColor("#000")
+          .text(finalLabel, 380, summaryY + 42)
+          .text(`Rs. ${balance > 0 ? balance.toLocaleString() : (bookingData.paidAmount || 0).toLocaleString()}`, 480, summaryY + 42, { width: 65, align: "right" });
+      }
 
       // Footer with warranty terms and contact info
       await generateFooter(doc);
@@ -565,8 +626,10 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
       // Simple table header with line
       const tableTop = doc.y;
       const itemX = 50;
-      const typeX = 200;
-      const serialX = 300;
+      const typeX = 180;
+      const serialX = 260;
+      const priceX = 360;
+      const discountX = 420;
       const amountX = 480;
 
       doc
@@ -576,7 +639,9 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
         .text("Item", itemX, tableTop)
         .text("Type", typeX, tableTop)
         .text("Serial #", serialX, tableTop)
-        .text("Amount", amountX, tableTop, { width: 65, align: "right" });
+        .text("Price", priceX, tableTop, { width: 50, align: "right" })
+        .text("Disc.", discountX, tableTop, { width: 50, align: "right" })
+        .text("Total", amountX, tableTop, { width: 65, align: "right" });
 
       // Line under header
       doc.moveTo(50, tableTop + 15).lineTo(545, tableTop + 15).strokeColor("#E5E5E5").lineWidth(1).stroke();
@@ -591,14 +656,26 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
           itemY = 50;
         }
 
+        const itemDiscount = item.discountAmount || 0;
+        const itemTotal = item.payableAmount - itemDiscount;
+
         doc
           .fillColor("#000")
-          .text(item.name, itemX, itemY, { width: 140 })
-          .text(item.type, typeX, itemY)
+          .text(item.name, itemX, itemY, { width: 120 })
+          .text(item.type, typeX, itemY, { width: 70 })
           .fillColor("#666")
-          .text(item.serialNumber || "—", serialX, itemY, { width: 140 })
+          .text(item.serialNumber || "—", serialX, itemY, { width: 90 })
           .fillColor("#000")
-          .text(`Rs. ${item.payableAmount.toLocaleString()}`, amountX, itemY, { width: 65, align: "right" });
+          .text(`Rs. ${item.payableAmount.toLocaleString()}`, priceX, itemY, { width: 50, align: "right" });
+
+        // Show discount if present
+        if (itemDiscount > 0) {
+          doc.fillColor("#E74C3C").text(`-${itemDiscount.toLocaleString()}`, discountX, itemY, { width: 50, align: "right" });
+        } else {
+          doc.fillColor("#666").text("—", discountX, itemY, { width: 50, align: "right" });
+        }
+
+        doc.fillColor("#000").text(`Rs. ${itemTotal.toLocaleString()}`, amountX, itemY, { width: 65, align: "right" });
 
         if (item.reportedIssue) {
           itemY += 15;
@@ -639,11 +716,14 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
         doc.moveDown(0.8);
       });
 
-      // Payment Summary - Stripe style
+      // Payment Summary - Stripe style with discounts
       doc.moveDown(1);
       const summaryY = doc.y;
       const totalPaid = paidPayments.reduce((sum, p) => sum + (p.paidAmount || 0), 0);
-      const balance = (bookingData.payableAmount || 0) - totalPaid;
+      const subtotal = bookingData.payableAmount || 0;
+      const totalDiscount = bookingData.discountAmount || 0;
+      const finalAmount = bookingData.finalAmount || subtotal - totalDiscount;
+      const balance = finalAmount - totalPaid;
 
       // Right-aligned summary
       doc
@@ -652,25 +732,64 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
         .fillColor("#666")
         .text("Subtotal", 380, summaryY)
         .fillColor("#000")
-        .text(`Rs. ${(bookingData.payableAmount || 0).toLocaleString()}`, 480, summaryY, { width: 65, align: "right" });
+        .text(`Rs. ${subtotal.toLocaleString()}`, 480, summaryY, { width: 65, align: "right" });
 
-      doc
-        .fillColor("#666")
-        .text("Paid", 380, summaryY + 18)
-        .fillColor("#000")
-        .text(`Rs. ${totalPaid.toLocaleString()}`, 480, summaryY + 18, { width: 65, align: "right" });
+      // Show discount if present
+      if (totalDiscount > 0) {
+        doc
+          .fillColor("#666")
+          .text("Discount", 380, summaryY + 18)
+          .fillColor("#E74C3C")
+          .text(`-Rs. ${totalDiscount.toLocaleString()}`, 480, summaryY + 18, { width: 65, align: "right" });
 
-      // Line before final amount
-      doc.moveTo(380, summaryY + 34).lineTo(545, summaryY + 34).strokeColor("#E5E5E5").lineWidth(1).stroke();
+        // Line before final amount
+        doc.moveTo(380, summaryY + 34).lineTo(545, summaryY + 34).strokeColor("#E5E5E5").lineWidth(1).stroke();
 
-      // Show "Amount Due" if balance > 0, otherwise show "Total Paid"
-      const finalLabel = balance > 0 ? "Amount Due" : "Total Paid";
-      doc
-        .fontSize(9)
-        .font("Helvetica-Bold")
-        .fillColor("#000")
-        .text(finalLabel, 380, summaryY + 42)
-        .text(`Rs. ${balance > 0 ? balance.toLocaleString() : totalPaid.toLocaleString()}`, 480, summaryY + 42, { width: 65, align: "right" });
+        doc
+          .fillColor("#666")
+          .text("Final Amount", 380, summaryY + 42)
+          .fillColor("#000")
+          .font("Helvetica-Bold")
+          .text(`Rs. ${finalAmount.toLocaleString()}`, 480, summaryY + 42, { width: 65, align: "right" })
+          .font("Helvetica");
+
+        doc
+          .fillColor("#666")
+          .text("Paid", 380, summaryY + 60)
+          .fillColor("#000")
+          .text(`Rs. ${totalPaid.toLocaleString()}`, 480, summaryY + 60, { width: 65, align: "right" });
+
+        // Line before balance
+        doc.moveTo(380, summaryY + 76).lineTo(545, summaryY + 76).strokeColor("#E5E5E5").lineWidth(1).stroke();
+
+        // Show "Amount Due" if balance > 0, otherwise show "Total Paid"
+        const finalLabel = balance > 0 ? "Amount Due" : "Paid in Full";
+        doc
+          .fontSize(9)
+          .font("Helvetica-Bold")
+          .fillColor("#000")
+          .text(finalLabel, 380, summaryY + 84)
+          .text(`Rs. ${balance > 0 ? balance.toLocaleString() : totalPaid.toLocaleString()}`, 480, summaryY + 84, { width: 65, align: "right" });
+      } else {
+        // No discount - simpler layout
+        doc
+          .fillColor("#666")
+          .text("Paid", 380, summaryY + 18)
+          .fillColor("#000")
+          .text(`Rs. ${totalPaid.toLocaleString()}`, 480, summaryY + 18, { width: 65, align: "right" });
+
+        // Line before final amount
+        doc.moveTo(380, summaryY + 34).lineTo(545, summaryY + 34).strokeColor("#E5E5E5").lineWidth(1).stroke();
+
+        // Show "Amount Due" if balance > 0, otherwise show "Total Paid"
+        const finalLabel = balance > 0 ? "Amount Due" : "Paid in Full";
+        doc
+          .fontSize(9)
+          .font("Helvetica-Bold")
+          .fillColor("#000")
+          .text(finalLabel, 380, summaryY + 42)
+          .text(`Rs. ${balance > 0 ? balance.toLocaleString() : totalPaid.toLocaleString()}`, 480, summaryY + 42, { width: 65, align: "right" });
+      }
 
       // Footer with warranty terms and contact info
       await generateFooter(doc);
