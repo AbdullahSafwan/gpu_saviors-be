@@ -439,7 +439,7 @@ const listBookingsValidator = [
   }),
 ];
 
-const removeBookingValidator = [
+const deleteBookingValidator = [
   query("id").notEmpty().withMessage("Booking ID is required").isInt({ min: 1 }).withMessage("Booking ID must be a positive integer").toInt(),
   query("id").custom(async (value) => {
     if (isNaN(value) || value <= 0) {
@@ -484,4 +484,4 @@ const reopenBookingValidator = [
     }),
 ];
 
-export const bookingValidator = { createBookingValidator, updateBookingValidator, listBookingsValidator, removeBookingValidator, generateDocumentValidator, reopenBookingValidator };
+export const bookingValidator = { createBookingValidator, updateBookingValidator, listBookingsValidator, deleteBookingValidator, generateDocumentValidator, reopenBookingValidator };

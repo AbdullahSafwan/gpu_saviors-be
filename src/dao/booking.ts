@@ -201,6 +201,20 @@ const validateBookingExists = async (prisma: PrismaClient | Prisma.TransactionCl
   });
   return !!booking;
 };
+
+const deleteBooking = async (prisma: PrismaClient | Prisma.TransactionClient, id: number, userId: number) => {
+  try {
+    const result = await prisma.booking.update({
+      where: { id },
+      data: { isActive: false, status: booking_status.DELETED, modifiedBy: userId},
+    });
+    return result;
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+
 export const bookingDao = {
   createBooking,
   getBooking,
@@ -209,4 +223,5 @@ export const bookingDao = {
   fetchingBookingsByFilter,
   updateManyBookings,
   validateBookingExists,
+  deleteBooking
 };
