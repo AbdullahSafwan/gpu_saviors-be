@@ -39,6 +39,8 @@ const createDeliveryValidator = [
   body("courier").notEmpty().isString().withMessage("Courier name is required"),
 
   body("type").notEmpty().withMessage("courier type is required").bail().isIn(Object.values(courier_type)),
+
+  body("hasPackaging").notEmpty().withMessage("hasPackaging is required").bail().isBoolean().withMessage("hasPackaging must be a boolean value"),
 ];
 
 const updateDeliveryValidator = [
@@ -80,6 +82,8 @@ const updateDeliveryValidator = [
   body("courier").optional().notEmpty().isString().withMessage("Courier name is required"),
 
   body("type").optional().notEmpty().withMessage("courier type is required").bail().isIn(Object.values(courier_type)),
+
+  body("hasPackaging").optional().isBoolean().withMessage("hasPackaging must be a boolean value"),
 ];
 
 export const deliveryValidator = { createDeliveryValidator, updateDeliveryValidator };

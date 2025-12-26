@@ -156,7 +156,17 @@ const listBookings = async (
 ) => {
   try {
     // Define searchable fields here in the service layer
-    const searchFields = ["clientName", "code", "whatsappNumber", "phoneNumber", "booking_items.serialNumber", "booking_items.code"];
+    const searchFields = [
+      "clientName",
+      "code",
+      "whatsappNumber",
+      "phoneNumber",
+      "booking_items.name",
+      "booking_items.code",
+      "booking_items.serialNumber",
+      "booking_items.reportedIssue",
+      "booking_items.comments",
+    ];
 
     const result = await bookingDao.listBookings(prisma, page, pageSize, sortBy, orderBy, status, searchString, searchFields, isActive, locationId);
 
@@ -553,6 +563,16 @@ const updateBooking = async (id: number, data: UpdateBookingRequest, modifiedBy:
   }
 };
 
+const deleteBooking = async (id: number, userId: number) => {
+  try {
+    const result = await bookingDao.deleteBooking(prisma, id, userId);
+    return result;
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+
 const dashboard = async (searchString?: string) => {
   try {
     const searchFields = ["clientName", "code", "whatsappNumber", "phoneNumber", "booking_items.serialNumber", "booking_items.code"];
@@ -619,4 +639,4 @@ const reopenBooking = async (id: number, modifiedBy: number) => {
   }
 };
 
-export const bookingService = { updateBooking, createBooking, getBooking, listBookings, dashboard, generateDocument, reopenBooking };
+export const bookingService = { updateBooking, createBooking, getBooking, listBookings, dashboard, generateDocument, reopenBooking, deleteBooking };
