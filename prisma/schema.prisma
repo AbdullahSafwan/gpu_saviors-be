@@ -137,7 +137,7 @@ model booking_item {
   modifiedBy     Int
   bookingId      Int
   paymentId      Int?
-  discountAmount Int? @default(0)
+  discountAmount Int?                @default(0)
   vendor         String?
   service        service[]
   contact_log    contact_log[]
@@ -166,6 +166,7 @@ model delivery {
   isActive             Boolean         @default(true)
   createdBy            Int
   modifiedBy           Int
+  hasPackaging         Boolean         @default(false)
   createdByUser        user            @relation("DeliveryCreatedBy", fields: [createdBy], references: [id])
   modifiedByUser       user            @relation("DeliveryModifiedBy", fields: [modifiedBy], references: [id])
 }
@@ -297,7 +298,7 @@ enum delivery_status {
   PENDING
   IN_TRANSIT_INBOUND
   IN_TRANSIT_OUTBOUND
-  IN_WAREHOUSE
+  CANCELLED
   DELIVERED
   PENDING_INBOUND
   PENDING_OUTBOUND

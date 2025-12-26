@@ -26,6 +26,7 @@ interface BookingData {
     payableAmount: number;
     discountAmount: number | null;
     reportedIssue: string | null;
+    vendor: string | null;
   }>;
   booking_payments: Array<{
     paidAmount: number | null;
@@ -34,6 +35,50 @@ interface BookingData {
     createdAt: Date;
   }>;
 }
+
+/**
+ * Generates a standardized header for PDF documents
+ * @param doc - PDFKit document instance
+ * @param documentType - Type of document (e.g., 'Receipt', 'Invoice')
+ * @returns void
+ */
+const generateHeader = (doc: PDFKit.PDFDocument, documentType: string): void => {
+  // Logo path (use process.cwd() for correct path in both dev and production)
+  const logoPath = path.join(process.cwd(), "public/assets/logos/logo.png");
+  const hasLogo = fs.existsSync(logoPath);
+
+  // Header with dark background for better logo visibility
+  doc.rect(50, 40, 495, 50).fillAndStroke("#4A4A4A", "#333333");
+
+  // Simple header - Stripe style
+  if (hasLogo) {
+    doc.image(logoPath, 54, 50, { width: 60 });
+  }
+
+  doc
+    .fontSize(20)
+    .font("Helvetica-Bold")
+    .fillColor("#FFFFFF")
+    .text("GPU SAVIORS", hasLogo ? 125 : 50, 53, { align: hasLogo ? "left" : "center" })
+    .fontSize(9)
+    .font("Helvetica")
+    .fillColor("#CCCCCC")
+    .text("Professional GPU Repair Services", hasLogo ? 125 : 50, 74, { align: hasLogo ? "left" : "center" });
+
+  // Document type label on the right
+  doc
+    .fontSize(14)
+    .font("Helvetica")
+    .fillColor("#FFFFFF")
+    .text(documentType, 450, 55, { width: 90, align: "right" });
+
+  // Thin separator line
+  doc.moveDown(1.5);
+  const lineY = doc.y;
+  doc.moveTo(50, lineY).lineTo(545, lineY).strokeColor("#E5E5E5").lineWidth(1).stroke();
+
+  doc.moveDown(1.5);
+};
 
 /**
  * Generates the footer section for PDFs with warranty terms and contact information
@@ -148,42 +193,8 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
       });
       doc.on("error", reject);
 
-      // Logo path (use process.cwd() for correct path in both dev and production)
-      const logoPath = path.join(process.cwd(), "public/assets/logos/logo.png");
-      const hasLogo = fs.existsSync(logoPath);
-
-      // Header with dark background for better logo visibility
-      // Add dark background spanning the full header width
-      doc.rect(50, 40, 495, 50).fillAndStroke("#4A4A4A", "#333333");
-
-      // Simple header - Stripe style
-      if (hasLogo) {
-        doc.image(logoPath, 54, 50, { width: 60 });
-      }
-
-      doc
-        .fontSize(20)
-        .font("Helvetica-Bold")
-        .fillColor("#FFFFFF")
-        .text("GPU SAVIORS", hasLogo ? 125 : 50, 53, { align: hasLogo ? "left" : "center" })
-        .fontSize(9)
-        .font("Helvetica")
-        .fillColor("#CCCCCC")
-        .text("Professional GPU Repair Services", hasLogo ? 125 : 50, 74, { align: hasLogo ? "left" : "center" });
-
-      // Receipt label on the right
-      doc
-        .fontSize(14)
-        .font("Helvetica")
-        .fillColor("#FFFFFF")
-        .text("Receipt", 450, 55, { width: 90, align: "right" })
-
-      // Thin separator line
-      doc.moveDown(1.5);
-      const lineY = doc.y;
-      doc.moveTo(50, lineY).lineTo(545, lineY).strokeColor("#E5E5E5").lineWidth(1).stroke();
-
-      doc.moveDown(1.5);
+      // Generate standardized header
+      generateHeader(doc, "Receipt");
 
       // Booking Code - Simple box
       const bookingCode = bookingData.code || bookingData.id.toString();
@@ -289,14 +300,19 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
         .text("Items", 50)
         .moveDown(0.5);
 
+      // Check if any discount is applied
+      const hasDiscount = (bookingData.discountAmount || 0) > 0;
+
       // Simple table header with line
       const tableTop = doc.y;
       const itemX = 50;
-      const typeX = 180;
-      const serialX = 260;
-      const priceX = 360;
+      const typeX = 155;
+      const vendorX = 210;
+      const serialX = 270;
+      // Adjust positions based on whether discount column is shown
+      const priceX = hasDiscount ? 360 : 380;
       const discountX = 420;
-      const amountX = 480;
+      const amountX = hasDiscount ? 480 : 500;
 
       doc
         .fontSize(9)
@@ -304,10 +320,16 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
         .fillColor("#666")
         .text("Item", itemX, tableTop)
         .text("Type", typeX, tableTop)
+        .text("Vendor", vendorX, tableTop)
         .text("Serial #", serialX, tableTop)
-        .text("Price", priceX, tableTop, { width: 50, align: "right" })
-        .text("Disc.", discountX, tableTop, { width: 50, align: "right" })
-        .text("Total", amountX, tableTop, { width: 65, align: "right" });
+        .text("Price", priceX, tableTop, { width: 50, align: "right" });
+
+      // Only show discount column if there are discounts
+      if (hasDiscount) {
+        doc.text("Disc.", discountX, tableTop, { width: 50, align: "right" });
+      }
+
+      doc.text("Total", amountX, tableTop, { width: 65, align: "right" });
 
       // Line under header
       doc.moveTo(50, tableTop + 15).lineTo(545, tableTop + 15).strokeColor("#E5E5E5").lineWidth(1).stroke();
@@ -327,18 +349,21 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
 
         doc
           .fillColor("#000")
-          .text(item.name, itemX, itemY, { width: 120 })
-          .text(item.type, typeX, itemY, { width: 70 })
+          .text(item.name, itemX, itemY, { width: 100 })
+          .text(item.type, typeX, itemY, { width: 50 })
           .fillColor("#666")
-          .text(item.serialNumber || "—", serialX, itemY, { width: 90 })
+          .text(item.vendor || "—", vendorX, itemY, { width: 55 })
+          .text(item.serialNumber || "—", serialX, itemY, { width: 85 })
           .fillColor("#000")
           .text(`Rs. ${item.payableAmount.toLocaleString()}`, priceX, itemY, { width: 50, align: "right" });
 
-        // Show discount if present
-        if (itemDiscount > 0) {
-          doc.fillColor("#E74C3C").text(`-${itemDiscount.toLocaleString()}`, discountX, itemY, { width: 50, align: "right" });
-        } else {
-          doc.fillColor("#666").text("—", discountX, itemY, { width: 50, align: "right" });
+        // Only show discount column if there are discounts
+        if (hasDiscount) {
+          if (itemDiscount > 0) {
+            doc.fillColor("#E74C3C").text(`-${itemDiscount.toLocaleString()}`, discountX, itemY, { width: 50, align: "right" });
+          } else {
+            doc.fillColor("#666").text("—", discountX, itemY, { width: 50, align: "right" });
+          }
         }
 
         doc.fillColor("#000").text(`Rs. ${itemTotal.toLocaleString()}`, amountX, itemY, { width: 65, align: "right" });
@@ -474,42 +499,8 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
       });
       doc.on("error", reject);
 
-      // Logo (use process.cwd() for correct path in both dev and production)
-      const logoPath = path.join(process.cwd(), "public/assets/logos/logo.png");
-      const hasLogo = fs.existsSync(logoPath);
-
-      // Header with dark background for better logo visibility
-      // Add dark background spanning the full header width
-      doc.rect(50, 40, 495, 50).fillAndStroke("#4A4A4A", "#333333");
-
-      // Simple header - Stripe style
-      if (hasLogo) {
-        doc.image(logoPath, 54, 45, { width: 60 });
-      }
-
-      doc
-        .fontSize(20)
-        .font("Helvetica-Bold")
-        .fillColor("#FFFFFF")
-        .text("GPU SAVIORS", hasLogo ? 125 : 50, 53, { align: hasLogo ? "left" : "center" })
-        .fontSize(9)
-        .font("Helvetica")
-        .fillColor("#CCCCCC")
-        .text("Professional GPU Repair Services", hasLogo ? 125 : 50, 74, { align: hasLogo ? "left" : "center" });
-
-      // Invoice label on the right
-      doc
-        .fontSize(14)
-        .font("Helvetica")
-        .fillColor("#FFFFFF")
-        .text("Invoice", 450, 55, { width: 90, align: "right" })
-
-      // Thin separator line
-      doc.moveDown(1.5);
-      const lineY = doc.y;
-      doc.moveTo(50, lineY).lineTo(545, lineY).strokeColor("#E5E5E5").lineWidth(1).stroke();
-
-      doc.moveDown(1.5);
+      // Generate standardized header
+      generateHeader(doc, "Invoice");
 
       // Booking Code - Simple box
       const bookingCode = bookingData.code || bookingData.id.toString();
@@ -623,14 +614,19 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
         .text("Items", 50)
         .moveDown(0.5);
 
+      // Check if any discount is applied (for invoice)
+      const hasInvoiceDiscount = (bookingData.discountAmount || 0) > 0;
+
       // Simple table header with line
       const tableTop = doc.y;
       const itemX = 50;
-      const typeX = 180;
-      const serialX = 260;
-      const priceX = 360;
+      const typeX = 155;
+      const vendorX = 210;
+      const serialX = 270;
+      // Adjust positions based on whether discount column is shown
+      const priceX = hasInvoiceDiscount ? 360 : 380;
       const discountX = 420;
-      const amountX = 480;
+      const amountX = hasInvoiceDiscount ? 480 : 500;
 
       doc
         .fontSize(9)
@@ -638,10 +634,16 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
         .fillColor("#666")
         .text("Item", itemX, tableTop)
         .text("Type", typeX, tableTop)
+        .text("Vendor", vendorX, tableTop)
         .text("Serial #", serialX, tableTop)
-        .text("Price", priceX, tableTop, { width: 50, align: "right" })
-        .text("Disc.", discountX, tableTop, { width: 50, align: "right" })
-        .text("Total", amountX, tableTop, { width: 65, align: "right" });
+        .text("Price", priceX, tableTop, { width: 50, align: "right" });
+
+      // Only show discount column if there are discounts
+      if (hasInvoiceDiscount) {
+        doc.text("Disc.", discountX, tableTop, { width: 50, align: "right" });
+      }
+
+      doc.text("Total", amountX, tableTop, { width: 65, align: "right" });
 
       // Line under header
       doc.moveTo(50, tableTop + 15).lineTo(545, tableTop + 15).strokeColor("#E5E5E5").lineWidth(1).stroke();
@@ -661,18 +663,21 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
 
         doc
           .fillColor("#000")
-          .text(item.name, itemX, itemY, { width: 120 })
-          .text(item.type, typeX, itemY, { width: 70 })
+          .text(item.name, itemX, itemY, { width: 100 })
+          .text(item.type, typeX, itemY, { width: 50 })
           .fillColor("#666")
-          .text(item.serialNumber || "—", serialX, itemY, { width: 90 })
+          .text(item.vendor || "—", vendorX, itemY, { width: 55 })
+          .text(item.serialNumber || "—", serialX, itemY, { width: 85 })
           .fillColor("#000")
           .text(`Rs. ${item.payableAmount.toLocaleString()}`, priceX, itemY, { width: 50, align: "right" });
 
-        // Show discount if present
-        if (itemDiscount > 0) {
-          doc.fillColor("#E74C3C").text(`-${itemDiscount.toLocaleString()}`, discountX, itemY, { width: 50, align: "right" });
-        } else {
-          doc.fillColor("#666").text("—", discountX, itemY, { width: 50, align: "right" });
+        // Only show discount column if there are discounts
+        if (hasInvoiceDiscount) {
+          if (itemDiscount > 0) {
+            doc.fillColor("#E74C3C").text(`-${itemDiscount.toLocaleString()}`, discountX, itemY, { width: 50, align: "right" });
+          } else {
+            doc.fillColor("#666").text("—", discountX, itemY, { width: 50, align: "right" });
+          }
         }
 
         doc.fillColor("#000").text(`Rs. ${itemTotal.toLocaleString()}`, amountX, itemY, { width: 65, align: "right" });
