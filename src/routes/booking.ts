@@ -10,7 +10,7 @@ router.post("/", verifyToken, bookingValidator.createBookingValidator, throwVali
 router.get("/", verifyToken, bookingValidator.listBookingsValidator, throwValidationResult, bookingController.listBookings);
 router.get("/:id", verifyToken, bookingController.getBookingDetails);
 router.patch("/:id", verifyToken, bookingValidator.updateBookingValidator, throwValidationResult, bookingController.updateBooking);
-router.delete("/:id", verifyToken, bookingValidator.removeBookingValidator, bookingController.removeBooking);
+router.delete("/:id", verifyToken, bookingValidator.deleteBookingValidator, bookingController.deleteBooking);
 router.post("/:id/reopen", verifyToken, bookingValidator.reopenBookingValidator, throwValidationResult, bookingController.reopenBooking);
 router.get("/:id/document", verifyToken, bookingValidator.generateDocumentValidator, throwValidationResult, bookingController.generateDocument);
 

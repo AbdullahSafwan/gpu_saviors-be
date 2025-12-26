@@ -74,16 +74,15 @@ const dashboard = async (req: Request<unknown, unknown, unknown, DashboardReques
   }
 };
 
-const removeBooking = async (req: Request, res: Response) => {
+const deleteBooking = async (req: Request<{ id: string }, {}, {}>, res: Response) => {
   try {
     const id = +req.params.id;
     if (typeof id !== "number" || isNaN(id) || id <= 0) {
       throw new Error("Invalid booking ID");
     }
-    const data = { isActive: false, status: booking_status.DELETED } as UpdateBookingRequest;
     const userId = req.user.userId;
 
-    const result = await bookingService.updateBooking(id, data, userId);
+    const result = await bookingService.deleteBooking(id, userId);
     sendSuccessResponse(res, 200, "Successfully removed booking", result);
   } catch (error) {
     debugLog(error);
@@ -140,4 +139,4 @@ const reopenBooking = async (req: Request, res: Response) => {
   }
 };
 
-export const bookingController = { createBooking, getBookingDetails, updateBooking, listBookings, dashboard, removeBooking, generateDocument, reopenBooking };
+export const bookingController = { createBooking, getBookingDetails, updateBooking, listBookings, dashboard, deleteBooking, generateDocument, reopenBooking };
