@@ -12,8 +12,9 @@ export interface CreateDeliveryRequest {
   landmark?: string;
   secondaryPhoneNumber?: string;
   deliveryDate: Date;
-  isActive?: boolean; // Optional, defaults to true in the model
-  createdBy?: number; // Will be set by system
+  hasPackaging: boolean;
+  isActive?: boolean;
+  createdBy?: number;
 }
 
 // Interface for getting delivery details (by ID)
@@ -34,6 +35,7 @@ export interface UpdateDeliveryRequest {
   landmark?: string;
   secondaryPhoneNumber?: string;
   deliveryDate?: Date;
+  hasPackaging?: boolean; // Optional, indicates if item came with box/packaging
   isActive?: boolean;
   modifiedBy?: number; // Will be set by system
 }
