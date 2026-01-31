@@ -1,11 +1,11 @@
 generator client {
-  provider        = "prisma-client-js"
+  provider        = "prisma-client"
   previewFeatures = ["views"]
+  output          = "../generated/prisma"
 }
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
 }
 
 model user {
@@ -111,6 +111,7 @@ model booking {
   delivery              delivery[]
   contact_log           contact_log[]
   booking_payments      booking_payment[]
+  refunds               refund[]
   warrantyClaims        warranty_claim[]       @relation("WarrantyClaimBooking")
   originalBookingClaims warranty_claim[]       @relation("OriginalBookingClaims")
   createdByUser         user                   @relation("BookingCreatedBy", fields: [createdBy], references: [id])
@@ -138,10 +139,12 @@ model booking_item {
   bookingId      Int
   paymentId      Int?
   discountAmount Int?                @default(0)
+  refundedAmount Int?                @default(0)
   vendor         String?
   service        service[]
   contact_log    contact_log[]
   warranty       warranty?
+  refundItems    refund_item[]
   payment        booking_payment?    @relation(fields: [paymentId], references: [id])
   booking        booking             @relation(fields: [bookingId], references: [id])
   createdByUser  user                @relation("BookingItemCreatedBy", fields: [createdBy], references: [id])
@@ -217,7 +220,6 @@ model booking_payment {
   transactionId  String?
   createdBy      Int
   modifiedBy     Int
-  refund         refund[]
   bookingItem    booking_item[]
   createdByUser  user           @relation("BookingPaymentCreatedBy", fields: [createdBy], references: [id])
   modifiedByUser user           @relation("BookingPaymentModifiedBy", fields: [modifiedBy], references: [id])
@@ -225,8 +227,8 @@ model booking_payment {
 
 model refund {
   id              Int             @unique @default(autoincrement())
-  booking_payment booking_payment @relation(fields: [paymentId], references: [id])
-  paymentId       Int
+  bookingId       Int
+  warrantyClaimId Int?
   refundDate      DateTime
   remarks         String?
   createdAt       DateTime        @default(now())
@@ -235,8 +237,25 @@ model refund {
   isActive        Boolean         @default(true)
   createdBy       Int
   modifiedBy      Int
+  booking         booking         @relation(fields: [bookingId], references: [id])
+  warrantyClaim   warranty_claim? @relation(fields: [warrantyClaimId], references: [id])
+  refundItems     refund_item[]
   createdByUser   user            @relation("RefundCreatedBy", fields: [createdBy], references: [id])
   modifiedByUser  user            @relation("RefundModifiedBy", fields: [modifiedBy], references: [id])
+}
+
+model refund_item {
+  id            Int          @unique @default(autoincrement())
+  refundId      Int
+  bookingItemId Int          @unique
+  amount        Int
+  remarks       String?
+  createdAt     DateTime     @default(now())
+  modifiedAt    DateTime     @default(now()) @updatedAt
+  refund        refund       @relation(fields: [refundId], references: [id])
+  bookingItem   booking_item @relation(fields: [bookingItemId], references: [id])
+
+  @@index([refundId])
 }
 
 model system_role {
@@ -440,6 +459,7 @@ model warranty_claim {
   createdByUser      user                  @relation("WarrantyClaimCreatedBy", fields: [createdBy], references: [id])
   modifiedByUser     user                  @relation("WarrantyClaimModifiedBy", fields: [modifiedBy], references: [id])
   warrantyClaimItems warranty_claim_item[]
+  refunds            refund[]
 }
 
 model warranty_claim_item {
