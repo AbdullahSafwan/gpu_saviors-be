@@ -6,8 +6,12 @@ import { verifyToken } from "../middleware/auth";
 
 const router = express.Router();
 
+router.get("/booking/:bookingId/refundable-items", verifyToken, refundController.getRefundableItems);
+
 router.post("/", verifyToken, refundValidator.createRefundValidator, throwValidationResult, refundController.createRefund);
-router.get("/:id", verifyToken, refundController.getRefundDetails);
+
+router.get("/:id", verifyToken, refundController.getRefund);
+
 router.patch("/:id", verifyToken, refundValidator.updateRefundValidator, throwValidationResult, refundController.updateRefund);
 
 export default router;

@@ -40,9 +40,12 @@ export interface RevenueMetrics {
   totalBookings: number;
   totalRevenue: number;
   totalCollected: number;
+  totalRefunded: number;
+  netCollected: number;
   totalOutstanding: number;
   averageBookingValue: number;
-  collectionRate: number; // percentage
+  collectionRate: number;
+  refundCount: number;
   byPaymentStatus: {
     paid: BookingStatusBreakdown;
     partialPaid: BookingStatusBreakdown;
@@ -105,10 +108,21 @@ export interface WarrantyMetrics {
 
 export interface FinancialMetrics {
   totalRevenue: number;
+  totalRefunded: number;
+  netRevenue: number;
   totalExpenses: number;
   netProfit: number;
-  profitMargin: number; // percentage
+  profitMargin: number;
   roi: number; // percentage
+}
+export interface RefundAnalytics {
+  totalRefunds: number;
+  totalRefundAmount: number;
+  bookingsWithRefunds: number;
+  warrantyRelatedRefunds: number;
+  avgRefundAmount: number;
+  itemsRefunded: number;
+  refundRate: number;
 }
 
 export interface RevenueAnalyticsResponse {

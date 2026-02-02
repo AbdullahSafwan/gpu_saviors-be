@@ -2,7 +2,11 @@ import { Request, Response } from "express";
 import { debugLog } from "../services/helper";
 import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
 import { refundService } from "../services/refund";
-import { CreateRefundRequest,UpdateRefundRequest } from "../types/refundTypes";
+import {
+  CreateRefundRequest,
+  UpdateRefundRequest,
+} from "../types/refundTypes";
+
 const createRefund = async (req: Request, res: Response) => {
   try {
     const data = req.body as CreateRefundRequest;
@@ -15,9 +19,9 @@ const createRefund = async (req: Request, res: Response) => {
   }
 };
 
-const getRefundDetails = async (req: Request<{id: string},{},{}> , res: Response) => {
+const getRefund = async (req: Request<{ id: string }, {}, {}>, res: Response) => {
   try {
-    const id = req.params.id ? +req.params?.id : null;
+    const id = req.params.id ? +req.params.id : null;
     if (!id) {
       throw new Error("id is required");
     }
@@ -42,4 +46,23 @@ const updateRefund = async (req: Request, res: Response) => {
   }
 };
 
-export const refundController = { createRefund, getRefundDetails, updateRefund };
+const getRefundableItems = async (req: Request<{ bookingId: string }, {}, {}>, res: Response) => {
+  try {
+    const bookingId = req.params.bookingId ? +req.params.bookingId : null;
+    if (!bookingId) {
+      throw new Error("bookingId is required");
+    }
+    const result = await refundService.calculateMaxRefundablePerItem(bookingId);
+    sendSuccessResponse(res, 200, "Successfully fetched refundable items", result);
+  } catch (error) {
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error fetching refundable items", error);
+  }
+};
+
+export const refundController = {
+  createRefund,
+  getRefund,
+  updateRefund,
+  getRefundableItems,
+};

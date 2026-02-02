@@ -60,7 +60,7 @@ const getDashboard = async (request: DashboardRequest): Promise<DashboardRespons
       analyticsDao.getTotalExpenses(prisma, startDate, endDate, locationId),
     ]);
 
-    const financial = calculateFinancialMetrics(revenueData.totalRevenue, expensesData);
+    const financial = calculateFinancialMetrics(revenueData.totalRevenue, revenueData.totalRefunded, expensesData);
 
     return {
       dateRange: {
@@ -253,14 +253,19 @@ const getFinancialSummary = async (request: DashboardRequest): Promise<Financial
  * Calculate revenue metrics
  */
 const getRevenueMetrics = async (startDate: Date, endDate: Date, locationId?: number): Promise<RevenueMetrics> => {
-  const [totalData, paymentStatusBreakdown] = await Promise.all([
+  const [totalData, paymentStatusBreakdown, refundData] = await Promise.all([
     analyticsDao.getTotalRevenue(prisma, startDate, endDate, locationId),
     analyticsDao.getRevenueByPaymentStatus(prisma),
+    analyticsDao.getTotalRefunds(prisma, startDate, endDate, locationId),
   ]);
+
+  // Calculate net collected (collected - refunded)
+  const netCollected = totalData.totalCollected - refundData.totalRefunded;
 
   const averageBookingValue = totalData.totalBookings > 0 ? totalData.totalRevenue / totalData.totalBookings : 0;
 
-  const collectionRate = totalData.totalRevenue > 0 ? (totalData.totalCollected / totalData.totalRevenue) * 100 : 0;
+  // Collection rate based on net collected (after refunds)
+  const collectionRate = totalData.totalRevenue > 0 ? (netCollected / totalData.totalRevenue) * 100 : 0;
 
   // Map payment status breakdown
   const statusMap = paymentStatusBreakdown.reduce((acc, item) => {
@@ -277,9 +282,12 @@ const getRevenueMetrics = async (startDate: Date, endDate: Date, locationId?: nu
     totalBookings: totalData.totalBookings,
     totalRevenue: totalData.totalRevenue,
     totalCollected: totalData.totalCollected,
+    totalRefunded: refundData.totalRefunded,
+    netCollected,
     totalOutstanding: totalData.totalOutstanding,
     averageBookingValue,
     collectionRate,
+    refundCount: refundData.refundCount,
     byPaymentStatus: {
       paid: statusMap[booking_payment_status.PAID.toLowerCase()] || { count: 0, revenue: 0, collected: 0, outstanding: 0 },
       partialPaid: statusMap[booking_payment_status.PARTIAL_PAID.toLowerCase()] || { count: 0, revenue: 0, collected: 0, outstanding: 0 },
@@ -383,13 +391,20 @@ const calculateWarrantyMetrics = (warrantyStats: { activeWarranties: number; tot
 /**
  * Calculate financial metrics
  */
-const calculateFinancialMetrics = (totalRevenue: number, totalExpenses: number): FinancialMetrics => {
-  const netProfit = totalRevenue - totalExpenses;
-  const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+const calculateFinancialMetrics = (totalRevenue: number, totalRefunded: number, totalExpenses: number): FinancialMetrics => {
+  const netRevenue = totalRevenue - totalRefunded;
+
+  const netProfit = netRevenue - totalExpenses;
+
+  // Profit margin based on net revenue
+  const profitMargin = netRevenue > 0 ? (netProfit / netRevenue) * 100 : 0;
+
   const roi = totalExpenses > 0 ? (netProfit / totalExpenses) * 100 : 0;
 
   return {
     totalRevenue,
+    totalRefunded,
+    netRevenue,
     totalExpenses,
     netProfit,
     profitMargin,
