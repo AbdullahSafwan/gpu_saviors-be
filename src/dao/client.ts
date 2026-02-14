@@ -1,4 +1,4 @@
-import { PrismaClient, client_status, Prisma } from "@prisma/client";
+import { PrismaClient, client_status, Prisma } from "../../generated/prisma/client";
 import { debugLog } from "../services/helper";
 
 const createClient = async (prisma: PrismaClient, data: Prisma.clientCreateInput) => {

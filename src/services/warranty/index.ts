@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "../../../generated/prisma/client";
 import { warrantyDao } from "../../dao/warranty";
 import { CreateWarrantyRequest, WarrantyEligibilityResponse } from "../../types/warrantyTypes";
 import { debugLog } from "../helper";

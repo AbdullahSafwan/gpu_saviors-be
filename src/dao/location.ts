@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../../generated/prisma/client";
 import { debugLog } from "../services/helper";
 
 const getLocation = async (prisma: PrismaClient, id: number) => {

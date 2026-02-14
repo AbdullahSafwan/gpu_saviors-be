@@ -1,4 +1,4 @@
-import { booking_status, Prisma, PrismaClient } from "@prisma/client";
+import { booking_status, Prisma, PrismaClient } from "../../generated/prisma/client";
 import { debugLog, buildSearchCondition } from "../services/helper";
 
 const createBooking = async (prisma: PrismaClient | Prisma.TransactionClient, data: Prisma.bookingCreateInput) => {

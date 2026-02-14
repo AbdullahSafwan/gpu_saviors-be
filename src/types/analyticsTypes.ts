@@ -1,4 +1,4 @@
-import { booking_item_type, booking_payment_status, client_type } from "@prisma/client";
+import { booking_item_type, booking_payment_status, client_type } from "../../generated/prisma/client";
 
 export interface AnalyticsDateRangeRequest {
   startDate?: string;

@@ -1,4 +1,4 @@
-import { booking_status, Prisma, booking_item_status, booking_payment_status, client_type, delivery_status, courier_type } from "@prisma/client";
+import { booking_status, Prisma, booking_item_status, booking_payment_status, client_type, delivery_status, courier_type } from "../../../generated/prisma/client";
 import {
   CreateBookingItem,
   CreateBookingRequest,

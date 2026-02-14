@@ -2,7 +2,7 @@ import prisma from "../../prisma";
 import { clientDao } from "../../dao/client";
 import { debugLog } from "../helper";
 import { CreateClientRequest, UpdateClientRequest, ListClientsRequest, GetClientBookingsRequest } from "../../types/clientTypes";
-import { booking_payment_status, booking_status, payment_status, Prisma } from "@prisma/client";
+import { booking_payment_status, booking_status, payment_status, Prisma } from "../../../generated/prisma/client";
 
 /**
  * Generate unique client code

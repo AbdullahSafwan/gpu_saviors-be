@@ -2,7 +2,7 @@ import { body, query, param } from "express-validator";
 import { bookingDao } from "../../dao/booking";
 import prisma from "../../prisma";
 import { warrantyClaimDao } from "../../dao/warrantyClaim";
-import { booking_status } from "@prisma/client";
+import { booking_status } from "../../../generated/prisma/client";
 
 const createWarrantyClaimValidator = [
   // Validate bookingId

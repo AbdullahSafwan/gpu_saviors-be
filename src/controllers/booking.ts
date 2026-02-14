@@ -3,7 +3,7 @@ import { debugLog } from "../services/helper";
 import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
 import { CreateBookingRequest, DashboardRequest, ListBookingsRequest, UpdateBookingRequest } from "../types/bookingTypes";
 import { bookingService } from "../services/booking";
-import { booking_status } from "@prisma/client";
+import { booking_status } from "../../generated/prisma/client";
 const createBooking = async (req: Request, res: Response) => {
   try {
     const data = req.body as CreateBookingRequest;

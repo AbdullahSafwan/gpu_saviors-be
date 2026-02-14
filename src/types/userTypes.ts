@@ -1,4 +1,4 @@
-import { user_status } from "@prisma/client";
+import { user_status } from "../../generated/prisma/client";
 
 // Interface for creating a new user
 export interface CreateUserRequest {

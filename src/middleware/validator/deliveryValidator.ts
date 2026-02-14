@@ -1,4 +1,4 @@
-import { delivery_status, courier_type } from "@prisma/client";
+import { delivery_status, courier_type } from "../../../generated/prisma/client";
 import { body, param } from "express-validator";
 
 const createDeliveryValidator = [

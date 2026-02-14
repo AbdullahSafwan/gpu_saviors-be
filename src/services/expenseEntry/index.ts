@@ -1,4 +1,4 @@
-import { expense_category } from "@prisma/client";
+import { expense_category } from "../../../generated/prisma/client";
 import { expenseEntryDao } from "../../dao/expenseEntry";
 import { locationDao } from "../../dao/location";
 import prisma from "../../prisma";

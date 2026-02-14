@@ -1,4 +1,4 @@
-import { booking_item_status, booking_payment_status, client_type } from "@prisma/client";
+import { booking_item_status, booking_payment_status, client_type } from "../../../generated/prisma/client";
 import { analyticsDao } from "../../dao/analytics";
 import prisma from "../../prisma";
 import { debugLog } from "../helper";

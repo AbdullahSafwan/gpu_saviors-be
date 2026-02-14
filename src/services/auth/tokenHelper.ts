@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { PrismaClient, token_type } from "@prisma/client";
+import { PrismaClient, token_type } from "../../../generated/prisma/client";
 import { userVerificationTokenDao } from "../../dao/userVerificationToken";
 
 /**

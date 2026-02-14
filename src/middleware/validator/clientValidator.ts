@@ -1,5 +1,5 @@
 import { body, query } from "express-validator";
-import { client_status } from "@prisma/client";
+import { client_status } from "../../../generated/prisma/client";
 import { locationDao } from "../../dao/location";
 import { clientDao } from "../../dao/client";
 import prisma from "../../prisma";

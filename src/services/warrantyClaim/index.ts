@@ -1,10 +1,12 @@
 import { warrantyClaimDao } from "../../dao/warrantyClaim";
 import { warrantyService } from "../warranty";
 import { bookingDao } from "../../dao/booking";
+import { refundService } from "../refund";
 import { CreateWarrantyClaimRequest } from "../../types/warrantyClaimTypes";
+import { RefundItemRequest } from "../../types/refundTypes";
 import { debugLog } from "../helper";
 import prisma from "../../prisma";
-import { booking_status } from "@prisma/client";
+import { booking_status } from "../../../generated/prisma/client";
 
 const generateClaimNumber = (): string => {
   const timestamp = new Date().getTime().toString(36).toUpperCase();
@@ -37,7 +39,7 @@ const createWarrantyClaim = async (
         }
 
         // Verify the booking item belongs to the specified booking
-        const bookingItem = originalBooking.booking_items.find(bi => bi.id === item.bookingItemId);
+        const bookingItem = originalBooking.booking_items.find((bi: any) => bi.id === item.bookingItemId);
         if (!bookingItem) {
           throw new Error(
             `Booking item ${item.bookingItemId} does not belong to booking ${bookingId}`
@@ -218,9 +220,74 @@ const listWarrantyClaims = async (
   }
 };
 
+/**
+ * Create refund for warranty claim when issue cannot be resolved
+ * This refunds the ORIGINAL booking items that were claimed under warranty
+ *
+ * @param warrantyClaimId - The warranty claim ID
+ * @param refundItems - Array of items to refund (from original booking)
+ * @param createdBy - User ID creating the refund
+ * @param remarks - Optional remarks for the refund
+ * @returns Created refund with items
+ */
+const createWarrantyClaimRefund = async (
+  warrantyClaimId: number,
+  refundItems: RefundItemRequest[],
+  createdBy: number,
+  remarks?: string
+) => {
+  try {
+    // Get warranty claim with original booking details
+    const warrantyClaim = await warrantyClaimDao.getWarrantyClaim(prisma, warrantyClaimId);
+
+    if (!warrantyClaim) {
+      throw new Error(`Warranty claim ${warrantyClaimId} not found`);
+    }
+
+    // Get original booking ID
+    const originalBookingId = warrantyClaim.originalBookingId;
+
+    // Validate that refund items belong to the original booking
+    const originalBooking = await bookingDao.getBooking(prisma, originalBookingId);
+    if (!originalBooking) {
+      throw new Error(`Original booking ${originalBookingId} not found`);
+    }
+
+    // Verify all refund items belong to original booking
+    for (const item of refundItems) {
+      const bookingItem = originalBooking.booking_items.find((bi: any) => bi.id === item.bookingItemId);
+      if (!bookingItem) {
+        throw new Error(
+          `Booking item ${item.bookingItemId} does not belong to original booking ${originalBookingId}`
+        );
+      }
+    }
+
+    // Create refund against ORIGINAL booking with warranty claim linkage
+    const refundRemarks = remarks || `Warranty claim ${warrantyClaim.claimNumber}: Issue could not be resolved`;
+
+    const refund = await refundService.createRefund(
+      {
+        bookingId: originalBookingId, // Refund against ORIGINAL booking where payment was made
+        warrantyClaimId, // Link to warranty claim for audit trail
+        refundDate: new Date(),
+        remarks: refundRemarks,
+        items: refundItems,
+      },
+      createdBy
+    );
+
+    return refund;
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+
 export const warrantyClaimService = {
   createWarrantyClaim,
   getWarrantyClaim,
   getWarrantyClaimByClaimNumber,
   listWarrantyClaims,
+  createWarrantyClaimRefund,
 };

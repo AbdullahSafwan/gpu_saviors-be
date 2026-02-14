@@ -1,4 +1,4 @@
-import { PrismaClient, booking_status } from "@prisma/client";
+import { PrismaClient, booking_status } from "../../generated/prisma/client";
 import { debugLog } from "../services/helper";
 
 const getWarrantyClaim = async (prisma: PrismaClient, id: number) => {

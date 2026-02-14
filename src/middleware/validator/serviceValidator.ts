@@ -1,4 +1,4 @@
-import { service_status } from "@prisma/client";
+import { service_status } from "../../../generated/prisma/client";
 import { body } from "express-validator";
 
 const createServiceValidator = [

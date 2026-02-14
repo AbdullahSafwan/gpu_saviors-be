@@ -1,5 +1,5 @@
 import { body, query } from "express-validator";
-import { expense_category, expense_payment_method } from "@prisma/client";
+import { expense_category, expense_payment_method } from "../../../generated/prisma/client";
 import { locationDao } from "../../dao/location";
 import prisma from "../../prisma";
 

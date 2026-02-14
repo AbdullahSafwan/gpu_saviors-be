@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient, expense_category } from "@prisma/client";
+import { Prisma, PrismaClient, expense_category } from "../../generated/prisma/client";
 import { debugLog } from "../services/helper";
 
 const createExpenseEntry = async (prisma: PrismaClient, data: Prisma.expense_entryCreateInput) => {

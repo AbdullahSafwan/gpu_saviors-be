@@ -1,4 +1,4 @@
-import { booking_item_status, booking_status, Prisma } from "@prisma/client";
+import { booking_item_status, booking_status, Prisma } from "../../../generated/prisma/client";
 import { debugLog } from "../helper";
 import { UpdateBookingItem, UpdateBookingRequest } from "../../types/bookingTypes";
 

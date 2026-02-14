@@ -1,4 +1,4 @@
-import { booking_status } from "@prisma/client";
+import { booking_status } from "../../generated/prisma/client";
 
 export interface ClaimedItemRequest {
   bookingItemId: number;

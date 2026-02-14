@@ -1,4 +1,4 @@
-import { client_status } from "@prisma/client";
+import { client_status } from "../../generated/prisma/client";
 
 export interface CreateClientRequest {
   businessName: string;

@@ -1,4 +1,4 @@
-import { booking_status } from "@prisma/client";
+import { booking_status } from "../../generated/prisma/client";
 import { bookingDao } from "../dao/booking";
 import { systemConfigurationDao } from "../dao/systemConfiguration";
 import prisma from "../prisma";

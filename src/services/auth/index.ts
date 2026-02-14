@@ -15,7 +15,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import "dotenv/config";
 import { userSessionDao } from "../../dao/userSession";
 import { sendEmail } from "../email";
-import { token_type } from "@prisma/client";
+import { token_type } from "../../../generated/prisma/client";
 import { userVerificationTokenDao } from "../../dao/userVerificationToken";
 import { generateUserToken } from "./tokenHelper";
 

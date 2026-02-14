@@ -1,4 +1,4 @@
-import { contact_method } from "@prisma/client";
+import { contact_method } from "../../../generated/prisma/client";
 import { body } from "express-validator";
 
 const createContactLogValidator = [

@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient, token_type } from "@prisma/client";
+import { Prisma, PrismaClient, token_type } from "../../generated/prisma/client";
 import { debugLog } from "../services/helper";
 
 const createUserVerificationToken = async (prisma: PrismaClient, data: Prisma.user_verification_tokenCreateInput) => {

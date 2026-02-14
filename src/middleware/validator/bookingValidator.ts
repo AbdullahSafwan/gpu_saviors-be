@@ -1,5 +1,5 @@
 import { body, query, param } from "express-validator";
-import { booking_status, booking_item_type, client_type, courier_type, ReferralSource } from "@prisma/client";
+import { booking_status, booking_item_type, client_type, courier_type, ReferralSource } from "../../../generated/prisma/client";
 import { formatWhatsAppNumber } from "./helper";
 import { bookingDao } from "../../dao/booking";
 import prisma from "../../prisma";

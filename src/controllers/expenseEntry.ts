@@ -10,7 +10,7 @@ import {
   DailySummaryRequest,
   MonthlySummaryRequest,
 } from "../types/expenseEntryTypes";
-import { expense_category } from "@prisma/client";
+import { expense_category } from "../../generated/prisma/client";
 
 const createExpenseEntry = async (req: Request, res: Response) => {
   try {

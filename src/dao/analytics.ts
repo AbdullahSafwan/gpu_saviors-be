@@ -1,4 +1,4 @@
-import { PrismaClient, booking_status } from "@prisma/client";
+import { PrismaClient, booking_status } from "../../generated/prisma/client";
 import { debugLog } from "../services/helper";
 
 /**
@@ -312,6 +312,141 @@ const getNewVsReturningCustomers = async (prisma: PrismaClient, startDate: Date,
   }
 };
 
+// ============================================
+// REFUND ANALYTICS QUERIES
+// ============================================
+
+/**
+ * Get total refunds in date range
+ * @param prisma - Prisma client
+ * @param startDate - Start date
+ * @param endDate - End date
+ * @param locationId - Optional location filter
+ */
+const getTotalRefunds = async (prisma: PrismaClient, startDate: Date, endDate: Date, locationId?: number) => {
+  try {
+    const result = await prisma.refund.aggregate({
+      where: {
+        isActive: true,
+        refundDate: {
+          gte: startDate,
+          lte: endDate,
+        },
+        ...(locationId && {
+          booking: {
+            locationId,
+          },
+        }),
+      },
+      _sum: {
+        amount: true,
+      },
+      _count: true,
+    });
+
+    return {
+      totalRefunded: result._sum.amount || 0,
+      refundCount: result._count,
+    };
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+
+/**
+ * Get refund statistics
+ * @param prisma - Prisma client
+ * @param startDate - Start date
+ * @param endDate - End date
+ */
+const getRefundStatistics = async (prisma: PrismaClient, startDate: Date, endDate: Date) => {
+  try {
+    const [refundStats, warrantyRefunds, itemsRefunded, bookingsWithRefunds] = await Promise.all([
+      // Total refunds and average
+      prisma.refund.aggregate({
+        where: {
+          isActive: true,
+          refundDate: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+        _count: true,
+        _sum: {
+          amount: true,
+        },
+        _avg: {
+          amount: true,
+        },
+      }),
+
+      // Warranty-related refunds
+      prisma.refund.count({
+        where: {
+          isActive: true,
+          refundDate: {
+            gte: startDate,
+            lte: endDate,
+          },
+          warrantyClaimId: {
+            not: null,
+          },
+        },
+      }),
+
+      // Total items refunded
+      prisma.refund_item.count({
+        where: {
+          refund: {
+            isActive: true,
+            refundDate: {
+              gte: startDate,
+              lte: endDate,
+            },
+          },
+        },
+      }),
+
+      // Bookings with refunds
+      prisma.booking.count({
+        where: {
+          hasRefunds: true,
+          createdAt: {
+            gte: startDate,
+            lte: endDate,
+          },
+          isActive: true,
+        },
+      }),
+    ]);
+
+    const totalBookings = await prisma.booking.count({
+      where: {
+        status: booking_status.COMPLETED,
+        createdAt: {
+          gte: startDate,
+          lte: endDate,
+        },
+        isActive: true,
+      },
+    });
+
+    return {
+      totalRefunds: refundStats._count,
+      totalRefundAmount: refundStats._sum.amount || 0,
+      avgRefundAmount: refundStats._avg.amount || 0,
+      warrantyRelatedRefunds: warrantyRefunds,
+      itemsRefunded,
+      bookingsWithRefunds,
+      refundRate: totalBookings > 0 ? (bookingsWithRefunds / totalBookings) * 100 : 0,
+    };
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+
 export const analyticsDao = {
   getCustomerStatistics,
   getRevenueByPaymentStatus,
@@ -327,4 +462,8 @@ export const analyticsDao = {
 
   // Raw SQL queries
   getNewVsReturningCustomers,
+
+  // Refund analytics
+  getTotalRefunds,
+  getRefundStatistics,
 };

@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "../../generated/prisma/client";
 import { debugLog } from "../services/helper";
 
 const createSystemConfiguration = async (prisma: PrismaClient, data: Prisma.system_configurationCreateInput) => {
