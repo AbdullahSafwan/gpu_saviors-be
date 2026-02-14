@@ -12,6 +12,9 @@ const createRefund = async (req: Request, res: Response) => {
     const data = req.body as CreateRefundRequest;
     const userId = req.user.userId;
     const result = await refundService.createRefund(data, userId);
+    if (!result) {
+      throw new Error("Failed to create refund");
+    }
     sendSuccessResponse(res, 200, "Successfully created refund", result);
   } catch (error) {
     debugLog(error);
@@ -39,6 +42,9 @@ const updateRefund = async (req: Request, res: Response) => {
     const id = +req.params.id;
     const userId = req.user.userId;
     const result = await refundService.updateRefund(id, data, userId);
+    if (!result) {
+      throw new Error("Failed to update refund");
+    }
     sendSuccessResponse(res, 200, "Successfully updated refund", result);
   } catch (error) {
     debugLog(error);

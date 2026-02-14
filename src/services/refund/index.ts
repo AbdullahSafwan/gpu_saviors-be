@@ -176,13 +176,7 @@ const createRefund = async (data: CreateRefundRequest, createdBy: number) => {
         },
       });
 
-      // 5. Get booking with client info
-      const booking = await tx.booking.findUnique({
-        where: { id: bookingId },
-        select: { clientId: true },
-      });
-
-      // Return refund with items
+      // 5. Return refund with items
       return tx.refund.findUnique({
         where: { id: refund.id },
         include: {
@@ -242,7 +236,7 @@ const updateRefund = async (
     // Start transaction
     const result = await prisma.$transaction(async (tx) => {
       // 1. Update refund record
-      const updatedRefund = await tx.refund.update({
+      await tx.refund.update({
         where: { id: refundId },
         data: {
           ...(refundDate && { refundDate }),

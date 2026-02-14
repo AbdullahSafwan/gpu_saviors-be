@@ -67,7 +67,7 @@ describe("refundController", () => {
     });
   });
 
-  describe("getRefundDetails", () => {
+  describe("getRefund", () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
@@ -87,7 +87,7 @@ describe("refundController", () => {
       // Spy on sendSuccessResponse
       const sendSuccessSpy = jest.spyOn(responseHelper, "sendSuccessResponse").mockImplementation();
 
-      await refundController.getRefundDetails(mockRequest, mockResponse);
+      await refundController.getRefund(mockRequest, mockResponse);
 
       expect(refundService.getRefund).toHaveBeenCalledWith(1);
       expect(sendSuccessSpy).toHaveBeenCalledWith(mockResponse, 200, expect.any(String), mockRefund);
@@ -108,7 +108,7 @@ describe("refundController", () => {
 
       const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse").mockImplementation();
 
-      await refundController.getRefundDetails(mockRequest, mockResponse);
+      await refundController.getRefund(mockRequest, mockResponse);
 
       expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, "Error fetching refund", new Error("id is required"));
     });
@@ -129,7 +129,7 @@ describe("refundController", () => {
       // Spy on sendErrorResponse
       const sendErrorSpy = jest.spyOn(responseHelper, "sendErrorResponse");
 
-      await refundController.getRefundDetails(mockRequest, mockResponse);
+      await refundController.getRefund(mockRequest, mockResponse);
 
       expect(refundService.getRefund).toHaveBeenCalledWith(1);
       expect(sendErrorSpy).toHaveBeenCalledWith(mockResponse, 400, expect.any(String), mockError);
