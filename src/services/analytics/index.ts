@@ -210,13 +210,14 @@ const getFinancialSummary = async (request: DashboardRequest): Promise<Financial
     const { startDate, endDate } = parseDateRange(request.startDate, request.endDate);
     const locationId = request.locationId ? parseInt(request.locationId) : undefined;
 
-    const [revenueData, expensesTotal, expensesByCategory] = await Promise.all([
+    const [revenueData, refundData, expensesTotal, expensesByCategory] = await Promise.all([
       analyticsDao.getTotalRevenue(prisma, startDate, endDate, locationId),
+      analyticsDao.getTotalRefunds(prisma, startDate, endDate, locationId),
       analyticsDao.getTotalExpenses(prisma, startDate, endDate, locationId),
       analyticsDao.getExpensesByCategory(prisma, startDate, endDate, locationId),
     ]);
 
-    const summary = calculateFinancialMetrics(revenueData.totalRevenue, expensesTotal);
+    const summary = calculateFinancialMetrics(revenueData.totalRevenue, refundData.totalRefunded, expensesTotal);
 
     const expenseBreakdown = expensesByCategory.map((cat) => ({
       category: cat.category,
