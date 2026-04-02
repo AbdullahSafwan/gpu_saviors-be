@@ -66,7 +66,7 @@ const listCurrentCharges = async (
 
     const result = await prisma.service_charge.findMany({
       where,
-      orderBy: { effectiveFrom: "desc" },
+      orderBy: { "productName": "asc" },
       distinct: ["productName", "type"],
     });
     return result;
