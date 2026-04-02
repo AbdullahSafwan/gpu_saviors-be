@@ -98,6 +98,62 @@ const updateRefund = async (prisma: PrismaClient, id: number, data: Prisma.refun
   }
 };
 
+const getBookingRefunds = async (prisma: PrismaClient, bookingId: number) => {
+  try {
+    const result = await prisma.refund.findMany({
+      where: {
+        bookingId,
+        isActive: true,
+      },
+      include: {
+        refundItems: {
+          include: {
+            bookingItem: {
+              select: {
+                id: true,
+                code: true,
+                name: true,
+                type: true,
+                serialNumber: true,
+                payableAmount: true,
+                paidAmount: true,
+              },
+            },
+          },
+        },
+        warrantyClaim: {
+          select: {
+            id: true,
+            claimNumber: true,
+            claimDate: true,
+          },
+        },
+        createdByUser: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        modifiedByUser: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+      orderBy: {
+        refundDate: 'desc',
+      },
+    });
+    return result;
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+
 const getRefundableItems = async (prisma: PrismaClient, bookingId: number): Promise<RefundableItemCalculation[]> => {
   try {
     // Get all booking items with their refund information
@@ -261,6 +317,7 @@ export const refundDao = {
   getRefund,
   getRefundWithItems,
   updateRefund,
+  getBookingRefunds,
   getRefundableItems,
   updateBookingRefundStatus,
   getBookingWithItemsAndRefunds,

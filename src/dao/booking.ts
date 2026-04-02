@@ -30,6 +30,52 @@ const getBooking = async (prisma: PrismaClient | Prisma.TransactionClient, id: n
             city: true,
           },
         },
+        refunds: {
+          where: {
+            isActive: true,
+          },
+          include: {
+            refundItems: {
+              include: {
+                bookingItem: {
+                  select: {
+                    id: true,
+                    code: true,
+                    name: true,
+                    type: true,
+                    serialNumber: true,
+                    payableAmount: true,
+                    paidAmount: true,
+                  },
+                },
+              },
+            },
+            warrantyClaim: {
+              select: {
+                id: true,
+                claimNumber: true,
+                claimDate: true,
+              },
+            },
+            createdByUser: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+            modifiedByUser: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+          orderBy: {
+            refundDate: 'desc',
+          },
+        },
       },
     });
     return result;

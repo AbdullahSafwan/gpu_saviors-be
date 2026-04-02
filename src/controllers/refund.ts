@@ -66,9 +66,24 @@ const getRefundableItems = async (req: Request<{ bookingId: string }, {}, {}>, r
   }
 };
 
+const getBookingRefunds = async (req: Request<{ bookingId: string }, {}, {}>, res: Response) => {
+  try {
+    const bookingId = req.params.bookingId ? +req.params.bookingId : null;
+    if (!bookingId) {
+      throw new Error("bookingId is required");
+    }
+    const result = await refundService.getBookingRefunds(bookingId);
+    sendSuccessResponse(res, 200, "Successfully fetched booking refunds", result);
+  } catch (error) {
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error fetching booking refunds", error);
+  }
+};
+
 export const refundController = {
   createRefund,
   getRefund,
   updateRefund,
   getRefundableItems,
+  getBookingRefunds,
 };

@@ -358,11 +358,27 @@ const updateBookingRefundStatus = async (bookingId: number) => {
   }
 };
 
+/**
+ * Get all refunds for a booking
+ * @param bookingId - Booking ID
+ * @returns Array of refunds with items
+ */
+const getBookingRefunds = async (bookingId: number) => {
+  try {
+    const result = await refundDao.getBookingRefunds(prisma, bookingId);
+    return result;
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+
 export const refundService = {
   calculateMaxRefundablePerItem,
   validateRefundRequest,
   createRefund,
   updateRefund,
   getRefund,
+  getBookingRefunds,
   updateBookingRefundStatus,
 };

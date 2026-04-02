@@ -6,7 +6,9 @@ import { verifyToken } from "../middleware/auth";
 
 const router = express.Router();
 
+// Specific routes must come before generic /:id routes
 router.get("/booking/:bookingId/refundable-items", verifyToken, refundController.getRefundableItems);
+router.get("/booking/:bookingId", verifyToken, refundController.getBookingRefunds);
 
 router.post("/", verifyToken, refundValidator.createRefundValidator, throwValidationResult, refundController.createRefund);
 
