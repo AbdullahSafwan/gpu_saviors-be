@@ -45,6 +45,8 @@ model user {
   modified_expense_entries  expense_entry[]           @relation("ExpenseEntryModifiedBy")
   created_clients           client[]                  @relation("ClientCreatedBy")
   modified_clients          client[]                  @relation("ClientModifiedBy")
+  created_service_charges   service_charge[]          @relation("ServiceChargeCreatedBy")
+  modified_service_charges  service_charge[]          @relation("ServiceChargeModifiedBy")
 }
 
 model user_session {
@@ -498,6 +500,32 @@ model expense_entry {
   modifiedByUser    user                   @relation("ExpenseEntryModifiedBy", fields: [modifiedBy], references: [id])
 
   @@index([entryDate, category, isActive])
+}
+
+model service_charge {
+  id            Int                 @unique @id @default(autoincrement())
+  productName   String
+  type          service_charge_type
+  amount        Int
+  description   String?
+  effectiveFrom DateTime            @default(now())
+  isActive      Boolean             @default(true)
+  createdAt     DateTime            @default(now())
+  modifiedAt    DateTime            @default(now()) @updatedAt
+  createdBy     Int
+  modifiedBy    Int
+  createdByUser  user               @relation("ServiceChargeCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser user               @relation("ServiceChargeModifiedBy", fields: [modifiedBy], references: [id])
+
+  @@unique([productName, type, effectiveFrom])
+  @@index([type, isActive])
+}
+
+enum service_charge_type {
+  REPAIR
+  MAINTENANCE
+  REBALL
+  OTHER
 }
 
 enum expense_category {
