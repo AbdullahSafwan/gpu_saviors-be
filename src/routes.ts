@@ -12,6 +12,7 @@ import locationRoutes from "./routes/location";
 import analyticsRoutes from "./routes/analytics";
 import dashboardRoutes from "./routes/dashboard";
 import clientRoutes from "./routes/client";
+import chargeRoutes from "./routes/charge";
 
 const router = express.Router();
 
@@ -29,5 +30,6 @@ router.use("/locations", locationRoutes);
 router.use("/analytics", analyticsRoutes);
 router.use("/dashboard", dashboardRoutes);
 router.use("/clients", clientRoutes);
+router.use("/charges", chargeRoutes);
 
 export default router;
