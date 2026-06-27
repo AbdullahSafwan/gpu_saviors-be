@@ -7,7 +7,6 @@ on:
 env:
   IMAGE_NAME: gpu-saviors-be
   CONTAINER_NAME_1: gpu-saviors-api
-  CONTAINER_NAME_2: gpu-saviors-api-replica
 
 jobs:
   test_build:
@@ -110,7 +109,7 @@ jobs:
             echo "Migration completed successfully!"
             
             # Start app services
-            docker compose up -d app app-replica caddy
+            docker compose up -d app caddy
             
             echo "Services started successfully!"
 
