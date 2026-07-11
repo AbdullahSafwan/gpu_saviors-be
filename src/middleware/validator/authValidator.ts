@@ -34,6 +34,10 @@ const logInValidator = [
   body("password").notEmpty().withMessage("Password is required."),
 ];
 
+const refreshTokenValidator = [
+  body("refreshToken").notEmpty().withMessage("Refresh token is required.").bail().isString().withMessage("Refresh token must be a string.").trim(),
+];
+
 const resetPasswordValidator = [
   body("newPassword")
     .isStrongPassword({ minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 0 })
@@ -41,4 +45,4 @@ const resetPasswordValidator = [
   body("token").notEmpty().isString(),
 ];
 
-export const authValidator = { signUpValidator, logInValidator, resetPasswordValidator };
+export const authValidator = { signUpValidator, logInValidator, refreshTokenValidator, resetPasswordValidator };

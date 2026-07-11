@@ -54,6 +54,7 @@ const authLimiter = rateLimit({
 });
 
 app.use("/auth/login", authLimiter);
+app.use("/auth/refresh", authLimiter);
 
 // logs client IP if dev
 if (process.env.NODE_ENV === "development") {
