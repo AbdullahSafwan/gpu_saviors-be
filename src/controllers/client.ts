@@ -30,7 +30,7 @@ export const listClients = async (req: Request, res: Response) => {
 
 export const getClientDetails = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.query.id as string);
+    const id = parseInt(req.params.id);
 
     const client = await clientService.getClientDetails(id);
 
@@ -58,7 +58,7 @@ export const updateClient = async (req: Request, res: Response) => {
 
 export const deleteClient = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.query.id as string);
+    const id = parseInt(req.params.id);
 
     await clientService.deleteClient(id);
 

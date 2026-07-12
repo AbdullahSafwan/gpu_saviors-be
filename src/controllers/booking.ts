@@ -116,6 +116,8 @@ const generateDocument = async (req: Request<{ id: string }, {}, {}, { type: str
 
     res.setHeader("Content-Type", contentTypes[format] || "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="${documentType}-${id}.${fileExtensions[format] || "pdf"}"`);
+    res.setHeader("Content-Length", documentBuffer.length);
+    res.setHeader("Cache-Control", "no-store");
     res.send(documentBuffer);
   } catch (error) {
     debugLog(error);
