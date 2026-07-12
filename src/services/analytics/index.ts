@@ -1,4 +1,4 @@
-import { booking_item_status, booking_payment_status, client_type } from "@prisma/client";
+import { booking_item_status, booking_item_type, booking_payment_status, booking_status, client_type } from "@prisma/client";
 import { analyticsDao } from "../../dao/analytics";
 import prisma from "../../prisma";
 import { debugLog } from "../helper";
@@ -16,6 +16,9 @@ import {
   RevenueMetrics,
   CustomerMetrics,
   RepairMetrics,
+  RepairTypeBreakdown,
+  ItemStatusBreakdown,
+  BookingMetrics,
   WarrantyMetrics,
   FinancialMetrics,
 } from "../../types/analyticsTypes";
@@ -51,13 +54,15 @@ const getDashboard = async (request: DashboardRequest): Promise<DashboardRespons
     const { startDate, endDate } = parseDateRange(request.startDate, request.endDate);
     const locationId = request.locationId ? parseInt(request.locationId) : undefined;
 
-    // Fetch all metrics in parallel
-    const [revenueData, customerData, repairData, warrantyData, expensesData] = await Promise.all([
+    const itemType = request.itemType as booking_item_type | undefined;
+
+    const [revenueData, customerData, repairData, warrantyData, expensesData, bookingData] = await Promise.all([
       getRevenueMetrics(startDate, endDate, locationId),
       getCustomerMetrics(startDate, endDate),
-      getRepairMetrics(startDate, endDate),
+      getRepairMetrics(startDate, endDate, itemType),
       analyticsDao.getWarrantyStats(prisma, startDate, endDate),
       analyticsDao.getTotalExpenses(prisma, startDate, endDate, locationId),
+      getBookingMetrics(startDate, endDate, locationId),
     ]);
 
     const financial = calculateFinancialMetrics(revenueData.totalRevenue, expensesData);
@@ -67,6 +72,7 @@ const getDashboard = async (request: DashboardRequest): Promise<DashboardRespons
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
       },
+      bookings: bookingData,
       revenue: revenueData,
       customers: customerData,
       repairs: repairData,
@@ -140,26 +146,14 @@ const getCustomerAnalytics = async (request: CustomerAnalyticsRequest): Promise<
 };
 
 /**
- * Get repair analytics
+ * Get repair analytics with optional itemType filter
  */
 const getRepairAnalytics = async (request: RepairAnalyticsRequest): Promise<RepairAnalyticsResponse> => {
   try {
     const { startDate, endDate } = parseDateRange(request.startDate, request.endDate);
+    const itemType = request.itemType as booking_item_type | undefined;
 
-    const summary = await getRepairMetrics(startDate, endDate);
-
-    let byType;
-    if (request.groupBy === "type") {
-      const typeStats = await analyticsDao.getRepairStatsByType(prisma);
-      byType = typeStats.map((stat) => ({
-        type: stat.type as any,
-        totalItems: stat.totalItems,
-        repaired: stat.repaired,
-        notRepaired: stat.notRepaired,
-        successRate: stat.successRate ? parseFloat(stat.successRate.toString()) : 0,
-        avgRepairDays: stat.avgRepairDays ? parseFloat(stat.avgRepairDays.toString()) : 0,
-      }));
-    }
+    const summary = await getRepairMetrics(startDate, endDate, itemType);
 
     return {
       dateRange: {
@@ -167,7 +161,7 @@ const getRepairAnalytics = async (request: RepairAnalyticsRequest): Promise<Repa
         endDate: endDate.toISOString(),
       },
       summary,
-      byType,
+      byType: summary.byType,
     };
   } catch (error) {
     debugLog(error);
@@ -329,28 +323,67 @@ const getCustomerMetrics = async (startDate: Date, endDate: Date): Promise<Custo
   };
 };
 
+const buildItemStatusBreakdown = (statusMap: Record<string, number>): ItemStatusBreakdown => ({
+  draft: statusMap[booking_item_status.DRAFT] || 0,
+  pending: statusMap[booking_item_status.PENDING] || 0,
+  inProgress: statusMap[booking_item_status.IN_PROGRESS] || 0,
+  repaired: statusMap[booking_item_status.REPAIRED] || 0,
+  notRepaired: statusMap[booking_item_status.NOT_REPAIRED] || 0,
+  noIssue: statusMap[booking_item_status.NO_ISSUE] || 0,
+});
+
 /**
- * Calculate repair metrics
+ * Calculate repair metrics with optional itemType filter
  */
-const getRepairMetrics = async (startDate: Date, endDate: Date): Promise<RepairMetrics> => {
-  const [itemStats, typeStats] = await Promise.all([
-    analyticsDao.getRepairItemStats(prisma, startDate, endDate),
+const getRepairMetrics = async (startDate: Date, endDate: Date, itemType?: booking_item_type): Promise<RepairMetrics> => {
+  const [itemStats, typeAndStatusStats, typeStats] = await Promise.all([
+    analyticsDao.getRepairItemStats(prisma, startDate, endDate, itemType),
+    analyticsDao.getRepairItemStatsByTypeAndStatus(prisma, startDate, endDate, itemType),
     analyticsDao.getRepairStatsByType(prisma),
   ]);
 
   const statusMap = itemStats.reduce((acc, item) => {
     acc[item.status] = item._count;
     return acc;
-  }, {} as any);
+  }, {} as Record<string, number>);
 
   const repaired = statusMap[booking_item_status.REPAIRED] || 0;
   const notRepaired = statusMap[booking_item_status.NOT_REPAIRED] || 0;
   const inProgress = statusMap[booking_item_status.IN_PROGRESS] || 0;
   const totalItems = itemStats.reduce((sum, stat) => sum + stat._count, 0);
-
   const successRate = repaired + notRepaired > 0 ? (repaired / (repaired + notRepaired)) * 100 : 0;
 
-  // Calculate average repair days across all types
+  const avgRepairDaysMap = typeStats.reduce((acc, stat) => {
+    acc[stat.type] = stat.avgRepairDays ? parseFloat(stat.avgRepairDays.toString()) : 0;
+    return acc;
+  }, {} as Record<string, number>);
+
+  // Group typeAndStatusStats by type
+  const typeMap: Record<string, Record<string, number>> = {};
+  for (const stat of typeAndStatusStats) {
+    if (!typeMap[stat.type]) typeMap[stat.type] = {};
+    typeMap[stat.type][stat.status] = stat._count;
+  }
+
+  const byType: RepairTypeBreakdown[] = Object.entries(typeMap).map(([type, statuses]) => {
+    const typeRepaired = statuses[booking_item_status.REPAIRED] || 0;
+    const typeNotRepaired = statuses[booking_item_status.NOT_REPAIRED] || 0;
+    const typeTotal = Object.values(statuses).reduce((sum, c) => sum + c, 0);
+    const typeSuccessRate = typeRepaired + typeNotRepaired > 0
+      ? (typeRepaired / (typeRepaired + typeNotRepaired)) * 100
+      : 0;
+
+    return {
+      type: type as booking_item_type,
+      totalItems: typeTotal,
+      byStatus: buildItemStatusBreakdown(statuses),
+      repaired: typeRepaired,
+      notRepaired: typeNotRepaired,
+      successRate: typeSuccessRate,
+      avgRepairDays: avgRepairDaysMap[type] || 0,
+    };
+  });
+
   const avgRepairDays =
     typeStats.length > 0
       ? typeStats.reduce((sum, stat) => sum + (stat.avgRepairDays ? parseFloat(stat.avgRepairDays.toString()) : 0), 0) / typeStats.length
@@ -358,12 +391,46 @@ const getRepairMetrics = async (startDate: Date, endDate: Date): Promise<RepairM
 
   return {
     totalItems,
+    byStatus: buildItemStatusBreakdown(statusMap),
     repaired,
     notRepaired,
     inProgress,
     successRate,
     averageRepairDays: avgRepairDays,
-    byType: [],
+    byType,
+  };
+};
+
+/**
+ * Get booking count metrics grouped by status
+ */
+const getBookingMetrics = async (startDate: Date, endDate: Date, locationId?: number): Promise<BookingMetrics> => {
+  const breakdown = await analyticsDao.getBookingStatusBreakdown(prisma, startDate, endDate, locationId);
+
+  const statusMap = breakdown.reduce((acc, item) => {
+    acc[item.status] = item._count;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const total = breakdown.reduce((sum, item) => sum + item._count, 0);
+
+  return {
+    total,
+    byStatus: {
+      draft: statusMap[booking_status.DRAFT] || 0,
+      pending: statusMap[booking_status.PENDING] || 0,
+      inReview: statusMap[booking_status.IN_REVIEW] || 0,
+      confirmed: statusMap[booking_status.CONFIRMED] || 0,
+      pendingDelivery: statusMap[booking_status.PENDING_DELIVERY] || 0,
+      inQueue: statusMap[booking_status.IN_QUEUE] || 0,
+      inProgress: statusMap[booking_status.IN_PROGRESS] || 0,
+      resolved: statusMap[booking_status.RESOLVED] || 0,
+      pendingPayment: statusMap[booking_status.PENDING_PAYMENT] || 0,
+      completed: statusMap[booking_status.COMPLETED] || 0,
+      cancelled: statusMap[booking_status.CANCELLED] || 0,
+      rejected: statusMap[booking_status.REJECTED] || 0,
+      expired: statusMap[booking_status.EXPIRED] || 0,
+    },
   };
 };
 

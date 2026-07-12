@@ -20,6 +20,7 @@ const getDashboard = async (req: Request<unknown, unknown, unknown, DashboardReq
       startDate: req.query.startDate,
       endDate: req.query.endDate,
       locationId: req.query.locationId,
+      itemType: req.query.itemType,
     };
 
     const result = await analyticsService.getDashboard(data);
@@ -83,6 +84,7 @@ const getRepairAnalytics = async (req: Request<unknown, unknown, unknown, Repair
       endDate: req.query.endDate,
       locationId: req.query.locationId,
       groupBy: req.query.groupBy,
+      itemType: req.query.itemType,
     };
 
     const result = await analyticsService.getRepairAnalytics(data);
