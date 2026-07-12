@@ -35,10 +35,7 @@ const limiter = rateLimit({
       message: "You have exceeded the rate limit. Please try again later.",
     });
   },
-  skip: (req) => {
-    // Skip rate limiting for health check
-    return req.path === "/health";
-  },
+  skip: () => false,
 });
 app.use(limiter);
 

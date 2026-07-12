@@ -47,12 +47,10 @@ const logInUser = async (data: LogInRequest) => {
   try {
     const { email, password } = data;
     const user = await userDao.findUserByEmail(prisma, email);
-    if (!user) throw new Error("User not found");
-    if (!user.isVerified) throw new Error("Account not verified");
+    if (!user || !user.isVerified) throw new Error("Invalid credentials");
 
-    // Validate password
     const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword) throw new Error("Wrong password");
+    if (!isValidPassword) throw new Error("Invalid credentials");
 
     const jwtPayload: CustomJwtPayload = {
       email: user.email,

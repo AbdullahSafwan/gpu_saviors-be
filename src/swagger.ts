@@ -1,6 +1,7 @@
 import { Express, Request, Response } from "express";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
+import { verifyToken } from "./middleware/auth";
 
 const options: swaggerJsdoc.Options = {
   definition: {
@@ -33,11 +34,10 @@ const swaggerSpec = swaggerJsdoc(options);
 function swaggerDocs(app: Express, port: number) {
   // swagger page
 
-  app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.use("/docs", verifyToken, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
   // Docs in JSON Format
-
-  app.get("/docs.json", (_req: Request, res: Response) => {
+  app.get("/docs.json", verifyToken, (_req: Request, res: Response) => {
     res.setHeader("Content-Type", "application/json");
     res.send(swaggerSpec);
   });
