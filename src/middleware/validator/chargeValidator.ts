@@ -38,8 +38,20 @@ const listChargeHistoryValidator = [
   query("type").optional().isIn(Object.values(service_charge_type)).withMessage("Invalid service charge type"),
 ];
 
+const updateChargeValidator = [
+  body("amount").optional().isInt({ min: 1 }).withMessage("Amount must be a positive integer"),
+  body("description")
+    .optional()
+    .isString()
+    .withMessage("Description must be a string")
+    .isLength({ max: 500 })
+    .withMessage("Description cannot exceed 500 characters"),
+  body("effectiveFrom").optional().isISO8601().withMessage("effectiveFrom must be a valid ISO 8601 date"),
+];
+
 export const chargeValidator = {
   createChargeValidator,
+  updateChargeValidator,
   listChargesValidator,
   listChargeHistoryValidator,
 };

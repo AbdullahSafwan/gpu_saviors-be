@@ -13,6 +13,12 @@ export interface ListChargesRequest {
   productName?: string;
 }
 
+export interface UpdateChargeRequest {
+  amount?: number;
+  description?: string;
+  effectiveFrom?: string;
+}
+
 export interface ListChargeHistoryRequest {
   productName?: string;
   type?: service_charge_type;

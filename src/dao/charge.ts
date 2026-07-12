@@ -50,6 +50,18 @@ const getChargeById = async (prisma: PrismaClient, id: number) => {
   }
 };
 
+const findActiveCharge = async (prisma: PrismaClient, productName: string, type: service_charge_type) => {
+  try {
+    return await prisma.service_charge.findFirst({
+      where: { productName, type, isActive: true },
+    });
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+
+
 const listCurrentCharges = async (
   prisma: PrismaClient,
   filters: {
@@ -60,13 +72,14 @@ const listCurrentCharges = async (
   try {
     const where: Prisma.service_chargeWhereInput = {
       isActive: true,
+      effectiveFrom: { lte: new Date() },
       ...(filters.type && { type: filters.type }),
       ...(filters.productName && { productName: { contains: filters.productName } }),
     };
 
     const result = await prisma.service_charge.findMany({
       where,
-      orderBy: { "productName": "asc" },
+      orderBy: [{ effectiveFrom: "desc" }, { productName: "asc" }],
       distinct: ["productName", "type"],
     });
     return result;
@@ -125,6 +138,7 @@ const softDeleteCharge = async (prisma: PrismaClient, id: number) => {
 export const chargeDao = {
   createCharge,
   getChargeById,
+  findActiveCharge,
   listCurrentCharges,
   listChargeHistory,
   softDeleteCharge,

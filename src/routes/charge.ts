@@ -7,6 +7,7 @@ import { verifyToken } from "../middleware/auth";
 const router = express.Router();
 
 router.post("/", verifyToken, chargeValidator.createChargeValidator, throwValidationResult, chargeController.createCharge);
+router.patch("/:id", verifyToken, chargeValidator.updateChargeValidator, throwValidationResult, chargeController.updateCharge);
 router.get("/", verifyToken, chargeValidator.listChargesValidator, throwValidationResult, chargeController.listCurrentCharges);
 router.get("/history", verifyToken, chargeValidator.listChargeHistoryValidator, throwValidationResult, chargeController.listChargeHistory);
 router.delete("/:id", verifyToken, chargeController.deleteCharge);
