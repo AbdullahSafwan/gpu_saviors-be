@@ -1,4 +1,5 @@
 import { query } from "express-validator";
+import { booking_item_type } from "@prisma/client";
 
 /**
  * Validator for analytics date range requests
@@ -41,7 +42,13 @@ const dateRangeValidator = [
     .withMessage("Location ID must be a positive integer"),
 ];
 
-const dashboardValidator = [...dateRangeValidator];
+const dashboardValidator = [
+  ...dateRangeValidator,
+  query("itemType")
+    .optional()
+    .isIn(Object.values(booking_item_type))
+    .withMessage(`itemType must be one of: ${Object.values(booking_item_type).join(", ")}`),
+];
 
 const revenueAnalyticsValidator = [
   ...dateRangeValidator,
@@ -65,6 +72,10 @@ const repairAnalyticsValidator = [
     .optional()
     .isIn(["type", "status"])
     .withMessage("groupBy must be one of: type, status"),
+  query("itemType")
+    .optional()
+    .isIn(Object.values(booking_item_type))
+    .withMessage(`itemType must be one of: ${Object.values(booking_item_type).join(", ")}`),
 ];
 
 const warrantyAnalyticsValidator = [...dateRangeValidator];

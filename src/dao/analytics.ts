@@ -1,4 +1,4 @@
-import { PrismaClient, booking_status } from "@prisma/client";
+import { PrismaClient, booking_item_type, booking_status } from "@prisma/client";
 import { debugLog } from "../services/helper";
 
 /**
@@ -152,18 +152,60 @@ const getCustomersByClientType = async (prisma: PrismaClient, startDate: Date, e
 };
 
 /**
- * Get repair item statistics
+ * Get repair item statistics grouped by status, with optional item type filter
  */
-const getRepairItemStats = async (prisma: PrismaClient, startDate: Date, endDate: Date) => {
+const getRepairItemStats = async (prisma: PrismaClient, startDate: Date, endDate: Date, itemType?: booking_item_type) => {
   try {
     const result = await prisma.booking_item.groupBy({
       by: ["status"],
       where: {
         isActive: true,
-        createdAt: {
-          gte: startDate,
-          lte: endDate,
-        },
+        createdAt: { gte: startDate, lte: endDate },
+        ...(itemType && { type: itemType }),
+      },
+      _count: true,
+    });
+
+    return result;
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+
+/**
+ * Get repair item statistics grouped by type AND status for byType breakdown
+ */
+const getRepairItemStatsByTypeAndStatus = async (prisma: PrismaClient, startDate: Date, endDate: Date, itemType?: booking_item_type) => {
+  try {
+    const result = await prisma.booking_item.groupBy({
+      by: ["type", "status"],
+      where: {
+        isActive: true,
+        createdAt: { gte: startDate, lte: endDate },
+        ...(itemType && { type: itemType }),
+      },
+      _count: true,
+    });
+
+    return result;
+  } catch (error) {
+    debugLog(error);
+    throw error;
+  }
+};
+
+/**
+ * Get booking count grouped by status for the given date range
+ */
+const getBookingStatusBreakdown = async (prisma: PrismaClient, startDate: Date, endDate: Date, locationId?: number) => {
+  try {
+    const result = await prisma.booking.groupBy({
+      by: ["status"],
+      where: {
+        isActive: true,
+        createdAt: { gte: startDate, lte: endDate },
+        ...(locationId && { locationId }),
       },
       _count: true,
     });
@@ -321,6 +363,8 @@ export const analyticsDao = {
   getUniqueCustomerCount,
   getCustomersByClientType,
   getRepairItemStats,
+  getRepairItemStatsByTypeAndStatus,
+  getBookingStatusBreakdown,
   getWarrantyStats,
   getTotalExpenses,
   getExpensesByCategory,

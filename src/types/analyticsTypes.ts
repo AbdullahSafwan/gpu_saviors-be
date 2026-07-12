@@ -6,7 +6,9 @@ export interface AnalyticsDateRangeRequest {
   locationId?: string;
 }
 
-export interface DashboardRequest extends AnalyticsDateRangeRequest {}
+export interface DashboardRequest extends AnalyticsDateRangeRequest {
+  itemType?: string;
+}
 
 export interface RevenueAnalyticsRequest extends AnalyticsDateRangeRequest {
   groupBy?: "date" | "paymentStatus" | "clientType";
@@ -18,17 +20,49 @@ export interface CustomerAnalyticsRequest extends AnalyticsDateRangeRequest {
 
 export interface RepairAnalyticsRequest extends AnalyticsDateRangeRequest {
   groupBy?: "type" | "status";
+  itemType?: string;
 }
 
 export interface WarrantyAnalyticsRequest extends AnalyticsDateRangeRequest {}
 
 export interface FinancialSummaryRequest extends AnalyticsDateRangeRequest {}
 
+export interface ItemStatusBreakdown {
+  draft: number;
+  pending: number;
+  inProgress: number;
+  repaired: number;
+  notRepaired: number;
+  noIssue: number;
+}
+
+export interface BookingStatusCount {
+  draft: number;
+  pending: number;
+  inReview: number;
+  confirmed: number;
+  pendingDelivery: number;
+  inQueue: number;
+  inProgress: number;
+  resolved: number;
+  pendingPayment: number;
+  completed: number;
+  cancelled: number;
+  rejected: number;
+  expired: number;
+}
+
+export interface BookingMetrics {
+  total: number;
+  byStatus: BookingStatusCount;
+}
+
 export interface DashboardResponse {
   dateRange: {
     startDate: string;
     endDate: string;
   };
+  bookings: BookingMetrics;
   revenue: RevenueMetrics;
   customers: CustomerMetrics;
   repairs: RepairMetrics;
@@ -80,6 +114,7 @@ export interface TopCustomer {
 
 export interface RepairMetrics {
   totalItems: number;
+  byStatus: ItemStatusBreakdown;
   repaired: number;
   notRepaired: number;
   inProgress: number;
@@ -91,6 +126,7 @@ export interface RepairMetrics {
 export interface RepairTypeBreakdown {
   type: booking_item_type;
   totalItems: number;
+  byStatus: ItemStatusBreakdown;
   repaired: number;
   notRepaired: number;
   successRate: number;
