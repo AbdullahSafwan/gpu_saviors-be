@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { debugLog } from "../services/helper";
 import { sendSuccessResponse, sendErrorResponse } from "../services/responseHelper";
 import { chargeService } from "../services/charge";
-import { CreateChargeRequest, ListChargesRequest, ListChargeHistoryRequest } from "../types/chargeTypes";
+import { CreateChargeRequest, UpdateChargeRequest, ListChargesRequest, ListChargeHistoryRequest } from "../types/chargeTypes";
 import { service_charge_type } from "@prisma/client";
 
 const createCharge = async (req: Request, res: Response) => {
@@ -46,6 +46,18 @@ const listChargeHistory = async (req: Request<unknown, unknown, unknown, ListCha
   }
 };
 
+const updateCharge = async (req: Request<{ id: string }, {}, UpdateChargeRequest>, res: Response) => {
+  try {
+    const id = +req.params.id;
+    const userId = req.user.userId;
+    const result = await chargeService.updateCharge(id, req.body, userId);
+    sendSuccessResponse(res, 200, "Successfully updated service charge", result);
+  } catch (error) {
+    debugLog(error);
+    sendErrorResponse(res, 400, "Error updating service charge", error);
+  }
+};
+
 const deleteCharge = async (req: Request<{ id: string }, {}, {}>, res: Response) => {
   try {
     const id = req.params.id ? +req.params.id : null;
@@ -63,6 +75,7 @@ const deleteCharge = async (req: Request<{ id: string }, {}, {}>, res: Response)
 
 export const chargeController = {
   createCharge,
+  updateCharge,
   listCurrentCharges,
   listChargeHistory,
   deleteCharge,
