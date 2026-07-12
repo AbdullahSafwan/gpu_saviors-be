@@ -341,6 +341,7 @@ enum booking_item_type {
   GPU
   MOBO
   LAPTOP
+  RAM
 }
 
 enum courier_type {
