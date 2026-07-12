@@ -8,10 +8,26 @@ import { sendErrorResponse } from "./services/responseHelper";
 
 const app = express();
 
-// trust the X-Forwarded-* headers
-app.set("trust proxy", true);
+// trust exactly 1 proxy hop (Caddy) — reads real client IP from X-Forwarded-For without allowing spoofing
+app.set("trust proxy", 1);
 
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:"],
+      },
+    },
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+    },
+    frameguard: { action: "deny" },
+  })
+);
 
 app.use(
   cors({
