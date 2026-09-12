@@ -66,11 +66,7 @@ const generateHeader = (doc: PDFKit.PDFDocument, documentType: string): void => 
     .text("Professional GPU Repair Services", hasLogo ? 125 : 50, 74, { align: hasLogo ? "left" : "center" });
 
   // Document type label on the right
-  doc
-    .fontSize(14)
-    .font("Helvetica")
-    .fillColor("#FFFFFF")
-    .text(documentType, 450, 55, { width: 90, align: "right" });
+  doc.fontSize(14).font("Helvetica").fillColor("#FFFFFF").text(documentType, 450, 55, { width: 90, align: "right" });
 
   // Thin separator line
   doc.moveDown(1.5);
@@ -112,14 +108,10 @@ const generateFooter = async (doc: PDFKit.PDFDocument): Promise<void> => {
     doc.moveDown(2);
     const termsY = doc.y;
 
-    doc
-      .fontSize(9)
-      .font("Helvetica-Bold")
-      .fillColor("#000")
-      .text("Warranty Terms & Conditions", 50, termsY);
+    doc.fontSize(9).font("Helvetica-Bold").fillColor("#000").text("Warranty Terms & Conditions", 50, termsY);
 
     // Split warranty terms by line breaks and render with proper spacing
-    const warrantyLines = warrantyTerms.split('\\n');
+    const warrantyLines = warrantyTerms.split("\\n");
     let currentY = termsY + 15;
 
     doc.fontSize(8).font("Helvetica").fillColor("#666");
@@ -142,28 +134,29 @@ const generateFooter = async (doc: PDFKit.PDFDocument): Promise<void> => {
   doc.moveDown(1);
   const textY = doc.y;
 
-  doc
-    .fontSize(8)
-    .font("Helvetica")
-    .fillColor("#666")
-    .text("Thank you for choosing GPU Saviors!", 50, textY, { align: "center", width: 495 });
+  doc.fontSize(8).font("Helvetica").fillColor("#666").text("Thank you for choosing GPU Saviors!", 50, textY, { align: "center", width: 495 });
 
   // Contact information
   if (customerSupportPhone) {
-    doc
-      .fontSize(8)
-      .text(`Customer Support: ${customerSupportPhone}`, 50, textY + 15, { align: "center", width: 495 });
+    doc.fontSize(8).text(`Customer Support: ${customerSupportPhone}`, 50, textY + 15, { align: "center", width: 495 });
   }
 
   // Review request with Facebook link
   doc
     .fontSize(8)
     .fillColor("#666")
-    .text("We’d love to hear from you! Share your experience with us on Facebook.", 50, customerSupportPhone ? textY + 30 : textY + 15, { align: "center", width: 495 })
+    .text("We’d love to hear from you! Share your experience with us on Facebook.", 50, customerSupportPhone ? textY + 30 : textY + 15, {
+      align: "center",
+      width: 495,
+    })
     .fontSize(8)
     .fillColor("#000")
     .font("Helvetica-Bold")
-    .text("https://www.facebook.com/gpusaviors", 50, customerSupportPhone ? textY + 43 : textY + 28, { align: "center", width: 495, link: "https://www.facebook.com/gpusaviors" })
+    .text("https://www.facebook.com/gpusaviors", 50, customerSupportPhone ? textY + 43 : textY + 28, {
+      align: "center",
+      width: 495,
+      link: "https://www.facebook.com/gpusaviors",
+    })
     .fillColor("#000")
     .font("Helvetica");
 };
@@ -257,12 +250,7 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
       doc.moveDown(2);
 
       // Customer Information - Clean layout
-      doc
-        .fontSize(10)
-        .font("Helvetica-Bold")
-        .fillColor("#000")
-        .text("Customer Information", 50)
-        .moveDown(0.5);
+      doc.fontSize(10).font("Helvetica-Bold").fillColor("#000").text("Customer Information", 50).moveDown(0.5);
 
       const custY = doc.y;
       doc
@@ -293,12 +281,7 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
       doc.moveDown(3);
 
       // Items Section - Clean table
-      doc
-        .fontSize(10)
-        .font("Helvetica-Bold")
-        .fillColor("#000")
-        .text("Items", 50)
-        .moveDown(0.5);
+      doc.fontSize(10).font("Helvetica-Bold").fillColor("#000").text("Items", 50).moveDown(0.5);
 
       // Check if any discount is applied
       const hasDiscount = (bookingData.discountAmount || 0) > 0;
@@ -332,7 +315,12 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
       doc.text("Total", amountX, tableTop, { width: 65, align: "right" });
 
       // Line under header
-      doc.moveTo(50, tableTop + 15).lineTo(545, tableTop + 15).strokeColor("#E5E5E5").lineWidth(1).stroke();
+      doc
+        .moveTo(50, tableTop + 15)
+        .lineTo(545, tableTop + 15)
+        .strokeColor("#E5E5E5")
+        .lineWidth(1)
+        .stroke();
 
       // Table rows - clean, no background colors
       let itemY = tableTop + 25;
@@ -370,12 +358,7 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
 
         if (item.reportedIssue) {
           itemY += 15;
-          doc
-            .fontSize(8)
-            .fillColor("#666")
-            .text(`Issue: ${item.reportedIssue}`, itemX, itemY, { width: 490 })
-            .fillColor("#000")
-            .fontSize(9);
+          doc.fontSize(8).fillColor("#666").text(`Issue: ${item.reportedIssue}`, itemX, itemY, { width: 490 }).fillColor("#000").fontSize(9);
         }
 
         itemY += item.reportedIssue ? 35 : 20;
@@ -410,7 +393,12 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
           .text(`-Rs. ${totalDiscount.toLocaleString()}`, 480, summaryY + 18, { width: 65, align: "right" });
 
         // Line before final amount
-        doc.moveTo(380, summaryY + 34).lineTo(545, summaryY + 34).strokeColor("#E5E5E5").lineWidth(1).stroke();
+        doc
+          .moveTo(380, summaryY + 34)
+          .lineTo(545, summaryY + 34)
+          .strokeColor("#E5E5E5")
+          .lineWidth(1)
+          .stroke();
 
         doc
           .fillColor("#666")
@@ -427,7 +415,12 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
           .text(`Rs. ${(bookingData.paidAmount || 0).toLocaleString()}`, 480, summaryY + 60, { width: 65, align: "right" });
 
         // Line before balance
-        doc.moveTo(380, summaryY + 76).lineTo(545, summaryY + 76).strokeColor("#E5E5E5").lineWidth(1).stroke();
+        doc
+          .moveTo(380, summaryY + 76)
+          .lineTo(545, summaryY + 76)
+          .strokeColor("#E5E5E5")
+          .lineWidth(1)
+          .stroke();
 
         // Show "Amount Due" if balance > 0, otherwise show "Total Paid"
         const finalLabel = balance > 0 ? "Amount Due" : "Paid in Full";
@@ -436,7 +429,10 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
           .font("Helvetica-Bold")
           .fillColor("#000")
           .text(finalLabel, 380, summaryY + 84)
-          .text(`Rs. ${balance > 0 ? balance.toLocaleString() : (bookingData.paidAmount || 0).toLocaleString()}`, 480, summaryY + 84, { width: 65, align: "right" });
+          .text(`Rs. ${balance > 0 ? balance.toLocaleString() : (bookingData.paidAmount || 0).toLocaleString()}`, 480, summaryY + 84, {
+            width: 65,
+            align: "right",
+          });
       } else {
         // No discount - simpler layout
         doc
@@ -446,7 +442,12 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
           .text(`Rs. ${(bookingData.paidAmount || 0).toLocaleString()}`, 480, summaryY + 18, { width: 65, align: "right" });
 
         // Line before final amount
-        doc.moveTo(380, summaryY + 34).lineTo(545, summaryY + 34).strokeColor("#E5E5E5").lineWidth(1).stroke();
+        doc
+          .moveTo(380, summaryY + 34)
+          .lineTo(545, summaryY + 34)
+          .strokeColor("#E5E5E5")
+          .lineWidth(1)
+          .stroke();
 
         // Show "Amount Due" if balance > 0, otherwise show "Total Paid"
         const finalLabel = balance > 0 ? "Amount Due" : "Paid in Full";
@@ -455,8 +456,52 @@ export const generateReceipt = async (bookingData: BookingData): Promise<Buffer>
           .font("Helvetica-Bold")
           .fillColor("#000")
           .text(finalLabel, 380, summaryY + 42)
-          .text(`Rs. ${balance > 0 ? balance.toLocaleString() : (bookingData.paidAmount || 0).toLocaleString()}`, 480, summaryY + 42, { width: 65, align: "right" });
+          .text(`Rs. ${balance > 0 ? balance.toLocaleString() : (bookingData.paidAmount || 0).toLocaleString()}`, 480, summaryY + 42, {
+            width: 65,
+            align: "right",
+          });
       }
+
+      doc.moveDown(0.15);
+      const disclaimerTextWidth = 471;
+      const disclaimerLine1 =
+        "- During diagnosis and repair, the card's condition may change (e.g., from displaying artifacts to no display). While every effort will be made to handle the card with care, GPU Saviors cannot be held responsible for any changes or deterioration that may occur during the process.";
+      const disclaimerLine2 =
+        "- We kindly request that you collect your card within 15 days of resolution/repair completion, as GPU Saviors cannot be held responsible for cards left uncollected beyond this period.";
+
+      doc.fontSize(8).font("Helvetica");
+      const line1Height = doc.heightOfString(disclaimerLine1, { width: disclaimerTextWidth, align: "left" });
+      const line2Height = doc.heightOfString(disclaimerLine2, { width: disclaimerTextWidth, align: "left" });
+
+      const headingOffset = 5;
+      const line1Offset = 14;
+      const linesGap = 1;
+      const bottomPadding = 2;
+      const disclaimerBoxHeight = line1Offset + line1Height + linesGap + line2Height + bottomPadding;
+
+      // Keep the disclaimer and footer together — push both to a fresh page rather than splitting them
+      const pageBottom = doc.page.height - doc.page.margins.bottom;
+      const footerMinHeight = 172;
+      if (doc.y + disclaimerBoxHeight + footerMinHeight > pageBottom) {
+        doc.addPage();
+      }
+
+      const disclaimerBoxY = doc.y;
+      doc.rect(50, disclaimerBoxY, 495, disclaimerBoxHeight).fillAndStroke("#FFF4E5", "#E67E22");
+
+      doc
+        .fontSize(9)
+        .font("Helvetica-Bold")
+        .fillColor("#D35400")
+        .text("DISCLAIMER", 62, disclaimerBoxY + headingOffset)
+        .fontSize(8)
+        .font("Helvetica")
+        .fillColor("#8A4B08")
+        .text(disclaimerLine1, 62, disclaimerBoxY + line1Offset, { width: disclaimerTextWidth, align: "left" })
+        .text(disclaimerLine2, 62, doc.y + linesGap, { width: disclaimerTextWidth, align: "left" })
+        .fillColor("#000");
+
+      doc.y = disclaimerBoxY + disclaimerBoxHeight;
 
       // Footer with warranty terms and contact info
       await generateFooter(doc);
@@ -571,12 +616,7 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
       doc.moveDown(2);
 
       // Bill To - Clean layout
-      doc
-        .fontSize(10)
-        .font("Helvetica-Bold")
-        .fillColor("#000")
-        .text("Bill To", 50)
-        .moveDown(0.5);
+      doc.fontSize(10).font("Helvetica-Bold").fillColor("#000").text("Bill To", 50).moveDown(0.5);
 
       const billY = doc.y;
       doc
@@ -607,12 +647,7 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
       doc.moveDown(3);
 
       // Items Section - Clean table
-      doc
-        .fontSize(10)
-        .font("Helvetica-Bold")
-        .fillColor("#000")
-        .text("Items", 50)
-        .moveDown(0.5);
+      doc.fontSize(10).font("Helvetica-Bold").fillColor("#000").text("Items", 50).moveDown(0.5);
 
       // Check if any discount is applied (for invoice)
       const hasInvoiceDiscount = (bookingData.discountAmount || 0) > 0;
@@ -646,7 +681,12 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
       doc.text("Total", amountX, tableTop, { width: 65, align: "right" });
 
       // Line under header
-      doc.moveTo(50, tableTop + 15).lineTo(545, tableTop + 15).strokeColor("#E5E5E5").lineWidth(1).stroke();
+      doc
+        .moveTo(50, tableTop + 15)
+        .lineTo(545, tableTop + 15)
+        .strokeColor("#E5E5E5")
+        .lineWidth(1)
+        .stroke();
 
       // Table rows - clean
       let itemY = tableTop + 25;
@@ -684,12 +724,7 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
 
         if (item.reportedIssue) {
           itemY += 15;
-          doc
-            .fontSize(8)
-            .fillColor("#666")
-            .text(`Service: ${item.reportedIssue}`, itemX, itemY, { width: 490 })
-            .fillColor("#000")
-            .fontSize(9);
+          doc.fontSize(8).fillColor("#666").text(`Service: ${item.reportedIssue}`, itemX, itemY, { width: 490 }).fillColor("#000").fontSize(9);
         }
 
         itemY += item.reportedIssue ? 35 : 20;
@@ -700,12 +735,7 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
 
       // Payment details - Simple list
       doc.moveDown(2);
-      doc
-        .fontSize(10)
-        .font("Helvetica-Bold")
-        .fillColor("#000")
-        .text("Payments", 50)
-        .moveDown(0.5);
+      doc.fontSize(10).font("Helvetica-Bold").fillColor("#000").text("Payments", 50).moveDown(0.5);
 
       paidPayments.forEach((payment) => {
         const paymentY = doc.y;
@@ -748,7 +778,12 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
           .text(`-Rs. ${totalDiscount.toLocaleString()}`, 480, summaryY + 18, { width: 65, align: "right" });
 
         // Line before final amount
-        doc.moveTo(380, summaryY + 34).lineTo(545, summaryY + 34).strokeColor("#E5E5E5").lineWidth(1).stroke();
+        doc
+          .moveTo(380, summaryY + 34)
+          .lineTo(545, summaryY + 34)
+          .strokeColor("#E5E5E5")
+          .lineWidth(1)
+          .stroke();
 
         doc
           .fillColor("#666")
@@ -765,7 +800,12 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
           .text(`Rs. ${totalPaid.toLocaleString()}`, 480, summaryY + 60, { width: 65, align: "right" });
 
         // Line before balance
-        doc.moveTo(380, summaryY + 76).lineTo(545, summaryY + 76).strokeColor("#E5E5E5").lineWidth(1).stroke();
+        doc
+          .moveTo(380, summaryY + 76)
+          .lineTo(545, summaryY + 76)
+          .strokeColor("#E5E5E5")
+          .lineWidth(1)
+          .stroke();
 
         // Show "Amount Due" if balance > 0, otherwise show "Total Paid"
         const finalLabel = balance > 0 ? "Amount Due" : "Paid in Full";
@@ -784,7 +824,12 @@ export const generateInvoice = async (bookingData: BookingData): Promise<Buffer>
           .text(`Rs. ${totalPaid.toLocaleString()}`, 480, summaryY + 18, { width: 65, align: "right" });
 
         // Line before final amount
-        doc.moveTo(380, summaryY + 34).lineTo(545, summaryY + 34).strokeColor("#E5E5E5").lineWidth(1).stroke();
+        doc
+          .moveTo(380, summaryY + 34)
+          .lineTo(545, summaryY + 34)
+          .strokeColor("#E5E5E5")
+          .lineWidth(1)
+          .stroke();
 
         // Show "Amount Due" if balance > 0, otherwise show "Total Paid"
         const finalLabel = balance > 0 ? "Amount Due" : "Paid in Full";
